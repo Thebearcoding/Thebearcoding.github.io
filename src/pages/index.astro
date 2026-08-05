@@ -1,0 +1,97 @@
+---
+import Base from '../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const notes = (await getCollection('notes', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 3);
+const fmt = (d: Date) => d.toISOString().slice(0, 10);
+---
+<Base title="Xinran Xiong · athebear">
+<div class="container">
+
+  <header class="hero">
+    <div>
+      <span class="kicker">MULTIMODAL · ML RESEARCH</span>
+      <h1>Xinran Xiong<span class="accent-dot">.</span></h1>
+      <p class="tagline">
+        多模态方向的研究者。关心视觉与语言如何在同一个空间里相遇,
+        也相信 65M 参数的小模型和一支笔一样,足够把一件事讲清楚。
+        这里记录我的研究笔记、想法,和亲手做的互动课程。
+      </p>
+      <div class="hero-links">
+        <a class="pill-link primary" href="/notes/">📔 读笔记</a>
+        <a class="pill-link" href="/teaching/">🎓 互动课程</a>
+        <a class="pill-link" href="https://github.com/Thebearcoding" target="_blank" rel="noopener">GitHub</a>
+        <a class="pill-link" href="mailto:hello@athebear.me">Email</a>
+      </div>
+    </div>
+
+    <div class="orbit-art" aria-hidden="true">
+      <svg width="260" height="260" viewBox="0 0 260 260">
+        <ellipse cx="130" cy="130" rx="112" ry="44" fill="none" stroke="#D8D5CC" stroke-width="1.5" transform="rotate(-24 130 130)" />
+        <ellipse cx="130" cy="130" rx="78" ry="30" fill="none" stroke="#D8D5CC" stroke-width="1.5" stroke-dasharray="4 6" transform="rotate(-24 130 130)" />
+        <circle cx="130" cy="130" r="26" fill="#D97757" />
+        <circle cx="122" cy="122" r="7" fill="rgba(255,255,255,0.35)" />
+        <g class="orbit-spin">
+          <circle cx="130" cy="130" r="0" fill="none" />
+          <circle cx="228" cy="92" r="8" fill="#6A9BCC" />
+        </g>
+        <g class="orbit-spin slow">
+          <circle cx="62" cy="158" r="6" fill="#6A8A4F" />
+        </g>
+      </svg>
+    </div>
+  </header>
+
+  <section class="section">
+    <div class="section-head"><h2>研究兴趣</h2></div>
+    <div class="chip-row">
+      <span class="chip"><b>多模态学习</b> · 视觉-语言模型</span>
+      <span class="chip">跨模态检索与对齐</span>
+      <span class="chip">对比学习 · CLIP / SigLIP</span>
+      <span class="chip">小模型 · 从零实现</span>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <h2>最新笔记</h2>
+      <a class="more" href="/notes/">全部笔记 →</a>
+    </div>
+    <div class="note-list">
+      {notes.map((n) => (
+        <article class="note-item">
+          <time datetime={fmt(n.data.date)}>{fmt(n.data.date)}</time>
+          <div>
+            <a class="note-title" href={`/notes/${n.id}/`}>{n.data.title}</a>
+            {n.data.summary && <p class="note-summary">{n.data.summary}</p>}
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <h2>互动课程</h2>
+      <a class="more" href="/teaching/">全部教学与学习 →</a>
+    </div>
+    <div class="card-grid">
+      <a class="t-card" href="https://athebear.me/minimind-v-course/course/" target="_blank" rel="noopener">
+        <span class="t-status live">在线 · 12 课</span>
+        <h3>MiniMind-V:从零看懂并训练一个视觉语言模型</h3>
+        <p>以 65M 参数的开源 VLM 为骨架,原子粒度拆解结构、训练与推理。每课 4~5 个交互动画 + 真实源码逐行讲解 + 零依赖练习。</p>
+        <span class="t-go">开始学习 →</span>
+      </a>
+      <a class="t-card" href="https://athebear.me/defect-detection-course/" target="_blank" rel="noopener">
+        <span class="t-status live">在线 · 13 课</span>
+        <h3>缺陷检测:从深度学习基础到主流方法全景</h3>
+        <p>工业缺陷检测中文交互课程,30+ 交互演示,从卷积讲到主流检测范式,配零依赖 Python 练习。</p>
+        <span class="t-go">开始学习 →</span>
+      </a>
+    </div>
+  </section>
+
+</div>
+</Base>

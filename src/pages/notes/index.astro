@@ -1,0 +1,31 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const notes = (await getCollection('notes', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const fmt = (d: Date) => d.toISOString().slice(0, 10);
+---
+<Base title="笔记 · athebear" description="研究笔记、学习记录与想法。">
+<div class="container">
+  <header class="prose-head">
+    <h1>笔记</h1>
+    <div class="meta"><span>想法、实验记录、读文献的碎片——不追求完整,追求诚实。</span><a href="/rss.xml">RSS 订阅</a></div>
+  </header>
+
+  <div class="note-list">
+    {notes.map((n) => (
+      <article class="note-item">
+        <time datetime={fmt(n.data.date)}>{fmt(n.data.date)}</time>
+        <div>
+          <a class="note-title" href={`/notes/${n.id}/`}>{n.data.title}</a>
+          {n.data.summary && <p class="note-summary">{n.data.summary}</p>}
+          {n.data.tags.length > 0 && (
+            <div class="tag-row">{n.data.tags.map((t) => <span class="tag">{t}</span>)}</div>
+          )}
+        </div>
+      </article>
+    ))}
+  </div>
+</div>
+</Base>

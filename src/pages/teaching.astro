@@ -1,0 +1,61 @@
+---
+import Base from '../layouts/Base.astro';
+
+const items = [
+  {
+    status: 'live', badge: '在线 · 12 课',
+    title: 'MiniMind-V:从零看懂并训练一个视觉语言模型',
+    desc: '以 65M 参数的开源 VLM MiniMind-V 为骨架,从 token 与注意力讲起,拆解视觉编码器、模态投影、两阶段训练与推理。每课 4~5 个交互动画、真实源码逐行讲解、零依赖 Python 练习。',
+    href: 'https://athebear.me/minimind-v-course/course/', go: '开始学习 →',
+  },
+  {
+    status: 'live', badge: '在线 · 13 课',
+    title: '缺陷检测:从深度学习基础到主流方法全景',
+    desc: '工业缺陷检测中文交互课程,30+ 交互演示,覆盖深度学习基础到主流检测方法,配套零依赖练习,手机也能学。',
+    href: 'https://athebear.me/defect-detection-course/', go: '开始学习 →',
+  },
+  {
+    status: 'wip', badge: '进行中 · 代码仓库',
+    title: 'MiniMind-V 从零手敲复现',
+    desc: '跟随课程逐课手写复现 MiniMind-V:不 clone 源码,目录与课程章节对齐,训练与工程事实以官方仓库为对照。',
+    href: 'https://github.com/Thebearcoding/minimind-v-course', go: '看仓库 →',
+  },
+  {
+    status: 'repo', badge: '学习仓库',
+    title: 'CS336:Language Modeling from Scratch',
+    desc: 'Stanford CS336 作业实现:从零写 tokenizer、Transformer 与训练循环,语言模型侧的地基工程。',
+    href: 'https://github.com/Thebearcoding/assignment1-basics', go: '看仓库 →',
+  },
+  {
+    status: 'repo', badge: '学习仓库',
+    title: 'CS336 多模态学习笔记',
+    desc: '多模态方向的课程学习与实验记录,与 MiniMind-V 课程互为印证。',
+    href: 'https://github.com/Thebearcoding/cs336-mllm-learning', go: '看仓库 →',
+  },
+  {
+    status: 'repo', badge: '速查手册',
+    title: 'ARIS-in-AI-Offer 面试速查',
+    desc: '中文 ML / LLM / 多模态 / 生成模型面试速查手册,HTML 排版,手机 / iPad / 电脑随处可读。',
+    href: 'https://github.com/Thebearcoding/ARIS-in-AI-Offer', go: '看仓库 →',
+  },
+];
+---
+<Base title="教学与学习 · athebear" description="互动课程与学习仓库:MiniMind-V 视觉语言模型课程、缺陷检测课程、CS336 从零实现等。">
+<div class="container">
+  <header class="prose-head">
+    <h1>教学与学习</h1>
+    <div class="meta"><span>做课程是我学东西的方式:能讲清楚,才算真的懂。</span></div>
+  </header>
+
+  <div class="card-grid">
+    {items.map((it) => (
+      <a class="t-card" href={it.href} target="_blank" rel="noopener">
+        <span class={`t-status ${it.status}`}>{it.badge}</span>
+        <h3>{it.title}</h3>
+        <p>{it.desc}</p>
+        <span class="t-go">{it.go}</span>
+      </a>
+    ))}
+  </div>
+</div>
+</Base>

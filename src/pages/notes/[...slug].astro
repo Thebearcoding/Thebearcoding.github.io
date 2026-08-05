@@ -1,0 +1,32 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const notes = await getCollection('notes', ({ data }) => !data.draft);
+  return notes.map((n) => ({ params: { slug: n.id }, props: { note: n } }));
+}
+
+const { note } = Astro.props;
+const { Content } = await render(note);
+const fmt = (d: Date) => d.toISOString().slice(0, 10);
+---
+<Base title={`${note.data.title} · athebear`} description={note.data.summary} math={true}>
+<div class="container">
+  <header class="prose-head">
+    <h1>{note.data.title}</h1>
+    <div class="meta">
+      <time datetime={fmt(note.data.date)}>{fmt(note.data.date)}</time>
+      {note.data.tags.length > 0 && (
+        <div class="tag-row" style="margin-top:0">{note.data.tags.map((t) => <span class="tag">{t}</span>)}</div>
+      )}
+    </div>
+  </header>
+
+  <article class="prose">
+    <Content />
+  </article>
+
+  <p style="margin-top:48px"><a href="/notes/">← 回到全部笔记</a></p>
+</div>
+</Base>

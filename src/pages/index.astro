@@ -11,9 +11,29 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
 <div class="container">
 
   <header class="hero">
-    <div>
-      <span class="kicker">MULTIMODAL · ML RESEARCH</span>
-      <h1>Xinran Xiong<span class="accent-dot">.</span></h1>
+    <div class="hero-backdrop" aria-hidden="true"></div>
+    <div class="hero-copy">
+      <div class="hero-intro">
+        <a
+          class="hero-avatar-link"
+          href="https://github.com/Thebearcoding"
+          target="_blank"
+          rel="noopener"
+          aria-label="在 GitHub 查看 Thebearcoding"
+        >
+          <img
+            class="hero-avatar"
+            src="/images/github-avatar.png"
+            alt="Xinran Xiong 的 GitHub 头像"
+            width="460"
+            height="460"
+          />
+        </a>
+        <div>
+          <span class="kicker">MULTIMODAL · ML RESEARCH</span>
+          <h1>Xinran Xiong<span class="accent-dot">.</span></h1>
+        </div>
+      </div>
       <p class="tagline">
         多模态方向的研究者。关心视觉与语言如何在同一个空间里相遇,
         也相信 65M 参数的小模型和一支笔一样,足够把一件事讲清楚。
@@ -25,22 +45,6 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
         <a class="pill-link" href="https://github.com/Thebearcoding" target="_blank" rel="noopener">GitHub</a>
         <a class="pill-link" href="mailto:hello@athebear.me">Email</a>
       </div>
-    </div>
-
-    <div class="orbit-art" aria-hidden="true">
-      <svg width="260" height="260" viewBox="0 0 260 260">
-        <ellipse cx="130" cy="130" rx="112" ry="44" fill="none" stroke="#D8D5CC" stroke-width="1.5" transform="rotate(-24 130 130)" />
-        <ellipse cx="130" cy="130" rx="78" ry="30" fill="none" stroke="#D8D5CC" stroke-width="1.5" stroke-dasharray="4 6" transform="rotate(-24 130 130)" />
-        <circle cx="130" cy="130" r="26" fill="#D97757" />
-        <circle cx="122" cy="122" r="7" fill="rgba(255,255,255,0.35)" />
-        <g class="orbit-spin">
-          <circle cx="130" cy="130" r="0" fill="none" />
-          <circle cx="228" cy="92" r="8" fill="#6A9BCC" />
-        </g>
-        <g class="orbit-spin slow">
-          <circle cx="62" cy="158" r="6" fill="#6A8A4F" />
-        </g>
-      </svg>
     </div>
   </header>
 

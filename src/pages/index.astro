@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import PillIcon from '../components/PillIcon.astro';
 import { getCollection } from 'astro:content';
 
 const notes = (await getCollection('notes', ({ data }) => !data.draft))
@@ -40,10 +41,10 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
         这里记录我的研究笔记、想法,和亲手做的互动课程。
       </p>
       <div class="hero-links">
-        <a class="pill-link primary" href="/notes/">📔 读笔记</a>
-        <a class="pill-link" href="/teaching/">🎓 互动课程</a>
-        <a class="pill-link" href="https://github.com/Thebearcoding" target="_blank" rel="noopener">GitHub</a>
-        <a class="pill-link" href="mailto:hello@athebear.me">Email</a>
+        <a class="pill-link primary" href="/notes/"><PillIcon name="notes" />读笔记</a>
+        <a class="pill-link" href="/teaching/"><PillIcon name="teaching" />互动课程</a>
+        <a class="pill-link" href="https://github.com/Thebearcoding" target="_blank" rel="noopener"><PillIcon name="github" />GitHub</a>
+        <a class="pill-link" href="mailto:hello@athebear.me"><PillIcon name="email" />Email</a>
       </div>
     </div>
   </header>

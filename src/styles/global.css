@@ -163,8 +163,20 @@ main { min-height: 60vh; }
   font-family: var(--font-heading); font-size: 13.5px; font-weight: 500; color: var(--text);
   transition: all 0.25s var(--ease);
 }
+.pill-icon {
+  width: 20px; height: 20px; flex: 0 0 20px;
+  overflow: visible; color: currentColor;
+  stroke: currentColor; stroke-width: 1.45; stroke-linecap: round; stroke-linejoin: round;
+  transform: rotate(-1.5deg);
+  transition: transform 0.25s var(--ease);
+}
+.pill-icon .icon-paper { fill: rgba(245, 243, 236, 0.42); }
+.pill-icon .icon-accent { stroke: var(--accent); }
+.pill-icon .icon-fill { fill: var(--accent); }
+.pill-icon .icon-seal { stroke: #f5f3ec; stroke-width: 1.05; }
+.pill-link:hover .pill-icon { transform: rotate(2deg) translateY(-1px); }
 .pill-link:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); text-decoration: none; }
-.pill-link.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.pill-link.primary { --accent: #f3c9b9; background: #df7654; border-color: #df7654; color: #fff; }
 .pill-link.primary:hover { filter: brightness(1.07); color: #fff; }
 
 /* ---- 区块 ---- */

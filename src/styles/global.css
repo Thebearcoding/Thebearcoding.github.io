@@ -26,20 +26,37 @@
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; background: var(--bg); }
 
 body {
-  background:
-    radial-gradient(ellipse 70% 55% at 12% 0%, rgba(217, 119, 87, 0.07) 0%, transparent 60%),
-    radial-gradient(ellipse 55% 45% at 92% 12%, rgba(106, 155, 204, 0.06) 0%, transparent 55%),
-    radial-gradient(ellipse 60% 50% at 50% 100%, rgba(120, 140, 93, 0.04) 0%, transparent 55%),
-    var(--bg);
+  position: relative; isolation: isolate; min-height: 100vh;
+  background: transparent;
   color: var(--text);
   font-family: var(--font-body);
   font-size: 16.5px;
   line-height: 1.75;
   text-spacing-trim: trim-start allow-end;
   overflow-wrap: break-word;
+}
+body::before,
+body::after {
+  content: ''; position: fixed; inset: 0; pointer-events: none;
+}
+body::before {
+  z-index: -2;
+  background: url('/images/global-gathered-scenes.webp') center 61% / cover no-repeat;
+  opacity: 0.58;
+  filter: saturate(0.78) contrast(0.94);
+}
+body::after {
+  z-index: -1;
+  background:
+    radial-gradient(ellipse 70% 55% at 12% 0%, rgba(217, 119, 87, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 55% 45% at 92% 12%, rgba(106, 155, 204, 0.05) 0%, transparent 55%),
+    linear-gradient(180deg,
+      rgba(236, 233, 224, 0.58) 0%,
+      rgba(236, 233, 224, 0.76) 48%,
+      rgba(236, 233, 224, 0.88) 100%);
 }
 
 a { color: var(--accent); text-decoration: none; }
@@ -264,6 +281,15 @@ main { min-height: 60vh; }
 /* ---- 响应式 ---- */
 @media (max-width: 760px) {
   body { font-size: 15.5px; }
+  body::before { background-position: center 58%; opacity: 0.46; }
+  body::after {
+    background:
+      radial-gradient(ellipse 85% 48% at 12% 0%, rgba(217, 119, 87, 0.07) 0%, transparent 65%),
+      linear-gradient(180deg,
+        rgba(236, 233, 224, 0.66) 0%,
+        rgba(236, 233, 224, 0.78) 52%,
+        rgba(236, 233, 224, 0.89) 100%);
+  }
   .container { padding: 0 18px 64px; }
   .hero {
     min-height: 500px; margin: 18px 0 22px; padding: 34px 24px 38px;

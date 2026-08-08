@@ -8,7 +8,7 @@ const notes = (await getCollection('notes', ({ data }) => !data.draft))
   .slice(0, 3);
 const fmt = (d: Date) => d.toISOString().slice(0, 10);
 ---
-<Base title="Xinran Xiong · athebear">
+<Base title="Xinran Xiong · athebear" bodyClass="home-page">
 <div class="container">
 
   <header class="hero">

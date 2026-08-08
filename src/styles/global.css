@@ -294,6 +294,12 @@ main { min-height: 60vh; }
 @media (max-width: 760px) {
   body { font-size: 15.5px; }
   body::before { background-position: center 58%; opacity: 0.46; }
+  body.home-page::before {
+    background-image: url('/images/mobile-ink-wash-waterfront.webp');
+    background-position: center 68%;
+    opacity: 0.53;
+    filter: saturate(0.72) contrast(0.96);
+  }
   body::after {
     background:
       radial-gradient(ellipse 85% 48% at 12% 0%, rgba(217, 119, 87, 0.07) 0%, transparent 65%),
@@ -301,6 +307,13 @@ main { min-height: 60vh; }
         rgba(236, 233, 224, 0.66) 0%,
         rgba(236, 233, 224, 0.78) 52%,
         rgba(236, 233, 224, 0.89) 100%);
+  }
+  body.home-page::after {
+    background:
+      linear-gradient(180deg,
+        rgba(236, 233, 224, 0.58) 0%,
+        rgba(236, 233, 224, 0.70) 50%,
+        rgba(236, 233, 224, 0.82) 100%);
   }
   .container { padding: 0 18px 64px; }
   .hero {
@@ -316,6 +329,12 @@ main { min-height: 60vh; }
       linear-gradient(180deg, rgba(245, 243, 236, 0.1), rgba(217, 119, 87, 0.08));
   }
   .hero-backdrop { background-position: 64% center; opacity: 0.63; }
+  body.home-page .hero-backdrop {
+    background-image: url('/images/mobile-ink-wash-waterfront.webp');
+    background-position: center 61%;
+    opacity: 0.72;
+    filter: saturate(0.76) contrast(0.96);
+  }
   .hero-intro { gap: 14px; margin-bottom: 18px; }
   .hero-avatar-link { width: 76px; height: 76px; padding: 4px; }
   .hero .kicker { padding: 4px 9px; font-size: 9.5px; letter-spacing: 1.6px; }

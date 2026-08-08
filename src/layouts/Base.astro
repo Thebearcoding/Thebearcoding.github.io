@@ -3,8 +3,9 @@ interface Props {
   title: string;
   description?: string;
   math?: boolean;
+  bodyClass?: string;
 }
-const { title, description = 'Xinran Xiong 的个人主页:多模态学习研究、互动课程与研究笔记。', math = false } = Astro.props;
+const { title, description = 'Xinran Xiong 的个人主页:多模态学习研究、互动课程与研究笔记。', math = false, bodyClass } = Astro.props;
 const path = Astro.url.pathname;
 const isActive = (p: string) => (p === '/' ? path === '/' : path.startsWith(p)) ? 'page' : undefined;
 import '../styles/global.css';
@@ -27,7 +28,7 @@ import '../styles/global.css';
 <link rel="alternate" type="application/rss+xml" title="笔记 RSS" href="/rss.xml" />
 <slot name="head" />
 </head>
-<body>
+<body class={bodyClass}>
 
 <nav class="site-nav">
   <div class="nav-inner">

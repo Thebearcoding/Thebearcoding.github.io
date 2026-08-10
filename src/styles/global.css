@@ -274,6 +274,7 @@ main { min-height: 60vh; }
 .prose pre code { background: none; border: none; padding: 0; color: inherit; font-size: inherit; }
 .prose img { max-width: 100%; border-radius: var(--radius); }
 .prose hr { border: none; border-top: 1px dashed var(--border); margin: 32px 0; }
+.prose mark { background: rgba(255, 212, 59, 0.45); padding: 0 3px; border-radius: 4px; color: inherit; }
 .prose .katex-display { overflow-x: auto; overflow-y: hidden; padding: 6px 0; }
 .prose table { border-collapse: collapse; margin: 18px 0; font-size: 14.5px; display: block; overflow-x: auto; }
 .prose th, .prose td { border: 1px solid var(--border); padding: 8px 14px; text-align: left; }

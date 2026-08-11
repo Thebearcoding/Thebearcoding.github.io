@@ -5,27 +5,126 @@ import { getCollection } from 'astro:content';
 const notes = (await getCollection('notes', ({ data }) => !data.draft))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 const fmt = (d: Date) => d.toISOString().slice(0, 10);
+const md = (d: Date) => d.toISOString().slice(5, 10);
+
+// 标签计数(按出现次数排序)
+const tagCount = new Map<string, number>();
+notes.forEach((n) => n.data.tags.forEach((t) => tagCount.set(t, (tagCount.get(t) || 0) + 1)));
+const tags = [...tagCount.entries()].sort((a, b) => b[1] - a[1]);
+
+// 按年份分组
+const yearMap = new Map<number, typeof notes>();
+notes.forEach((n) => {
+  const y = n.data.date.getFullYear();
+  if (!yearMap.has(y)) yearMap.set(y, []);
+  yearMap.get(y)!.push(n);
+});
+const yearGroups = [...yearMap.entries()].sort((a, b) => b[0] - a[0]);
 ---
-<Base title="笔记 · athebear" description="研究笔记、学习记录与想法。">
+<Base title="笔记 · athebear" description="研究笔记、学习记录与想法,按标签与年份归档。">
 <div class="container">
-  <header class="prose-head">
-    <h1>笔记</h1>
-    <div class="meta"><span>想法、实验记录、读文献的碎片——不追求完整,追求诚实。</span><a href="/rss.xml">RSS 订阅</a></div>
+  <header class="prose-head notes-head">
+    <div>
+      <h1>笔记</h1>
+      <div class="meta">
+        <span>想法、实验记录、读文献的碎片——不追求完整,追求诚实。</span>
+        <a href="/rss.xml">RSS 订阅</a>
+      </div>
+    </div>
+    <div class="search-box">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="note-search" type="search" placeholder="搜标题 / 摘要 / 标签…" autocomplete="off" aria-label="搜索笔记" />
+    </div>
   </header>
 
-  <div class="note-list">
-    {notes.map((n) => (
-      <article class="note-item">
-        <time datetime={fmt(n.data.date)}>{fmt(n.data.date)}</time>
-        <div>
-          <a class="note-title" href={`/notes/${n.id}/`}>{n.data.title}</a>
-          {n.data.summary && <p class="note-summary">{n.data.summary}</p>}
-          {n.data.tags.length > 0 && (
-            <div class="tag-row">{n.data.tags.map((t) => <span class="tag">{t}</span>)}</div>
-          )}
-        </div>
-      </article>
+  <div class="filter-bar" role="group" aria-label="按标签筛选">
+    <button class="filter-chip active" data-tag="">全部 <i>{notes.length}</i></button>
+    {tags.map(([t, c]) => (
+      <button class="filter-chip" data-tag={t}>{t} <i>{c}</i></button>
     ))}
   </div>
+
+  <p class="filter-status" id="filter-status" hidden></p>
+
+  {yearGroups.map(([year, group]) => (
+    <section class="year-group" data-year={year}>
+      <div class="year-mark" aria-hidden="true">{year}</div>
+      <div class="note-list">
+        {group.map((n) => (
+          <article
+            class="note-item"
+            data-tags={n.data.tags.join('|')}
+            data-text={`${n.data.title} ${n.data.summary ?? ''} ${n.data.tags.join(' ')}`.toLowerCase()}
+          >
+            <time datetime={fmt(n.data.date)}>{md(n.data.date)}</time>
+            <div>
+              <a class="note-title" href={`/notes/${n.id}/`}>{n.data.title}</a>
+              {n.data.summary && <p class="note-summary">{n.data.summary}</p>}
+              {n.data.tags.length > 0 && (
+                <div class="tag-row">{n.data.tags.map((t) => <button class="tag tag-btn" data-tag={t}>{t}</button>)}</div>
+              )}
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  ))}
+
+  <div class="empty-state" id="empty-state" hidden>
+    <span class="es-icon">🗂️</span>
+    <p>没有匹配的笔记。换个关键词,或者<button class="es-reset" id="es-reset">清除筛选</button>。</p>
+  </div>
 </div>
+
+<script>
+  const chips = [...document.querySelectorAll('.filter-chip')] as HTMLButtonElement[];
+  const items = [...document.querySelectorAll('.note-item')] as HTMLElement[];
+  const groups = [...document.querySelectorAll('.year-group')] as HTMLElement[];
+  const search = document.getElementById('note-search') as HTMLInputElement;
+  const status = document.getElementById('filter-status') as HTMLElement;
+  const empty = document.getElementById('empty-state') as HTMLElement;
+  let activeTag = '';
+
+  function apply() {
+    const q = search.value.trim().toLowerCase();
+    let shown = 0;
+    for (const it of items) {
+      const tagOk = !activeTag || (it.dataset.tags || '').split('|').includes(activeTag);
+      const textOk = !q || (it.dataset.text || '').includes(q);
+      const show = tagOk && textOk;
+      it.hidden = !show;
+      if (show) shown++;
+    }
+    for (const g of groups) {
+      g.hidden = ![...g.querySelectorAll('.note-item')].some((it) => !(it as HTMLElement).hidden);
+    }
+    const filtering = activeTag || q;
+    status.hidden = !filtering;
+    if (filtering) {
+      status.textContent = `筛选中:${shown} / ${items.length} 篇` + (activeTag ? ` · 标签「${activeTag}」` : '') + (q ? ` · 关键词「${q}」` : '');
+    }
+    empty.hidden = shown !== 0;
+  }
+
+  function setTag(tag: string, pushHash = true) {
+    activeTag = tag;
+    chips.forEach((c) => c.classList.toggle('active', (c.dataset.tag || '') === tag));
+    if (pushHash) history.replaceState(null, '', tag ? `#tag=${encodeURIComponent(tag)}` : location.pathname);
+    apply();
+  }
+
+  chips.forEach((c) => c.addEventListener('click', () => setTag(c.dataset.tag || '')));
+  document.querySelectorAll('.tag-btn').forEach((b) =>
+    b.addEventListener('click', (e) => {
+      e.preventDefault();
+      setTag((b as HTMLElement).dataset.tag || '');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    })
+  );
+  search.addEventListener('input', apply);
+  document.getElementById('es-reset')!.addEventListener('click', () => { search.value = ''; setTag(''); });
+
+  const m = location.hash.match(/tag=([^&]+)/);
+  if (m) setTag(decodeURIComponent(m[1]), false);
+</script>
 </Base>

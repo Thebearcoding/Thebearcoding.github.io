@@ -239,6 +239,15 @@ main { min-height: 60vh; }
 .t-card h3 { font-family: var(--font-heading); font-weight: 500; font-size: 16.5px; line-height: 1.5; margin-bottom: 8px; }
 .t-card p { color: var(--text-dim); font-size: 14px; line-height: 1.7; }
 .t-card .t-go { margin-top: 14px; font-family: var(--font-heading); font-size: 13px; font-weight: 500; color: var(--accent); }
+.t-card.wide { display: flex; align-items: center; gap: 28px; }
+.t-card.wide .wide-main { flex: 1; min-width: 0; }
+.t-card.wide .wide-art {
+  flex-shrink: 0; width: 96px; height: 96px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-size: 40px;
+  background: radial-gradient(circle at 32% 30%, rgba(217, 119, 87, 0.18), rgba(217, 119, 87, 0.05));
+  border: 1px dashed rgba(217, 119, 87, 0.45);
+}
+@media (max-width: 760px) { .t-card.wide .wide-art { display: none; } }
 
 /* ---- 文章页(prose)---- */
 .prose-head { padding: 64px 0 28px; border-bottom: 1px solid var(--border); margin-bottom: 34px; }

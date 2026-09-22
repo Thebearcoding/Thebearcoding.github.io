@@ -15,7 +15,7 @@ series: multimodal-interview
 ---
 <span id="mm-1dd4111c63af" style="display:block;scroll-margin-top:6rem"></span>
 
-“DeepSeek、Qwen、LLaMA有什么区别”是[05-ZealD真实面试题与项目深挖](/notes/multimodal-interview-questions/)中的正文自述题。回答它不能靠家族标签：一个家族可以同时有dense与MoE、文本与视觉、base与instruct。本章用**固定版本**解释不同模块解决的问题，再把论文阅读变成可检验的理解。
+“DeepSeek、Qwen、LLaMA有什么区别”可以用来检查模型比较是否具体。回答它不能靠家族标签：一个家族可以同时有dense与MoE、文本与视觉、base与instruct。本章用**固定版本**解释不同模块解决的问题，再把论文阅读变成可检验的理解；相关问答见[面试问题与项目深挖](/notes/multimodal-interview-questions/)。
 
 本轮核对时间为2026-09-22。材料固定为Qwen2.5-VL报告v1、Qwen3-VL报告v1、DeepSeek-V2报告v5及Llama3.1官方模型卡；这些是便于学习的实例，未宣称覆盖截至当日所有新品。旧笔记出现的“Qwen3.5标题配Qwen3.8链接”不作为依据。另一个实际陷阱是：Qwen2.5-VL旧GitHub地址当前会返回Qwen3-VL正文，所以**链接名字本身不是版本证据**。
 
@@ -71,7 +71,7 @@ $$
 [1024,1280]\longrightarrow[256,4\cdot1280]\longrightarrow[256,3584].
 $$
 
-这个链条说明“减少长度”发生在空间分组，“匹配语言维度”发生在投影。合并并不保证无损：如果四个patch分别含小字笔画，压缩是否保留它们由模型与训练共同决定。详细连接器原理见[06-视觉视频算法面试专项](/notes/vision-video-algorithms/)。
+这个链条说明“减少长度”发生在空间分组，“匹配语言维度”发生在投影。合并并不保证无损：如果四个patch分别含小字笔画，压缩是否保留它们由模型与训练共同决定。详细连接器原理见[为什么图像和视频能够进入语言模型](/notes/vision-video-algorithms/)。
 
 <span id="mm-18c2391dbb3d" style="display:block;scroll-margin-top:6rem"></span>
 
@@ -99,7 +99,7 @@ Qwen3-VL报告固定了四个dense规模2B/4B/8B/32B及两种MoE规模30B-A3B、
 
 ### 视觉初始化改变，不等于生成目标变成对比损失
 
-报告使用SigLIP2视觉编码器并继续做动态分辨率训练；2B/4B配较小的Large视觉塔，其余所述配置使用SO-400M。它保留2×2空间merger。SigLIP2是一种视觉预训练来源，后续VLM训练还要让视觉特征支持文字生成；不要把[06-视觉视频算法面试专项](/notes/vision-video-algorithms/)中的SigLIP原始配对loss直接说成Qwen3-VL所有训练阶段的loss。[报告第2节](https://arxiv.org/html/2511.21631v1)
+报告使用SigLIP2视觉编码器并继续做动态分辨率训练；2B/4B配较小的Large视觉塔，其余所述配置使用SO-400M。它保留2×2空间merger。SigLIP2是一种视觉预训练来源，后续VLM训练还要让视觉特征支持文字生成；不要把[为什么图像和视频能够进入语言模型](/notes/vision-video-algorithms/)中的SigLIP原始配对loss直接说成Qwen3-VL所有训练阶段的loss。[报告第2节](https://arxiv.org/html/2511.21631v1)
 
 <span id="mm-bb895a29990d" style="display:block;scroll-margin-top:6rem"></span>
 
@@ -234,4 +234,4 @@ Llama3.1官方文本系列为8B、70B、405B，均使用GQA；模型卡声明128
 5. **动态FPS能保证采到0.2秒事件吗？** 不能。训练适配不同采样频率与单段输入证据覆盖是不同问题。
 6. **Qwen3-VL优于某文本模型就证明其Attention更好吗？** 不成立：输入模态、骨干、数据、训练预算和评价不同，需要受控消融。
 
-返回[00-图解大模型算法与ZealD面经总览](/notes/multimodal-interview-guide/)，或用[05-ZealD真实面试题与项目深挖](/notes/multimodal-interview-questions/)检查能否不用型号标签把原因说清楚。
+返回[学习总览](/notes/multimodal-interview-guide/)，或用[面试问题与项目深挖](/notes/multimodal-interview-questions/)检查能否不用型号标签把原因说清楚。

@@ -17,9 +17,9 @@ series: multimodal-interview
 
 如果只知道“SFT 拟合标准答案，RL 最大化奖励”，遇到“为什么要减 baseline”“PPO 裁剪为什么取 min”“GRPO loss 为零为什么还有梯度”仍很容易卡住。本篇沿着一个问题推下去：**奖励只告诉我们一次结果好不好，怎样把它变成可训练的 token 概率更新？**
 
-先读 [02-SFT与DPO的训练信号](/notes/multimodal-sft-lora-dpo/) 的 log-prob、梯度和 reference。正文分三段：第 1–4 节解决“回报怎样变成梯度”；第 5–7 节解决“怎样估优势、重复利用采样”；第 8–10 节解决“语言模型如何组采样并约束更新”。不涉及 Agent 框架开发，图中的 agent 只是强化学习里“采取动作的策略”这个通用称呼。
+先读 [SFT与DPO：训练信号从哪里来](/notes/multimodal-sft-lora-dpo/) 的 log-prob、梯度和 reference。正文分三段：第 1–4 节解决“回报怎样变成梯度”；第 5–7 节解决“怎样估优势、重复利用采样”；第 8–10 节解决“语言模型如何组采样并约束更新”。不涉及 Agent 框架开发，图中的 agent 只是强化学习里“采取动作的策略”这个通用称呼。
 
-ZealD 在[学习记录](https://www.xiaohongshu.com/user/profile/68ff42af000000003702b1e5/6aa79968000000000b001eeb)中提到推导困难。这是教程的切入点；他的个人解释和项目结果不是数学证明，下面的算例也不是其真实实验数据。
+理解后训练的难点往往不是记住最终 loss，而是分清优化目标、采样估计与实际更新之间的联系。本章沿这条推导链展开；下面的数字算例均为教学构造，不代表真实项目的实验结果。
 
 <span id="mm-6f825518a1d6" style="display:block;scroll-margin-top:6rem"></span>
 
@@ -564,11 +564,11 @@ $$
 
 这是另一种反馈粒度，不代表每个写得详细的推理链都能被可靠评分；视频场景还需要步骤与画面证据、时间戳对应。过程奖励模型的标注成本与误判也会成为新问题。
 
-<span id="mm-21bba906bc9e" style="display:block;scroll-margin-top:6rem"></span>
+<span id="mm-8d2f7495f15c" style="display:block;scroll-margin-top:6rem"></span>
 
-## 10. 从 ZealD 的项目问题形成可证伪的解释
+## 10. 从训练现象形成可证伪的解释
 
-[ZealD 项目复盘](https://www.xiaohongshu.com/user/profile/68ff42af000000003702b1e5/6aaea91d0000000026017d0b)可引出“SFT 后 GRPO 为什么没提高”。没有完整实验数据时，答案应是待验证的机制，而不是替项目宣布唯一原因。
+“SFT 后 GRPO 为什么没提高”是一个需要实验证据的排障问题。没有完整实验数据时，答案应是待验证的机制，而不是凭一个现象宣布唯一原因。
 
 首先在 RL 前测 base/SFT 的单次成功率 pass@1 与多次采样至少一次成功的比例。若单次成功概率是 p，且独立同分布采 G 次，理论至少成功一次为 $1-(1-p)^G$；真实输出可能受采样设置和重复模式影响，不能把这个独立假设当事实。pass@G 高只说明候选集中有潜力，不代表自动能学会选出它。
 
@@ -580,7 +580,7 @@ $$
 
 **面试回答示范。**“我先看起始策略能否采出正确答案，以及奖励在同题组内是否有区分。再核对答案解析、证据覆盖、截断、advantage 和 mask。若有有效信号但更新仍小，检查 ratio、clip 和 KL；若训练 reward 上升而验证不升，检查奖励投机和数据泄漏。只有固定模型、数据拆分、预算和评测做对照，才归因到 SFT 分布或 GRPO 参数。”
 
-上述是教程扩展题；真实面试题与作者学习分享的来源等级见 [05-ZealD真实面试题与项目深挖](/notes/multimodal-interview-questions/)。这套后训练知识服务于多模态算法分析，具体视频证据评测见 [06-视觉视频算法面试专项](/notes/vision-video-algorithms/)。
+上述是教程扩展题，更多问答见 [面试问题与项目深挖](/notes/multimodal-interview-questions/)。这套后训练知识服务于多模态算法分析，具体视频证据评测见 [为什么图像和视频能够进入语言模型](/notes/vision-video-algorithms/)。
 
 <span id="mm-60b13accbf90" style="display:block;scroll-margin-top:6rem"></span>
 
@@ -613,5 +613,4 @@ $$
 - 余昌叶图解仓库：[奖励与价值](https://github.com/changyeyu/LLM-RL-Visualized#header-42)、[MC/TD](https://github.com/changyeyu/LLM-RL-Visualized#header-48)、[策略梯度](https://github.com/changyeyu/LLM-RL-Visualized#header-55)、[GAE](https://github.com/changyeyu/LLM-RL-Visualized#header-66)、[PPO/GRPO](https://github.com/changyeyu/LLM-RL-Visualized#header-72)、[PPO 四模型](https://github.com/changyeyu/LLM-RL-Visualized#header-82)。
 - [仓库 12 页策略梯度 PDF](https://github.com/changyeyu/LLM-RL-Visualized/blob/master/%E7%AD%96%E7%95%A5%E6%A2%AF%E5%BA%A6%28Policy%20Gradient%29-%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%28PPO%26GRPO%E7%AD%89%29%E4%B9%8B%E6%A0%B9%E5%9F%BA.pdf)：第 3–5 页用于概率推导直觉，第 9–11 页算法比较高度简化。尤其回答级 GRPO ratio 不能逐项替代原论文 token 目标。
 - 原始依据：[GAE](https://arxiv.org/abs/1506.02438)、[PPO](https://arxiv.org/abs/1707.06347)、[DeepSeekMath/GRPO](https://arxiv.org/abs/2402.03300)、[DeepSeekMath HTML §4.1](https://arxiv.org/html/2402.03300)。
-- ZealD：[推导学习记录](https://www.xiaohongshu.com/user/profile/68ff42af000000003702b1e5/6aa79968000000000b001eeb)、[传统 RL 学习](https://www.xiaohongshu.com/user/profile/68ff42af000000003702b1e5/6aaaa176000000000b036985)、[项目复盘](https://www.xiaohongshu.com/user/profile/68ff42af000000003702b1e5/6aaea91d0000000026017d0b)。
-- 原图署名和使用条件见 [00-图解大模型算法与ZealD面经总览](/notes/multimodal-interview-guide/)。公式边界由本文另行说明；图解不能替代具体算法和实现定义。
+- 原图署名和使用条件见 [学习总览](/notes/multimodal-interview-guide/)。公式边界由本文另行说明；图解不能替代具体算法和实现定义。

@@ -22,7 +22,7 @@ series: multimodal-interview
 
 ## 第 1 天：向量、条件概率与 softmax
 
-阅读[09-数学与张量预备课](/notes/multimodal-math-prerequisites/)前五节。
+阅读[读懂大模型公式之前：数学与张量预备课](/notes/multimodal-math-prerequisites/)前五节。
 
 **练习 1**：$x=(2,1)$，$W=\begin{bmatrix}1&0&-1\\0&2&1\end{bmatrix}$，求 $xW$。再说明结果是几个 token、几个特征。
 
@@ -38,7 +38,7 @@ series: multimodal-interview
 
 ## 第 2 天：Attention 的每一行在做什么
 
-阅读[01-模型骨干与多模态入口](/notes/transformer-attention-rope-gqa/)第 1–3 节，照着原图从右至左解释完整模型，再聚焦单头。
+阅读[从一个token理解Transformer与多模态入口](/notes/transformer-attention-rope-gqa/)第 1–3 节，照着原图从右至左解释完整模型，再聚焦单头。
 
 **练习 3**：设 $Q=K=\begin{bmatrix}1&0\\0&1\end{bmatrix}$，$V=\begin{bmatrix}2&0\\0&4\end{bmatrix}$，$d_h=2$，使用因果 mask。求两行输出。
 
@@ -52,7 +52,7 @@ series: multimodal-interview
 
 ## 第 3 天：RoPE、归一化与门控
 
-阅读[01-模型骨干与多模态入口](/notes/transformer-attention-rope-gqa/)第 5–7 节。把“旋转”解释到二维矩阵，不只背名称。
+阅读[从一个token理解Transformer与多模态入口](/notes/transformer-attention-rope-gqa/)第 5–7 节。把“旋转”解释到二维矩阵，不只背名称。
 
 **练习 5**：$q=k=(1,0)$，每个位置旋转 $30^\circ$；$m=1,n=3$，求旋转后点积。把两位置同时加 5，结果变不变？
 
@@ -66,7 +66,7 @@ series: multimodal-interview
 
 ## 第 4 天：缓存、GQA 与推理阶段
 
-阅读[04-推理效率与手撕考点](/notes/prefill-decode-video-tokens/)第 1–4 节。
+阅读[Prefill、Decode与视频token的计算代价](/notes/prefill-decode-video-tokens/)第 1–4 节。
 
 **练习 7**：历史 3 个 token，一次新增 2 个 token。写出 $[T_q,T_k]$ 和可见矩阵。用一句话解释新 token 的 RoPE 索引。
 
@@ -89,7 +89,7 @@ $$
 
 ## 第 5 天：ViT、CLIP 与图文匹配
 
-阅读[06-视觉视频算法面试专项](/notes/vision-video-algorithms/)的视觉编码、CLIP 与 SigLIP 部分。
+阅读[为什么图像和视频能够进入语言模型](/notes/vision-video-algorithms/)的视觉编码、CLIP 与 SigLIP 部分。
 
 **练习 9**：$224\times224$ RGB 图，以 $16\times16$ patch 切分，每 patch 展平宽度和 token 数分别多少？高宽都变为 448 时呢？
 
@@ -105,7 +105,7 @@ $$
 
 ## 第 6 天：连接器、帧采样与事件证据
 
-阅读[06-视觉视频算法面试专项](/notes/vision-video-algorithms/)的连接器与视频部分，暂不进入 RL。
+阅读[为什么图像和视频能够进入语言模型](/notes/vision-video-algorithms/)的连接器与视频部分，暂不进入 RL。
 
 **练习 11**：8 帧，每帧 196 个视觉 token，压缩后每帧 32 个，比较总量。若问题是辨认手表上的小字，和“先拿杯子还是先开门”，压缩风险分别是什么？
 
@@ -121,7 +121,7 @@ $$
 
 ## 第 7 天：SFT 的逐位置监督
 
-阅读[02-SFT与DPO的训练信号](/notes/multimodal-sft-lora-dpo/)的 shift 表、交叉熵和数据部分。复习第 2 天的 attention mask。
+阅读[SFT与DPO：训练信号从哪里来](/notes/multimodal-sft-lora-dpo/)的 shift 表、交叉熵和数据部分。复习第 2 天的 attention mask。
 
 **练习 13**：简化序列为 $[\text{BOS},\text{问},\text{答},\text{EOS}]$，仅监督“答”和 EOS，按标签与输入同位置的 convention 写 labels；说明哪两个 logits 参与预测。
 
@@ -135,7 +135,7 @@ $$
 
 ## 第 8 天：LoRA 与偏好学习
 
-阅读[02-SFT与DPO的训练信号](/notes/multimodal-sft-lora-dpo/)的 LoRA、QLoRA、DPO 推导。
+阅读[SFT与DPO：训练信号从哪里来](/notes/multimodal-sft-lora-dpo/)的 LoRA、QLoRA、DPO 推导。
 
 **练习 15**：$4096\times4096$ 权重上加 rank=8 LoRA，不计偏置，新增多少参数？A 随机、B=0 时，为何首步仍能学习？两者都为零呢？
 
@@ -149,7 +149,7 @@ $$
 
 ## 第 9 天：从奖励到策略梯度
 
-阅读[03-从RL基础推到PPO与GRPO](/notes/policy-gradient-ppo-grpo/)第 1–4 节；只要到 baseline，不必一天读完整个 RL 长章。
+阅读[从RL基础推到PPO与GRPO](/notes/policy-gradient-ppo-grpo/)第 1–4 节；只要到 baseline，不必一天读完整个 RL 长章。
 
 **练习 17**：奖励 $(0,1,2)$、$\gamma=0.9$，从后向前算 $G_2,G_1,G_0$。若当前 $V(s_0)=0.5,V(s_1)=1$，第一步 MC 与 TD 目标是什么？
 
@@ -163,7 +163,7 @@ $$
 
 ## 第 10 天：GAE 与终止边界
 
-阅读[03-从RL基础推到PPO与GRPO](/notes/policy-gradient-ppo-grpo/)第 5 节。
+阅读[从RL基础推到PPO与GRPO](/notes/policy-gradient-ppo-grpo/)第 5 节。
 
 **练习 19**：沿用昨天奖励，$V=(0.5,1,1.5)$，最后真正终止，$\lambda=0.8$。先算每步 TD 残差，再反向算 GAE。
 
@@ -177,7 +177,7 @@ $$
 
 ## 第 11 天：PPO 与 GRPO 的训练信号
 
-阅读[03-从RL基础推到PPO与GRPO](/notes/policy-gradient-ppo-grpo/)第 6–9 节。重看 PPO 四模型原图，逐一说明是否更新、输出什么。
+阅读[从RL基础推到PPO与GRPO](/notes/policy-gradient-ppo-grpo/)第 6–9 节。重看 PPO 四模型原图，逐一说明是否更新、输出什么。
 
 **练习 21**：$\epsilon=0.2$，分别求 $(A,\rho)=(2,1.3),(-2,0.7),(2,0.7),(-2,1.3)$ 的 clipped surrogate。
 
@@ -191,7 +191,7 @@ $$
 
 ## 第 12 天：评估、显存与排障
 
-阅读[07-训练显存与实验排障](/notes/training-memory-debugging/)和[06-视觉视频算法面试专项](/notes/vision-video-algorithms/)的评估部分。
+阅读[训练显存与实验排障：把机制变成可检查的量](/notes/training-memory-debugging/)和[为什么图像和视频能够进入语言模型](/notes/vision-video-algorithms/)的评估部分。
 
 **练习 23**：事件定位真区间 $[4,8]$，预测 $[6,10]$，求 tIoU。另有分类结果 TP=18、FP=6、FN=12，求 precision、recall、F1。
 
@@ -207,7 +207,7 @@ $$
 
 ## 第 13 天：读论文与讲项目
 
-阅读[08-模型家族与论文精读路线](/notes/multimodal-models-paper-reading/)，选一篇固定版本报告和一篇训练方法论文。
+阅读[模型差异为什么必须落到具体版本](/notes/multimodal-models-paper-reading/)，选一篇固定版本报告和一篇训练方法论文。
 
 **任务**：给每篇写五行：它解决的问题、相对基线改了什么、关键图的一条完整路径、结果成立的条件、你会做的一个消融。不能把论文摘要中的成绩直接说成自己的结果。
 
@@ -225,4 +225,4 @@ $$
 
 最后重新做第2、4、7、10、11天各一道题。间隔后仍能独立写出来，才说明记住的是关系；看到熟悉词就点头，尚不足以回答继续追问。
 
-本练习册的知识依据和对应面经入口集中于[11-来源、图像许可与知识点覆盖](/notes/multimodal-sources-coverage/)；来源证据不是题目“高频程度”的统计。
+本练习册的知识依据集中于[来源、图像许可与知识点覆盖](/notes/multimodal-sources-coverage/)；题目按学习目标组织，不代表任何招聘方的题库或“高频程度”统计。

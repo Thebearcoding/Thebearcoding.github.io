@@ -17,7 +17,7 @@ series: multimodal-interview
 
 “7B 的 BF16 权重只有 14 GB，为什么训练还会 OOM？”“loss 已下降，为什么视频问答变差？”这两类问题共同要求把一个抽象算法放回真实训练过程：**哪一项张量被保存，哪一条梯度被计算，哪个指标才支持结论。**
 
-本文承接 [02-SFT与DPO的训练信号](/notes/multimodal-sft-lora-dpo/) 的损失与 LoRA，以及 [03-从RL基础推到PPO与GRPO](/notes/policy-gradient-ppo-grpo/) 的 rollout、优势和新旧策略。目标是能解释和定位现象，不要求掌握分布式部署框架。ZealD 的[模型训练记录](https://www.xiaohongshu.com/user/profile/68ff42af000000003702b1e5/6a788ab7000000002202c020)和[项目复盘](https://www.xiaohongshu.com/user/profile/68ff42af000000003702b1e5/6aaea91d0000000026017d0b)提供面试讨论背景；下文案例均为教学构造。
+本文承接 [SFT与DPO：训练信号从哪里来](/notes/multimodal-sft-lora-dpo/) 的损失与 LoRA，以及 [从RL基础推到PPO与GRPO](/notes/policy-gradient-ppo-grpo/) 的 rollout、优势和新旧策略。目标是能解释和定位现象，不要求掌握分布式部署框架。下文通过教学构造的显存账单与排障案例，将训练机制变成可检查的量。
 
 <span id="mm-2c2559ac4c6a" style="display:block;scroll-margin-top:6rem"></span>
 
@@ -123,7 +123,7 @@ $$
 M_{\rm KV}\approx2LBT H_{\rm kv}d_hs,
 $$
 
-L 为层数，$H_{\rm kv}$ 为 KV 头数，$d_h$ 为每头维度，s 为字节数，最前面的 2 对应 K 和 V。32 层、B=1、T=8192、8 KV 头、128 维、BF16 时约为 1 GiB。详细来源与边界见 [04-推理效率与手撕考点](/notes/prefill-decode-video-tokens/)。
+L 为层数，$H_{\rm kv}$ 为 KV 头数，$d_h$ 为每头维度，s 为字节数，最前面的 2 对应 K 和 V。32 层、B=1、T=8192、8 KV 头、128 维、BF16 时约为 1 GiB。详细来源与边界见 [Prefill、Decode与视频token的计算代价](/notes/prefill-decode-video-tokens/)。
 
 RL 会先 rollout，再进行策略训练，有时生成引擎和训练模型同时驻留。因此一次 RL OOM 要先定位发生在生成还是反向阶段；不能把所有内存都套进 SFT 的 12P 公式，也不能把所有峰值都套进 KV 公式。
 
@@ -167,7 +167,7 @@ RL 会先 rollout，再进行策略训练，有时生成引擎和训练模型同
 
 LoRA 冻结原权重，用低秩参数更新，所以原权重无需梯度和 Adam 两份状态；但原权重仍需参与前向，梯度仍可能穿过该层到上游模块。QLoRA 再压缩冻结权重存储，计算 dtype 与存储 bit 数不同。
 
-因此低秩参数很少，不代表长视频激活很少。若 OOM 来自 T 太长，只减 LoRA rank 可能变化有限；若全参状态才是大头，LoRA 的帮助就很明显。首步梯度与参数数量手算见 [02-SFT与DPO的训练信号](/notes/multimodal-sft-lora-dpo/)。
+因此低秩参数很少，不代表长视频激活很少。若 OOM 来自 T 太长，只减 LoRA rank 可能变化有限；若全参状态才是大头，LoRA 的帮助就很明显。首步梯度与参数数量手算见 [SFT与DPO：训练信号从哪里来](/notes/multimodal-sft-lora-dpo/)。
 
 <span id="mm-d0085138cb71" style="display:block;scroll-margin-top:6rem"></span>
 
@@ -302,7 +302,7 @@ NaN 是非有限值传播的结果，优先定位最早出现的位置。若 log
 
 若仅字幕和完整输入几乎同分，可以怀疑视觉贡献有限；但不能直接断言“视觉完全没用”，因为测试集本身可能不需要视觉。时序打乱也要选真正依赖顺序的题，否则分数不变并无诊断力。
 
-同时还要检查视觉特征是否真正进入 forward、连接器是否在训练、采帧是否覆盖关键动作。若关键事件落在两帧之间，再强的优化器也没有足够输入证据。更多采帧与评测解释见 [06-视觉视频算法面试专项](/notes/vision-video-algorithms/)。
+同时还要检查视觉特征是否真正进入 forward、连接器是否在训练、采帧是否覆盖关键动作。若关键事件落在两帧之间，再强的优化器也没有足够输入证据。更多采帧与评测解释见 [为什么图像和视频能够进入语言模型](/notes/vision-video-algorithms/)。
 
 <span id="mm-7bb808e6efba" style="display:block;scroll-margin-top:6rem"></span>
 
@@ -310,7 +310,7 @@ NaN 是非有限值传播的结果，优先定位最早出现的位置。若 log
 
 先看 reward 是否评价了目标任务。若只奖励格式，模型学到稳定输出 JSON 也能让 reward 上升，却未提高时序事实。若答案解析把所有结果判错，组内优势可能全部为零。人审若干同题回答与机器分数，能发现这类目标错误。
 
-然后看信号与更新两个层面：同题组内方差、全对/全错比例说明有没有可比较的信号；梯度、ratio、clip 和新旧概率差说明信号有没有造成更新。中心化优势可能让 policy loss 数值为零而梯度非零，详见 [03-从RL基础推到PPO与GRPO](/notes/policy-gradient-ppo-grpo/)；所以不能用标量零值独立判定“没训练”。
+然后看信号与更新两个层面：同题组内方差、全对/全错比例说明有没有可比较的信号；梯度、ratio、clip 和新旧概率差说明信号有没有造成更新。中心化优势可能让 policy loss 数值为零而梯度非零，详见 [从RL基础推到PPO与GRPO](/notes/policy-gradient-ppo-grpo/)；所以不能用标量零值独立判定“没训练”。
 
 如果训练 reward 上升、独立验证不上升，再检查同视频泄漏、题型分布、奖励投机、输出截断和长度变化。只有这些证据支持时，才进一步把问题归因于 SFT 初始化、LoRA rank 或 GRPO 超参数；“某次 LoRA+GRPO 失败”不能证明 LoRA 普遍不适合 RL。
 
@@ -359,8 +359,7 @@ NaN 是非有限值传播的结果，优先定位最早出现的位置。若 log
 
 ## 来源与回链
 
-- [图解仓库训练流程](https://github.com/changyeyu/LLM-RL-Visualized#header-8)；本页与原图的 attention/SFT/PPO 部分对应，图片和授权总览见 [00-图解大模型算法与ZealD面经总览](/notes/multimodal-interview-guide/)。
+- [图解仓库训练流程](https://github.com/changyeyu/LLM-RL-Visualized#header-8)；本页与原图的 attention/SFT/PPO 部分对应，图片和授权总览见 [学习总览](/notes/multimodal-interview-guide/)。
 - [DeepSpeed ZeRO 官方](https://www.deepspeed.ai/tutorials/zero/)、[FlashAttention 原论文](https://arxiv.org/abs/2205.14135)。
 - [AdamW 原论文](https://arxiv.org/abs/1711.05101)、[PyTorch AMP 官方文档](https://docs.pytorch.org/docs/stable/amp.html)：核对优化器与混精实现时使用；硬件/框架版本须以实际环境为准。
-- ZealD：[训练记录](https://www.xiaohongshu.com/user/profile/68ff42af000000003702b1e5/6a788ab7000000002202c020)、[项目复盘](https://www.xiaohongshu.com/user/profile/68ff42af000000003702b1e5/6aaea91d0000000026017d0b)。
-- [02-SFT与DPO的训练信号](/notes/multimodal-sft-lora-dpo/) · [03-从RL基础推到PPO与GRPO](/notes/policy-gradient-ppo-grpo/) · [04-推理效率与手撕考点](/notes/prefill-decode-video-tokens/) · [05-ZealD真实面试题与项目深挖](/notes/multimodal-interview-questions/) · 参数高效微调。
+- [SFT与DPO：训练信号从哪里来](/notes/multimodal-sft-lora-dpo/) · [从RL基础推到PPO与GRPO](/notes/policy-gradient-ppo-grpo/) · [Prefill、Decode与视频token的计算代价](/notes/prefill-decode-video-tokens/) · [面试问题与项目深挖](/notes/multimodal-interview-questions/) · 参数高效微调。

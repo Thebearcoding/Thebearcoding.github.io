@@ -6,28 +6,28 @@ tags:
 - 来源
 - 图像许可
 - 知识覆盖
-summary: 记录原论文、图解仓库、面经证据、17幅配图及教程范围。
+summary: 记录原论文、图解仓库、17幅配图的使用条件，以及复习题与教程的知识范围。
 draft: false
 obsidian: true
 series: multimodal-interview
 ---
 <span id="mm-7ff656c25143" style="display:block;scroll-margin-top:6rem"></span>
 
-本页记录本系列的知识来源、章节对应和公开配图使用条件。技术核对日期为 2026-09-22；面经采用既有归档，不宣称本轮重新抓取全部小红书帖子。学习入口见[00-图解大模型算法与ZealD面经总览](/notes/multimodal-interview-guide/)。
+本页记录本系列的知识来源、章节对应和公开配图使用条件。学习入口见[学习总览](/notes/multimodal-interview-guide/)。
 
-<span id="mm-37fcc83bd40c" style="display:block;scroll-margin-top:6rem"></span>
+<span id="mm-31866b421ea8" style="display:block;scroll-margin-top:6rem"></span>
 
-## 1. 三类材料各承担什么证据
+## 1. 参考资料与教学内容各自的用途
 
 | 材料 | 用途 | 不支持的结论 |
 |---|---|---|
 | [LLM-RL-Visualized 图解仓库](https://github.com/changyeyu/LLM-RL-Visualized) | 知识路线与原图辅助；文字中的省略以论文补齐 | 一张示意图等于完整实现；本系列覆盖仓库所有分支 |
 | 原论文、固定版本报告、官方 API/模型卡 | 公式、模块、版本配置及实现语义的依据 | 论文在特定实验上的收益会无条件迁移到任何项目 |
-| 小红书公开面经/学习笔记的既有归档 | 决定复习方向、提取问题与项目线索 | 招聘方认证、高频率统计、作者诊断已被对照实验证实 |
+| 本教程的复习问答、数值例与假设项目 | 组织知识点，检查理解，练习实验设计 | 某公司的题库、面试频率统计、已经测得的项目收益 |
 
-图解仓库本轮基准快照为 [33cf3e98c04a60dd2ce8e8b03884e6a7b990694e](https://github.com/changyeyu/LLM-RL-Visualized/tree/33cf3e98c04a60dd2ce8e8b03884e6a7b990694e)。正文的便捷章节链接仍可能指向移动分支；需要追溯时以该快照核对。数学例题、解释和自绘图由本教程重新组织，不把原作者配图等同于其认可本教程全部观点。
+图解仓库采用的基准快照为 [33cf3e98c04a60dd2ce8e8b03884e6a7b990694e](https://github.com/changyeyu/LLM-RL-Visualized/tree/33cf3e98c04a60dd2ce8e8b03884e6a7b990694e)。正文的便捷章节链接仍可能指向移动分支；需要追溯时以该快照核对。数学例题、解释和自绘图由本教程重新组织，不把原作者配图等同于其认可本教程全部观点。
 
-模型报告固定为 Qwen2.5-VL v1、Qwen3-VL v1、DeepSeek-V2 v5；Llama3.1使用官方模型卡，并注明访问日期。不能根据仓库路径名称猜版本：旧 Qwen2.5-VL 仓库入口在本轮访问时会转向 Qwen3-VL，故采用明确 arXiv 版本。
+模型报告固定为 Qwen2.5-VL v1、Qwen3-VL v1、DeepSeek-V2 v5；Llama3.1使用官方模型卡。仓库路径可能随项目维护而调整，因此模型机制以明确的论文版本和模型卡为依据。
 
 <span id="mm-902218f66657" style="display:block;scroll-margin-top:6rem"></span>
 
@@ -79,23 +79,24 @@ series: multimodal-interview
 | [FlashAttention](https://arxiv.org/abs/2205.14135)、[PagedAttention](https://arxiv.org/abs/2309.06180) | IO感知计算与缓存管理 | 04、07 |
 | [PyTorch SDPA](https://docs.pytorch.org/docs/stable/generated/torch.nn.functional.scaled_dot_product_attention.html) | 布尔mask、非方形因果可见关系的API核对 | 04 |
 
-正文推导和算例是本教程组织的教学说明，不是对每篇论文的逐页译文。读论文的追问表在[08-模型家族与论文精读路线](/notes/multimodal-models-paper-reading/)；技术理解仍需区分定义、数学恒等式、优化近似与实验证据。
+正文推导和算例是本教程组织的教学说明，不是对每篇论文的逐页译文。读论文的追问表在[模型差异为什么必须落到具体版本](/notes/multimodal-models-paper-reading/)；技术理解仍需区分定义、数学恒等式、优化近似与实验证据。
 
-<span id="mm-4287145288c6" style="display:block;scroll-margin-top:6rem"></span>
+<span id="mm-08e17f9ec2e6" style="display:block;scroll-margin-top:6rem"></span>
 
-## 4. 面经证据索引与日期规则
+## 4. 复习题与知识点地图
 
-ZealD公开账号：[个人主页](https://www.xiaohongshu.com/user/profile/68ff42af000000003702b1e5)。本轮复习采用2026-09-20归档中的正文与既有后续记录。公开QA仅作技术主题概括，没有把他的完整帖子重发到本博客。
+复习问答按知识点组织，用于检查机制理解和项目分析能力，不代表某公司的题库或面试频率统计。阅读时可按下面的映射返回原理章节：
 
-| 证据标记 | 本系列使用规则 |
+| 问答主题 | 原理章节与自测重点 |
 |---|---|
-| Z | ZealD正文有归档，表述为作者自述 |
-| M | 其他作者面经正文有归档，表述为帖子自述 |
-| R | 只有既有转述，缺原始评论等信息，不提升为确认原题 |
-| S | 自学、求助、项目复盘，不写成被问过 |
-| E | 本教程扩展问题、数字例、假设实验，不归给原作者 |
+| Q1–Q3：模型、QKV、位置编码 | 01、08；张量形状、相对位置与固定版本比较 |
+| Q4：推理瓶颈 | 04；计算与访存、KV缓存、TTFT与TPOT |
+| Q5：项目与论文分析 | 02、05、06、07；任务定义、数据、控制变量与结论边界 |
+| Q6–Q10：视觉表示与语言接入 | 06、08；ViT、CLIP、连接器、时间编码与冻结策略 |
+| Q11–Q14：数据、蒸馏、分类与视频定位 | 02、05、06；监督质量、损失梯度与分项评价 |
+| 后训练延伸题 | 03、07；估计器、奖励差异与训练诊断 |
 
-原帖入口及逐题对应见[05-ZealD真实面试题与项目深挖](/notes/multimodal-interview-questions/)。平台链接可能要求登录，已剥离会话参数。部分归档日期曾由note ID推定，不能作为精确发帖或面试时间，也不据此做频率排名。没有完整日志时，作者或评论者的GRPO归因仅作为假设。
+完整问答见[面试问题与项目深挖](/notes/multimodal-interview-questions/)，每日练习见[十四天练习册：从手算到多模态面试](/notes/multimodal-fourteen-day-workbook/)。数值例应按给定条件复算，项目推演应继续补充数据、实验记录和评价，才能形成实证结论。
 
 <span id="mm-9c69fd41be9c" style="display:block;scroll-margin-top:6rem"></span>
 

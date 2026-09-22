@@ -18,7 +18,7 @@ series: multimodal-interview
 
 本章沿着一个问题展开：**模型回答“他先拿杯子还是先开柜门”时，答案究竟怎样受到画面的约束？** 输入中必须有证据，视觉网络必须保留证据，时间表示必须区别事件先后，训练目标必须奖励依赖证据的回答，评测也必须检验这件事。任何一环缺失，流畅的输出都可能只是猜测。
 
-先理解[01-模型骨干与多模态入口](/notes/transformer-attention-rope-gqa/)中的矩阵乘法、Attention、位置编码和残差。本章解释 patch、对齐、连接器、视频建模和评估；具体模型版本见[08-模型家族与论文精读路线](/notes/multimodal-models-paper-reading/)，可回溯的面试题见[05-ZealD真实面试题与项目深挖](/notes/multimodal-interview-questions/)。全部算例和拟开展实验均为教学构造。
+先理解[从一个token理解Transformer与多模态入口](/notes/transformer-attention-rope-gqa/)中的矩阵乘法、Attention、位置编码和残差。本章解释 patch、对齐、连接器、视频建模和评估；具体模型版本见[模型差异为什么必须落到具体版本](/notes/multimodal-models-paper-reading/)，复习问答见[面试问题与项目深挖](/notes/multimodal-interview-questions/)。全部算例和拟开展实验均为教学构造。
 
 <span id="mm-f9764a456398" style="display:block;scroll-margin-top:6rem"></span>
 
@@ -186,7 +186,7 @@ $$
 \mathcal L=-\sum_{t\in\text{答案位置}}\log p_\theta(y_t\mid I,q,y_{<t}).
 $$
 
-图像与问题作为条件，答案位置算loss。视觉token未直接被要求预测词表标签，但答案梯度仍能经注意力回传到可训练视觉模块。冻结LLM参数并不意味着可以切断经过LLM的全部梯度：要训练前方projector，仍需损失对LLM输入的梯度。label mask详见[02-SFT与DPO的训练信号](/notes/multimodal-sft-lora-dpo/)。
+图像与问题作为条件，答案位置算loss。视觉token未直接被要求预测词表标签，但答案梯度仍能经注意力回传到可训练视觉模块。冻结LLM参数并不意味着可以切断经过LLM的全部梯度：要训练前方projector，仍需损失对LLM输入的梯度。label mask详见[SFT与DPO：训练信号从哪里来](/notes/multimodal-sft-lora-dpo/)。
 
 冻结视觉塔保留已有表征、减少训练负担；面对领域变化或细节任务，解冻可能有益，也可能过拟合。应比较冻结、局部解冻和全参在相同数据上的质量与成本，不把某一论文方案当通用规定。
 
@@ -245,7 +245,7 @@ $$
 
 视觉token可粗写 $N_v=FP/c$，$c$为压缩倍率；具体模型可能将相邻帧组成tubelet，添加分隔符或动态裁剪。8帧×196为1568个；每帧压到32得到256个，时间位置仍有8个而局部细节可能损失。如果同预算只保留一张高分辨率帧，空间细节好却容易漏事件。应比较按短事件、OCR、顺序分桶的准确率—token—延迟曲线。
 
-帧编号也不等于时间：$[0,0.1,8]$ 秒与 $[0,4,8]$ 秒编号都为 $[0,1,2]$，持续时间却不同。精确定位必须保留真实采样时间与片段相对原视频的偏移。解码帧率、模型采样FPS和最终帧数是三个概念；可变帧率文件尤其不能随意用帧号除名义FPS代表真实时间。具体Qwen时间编码见[08-模型家族与论文精读路线](/notes/multimodal-models-paper-reading/)。
+帧编号也不等于时间：$[0,0.1,8]$ 秒与 $[0,4,8]$ 秒编号都为 $[0,1,2]$，持续时间却不同。精确定位必须保留真实采样时间与片段相对原视频的偏移。解码帧率、模型采样FPS和最终帧数是三个概念；可变帧率文件尤其不能随意用帧号除名义FPS代表真实时间。具体Qwen时间编码见[模型差异为什么必须落到具体版本](/notes/multimodal-models-paper-reading/)。
 
 <span id="mm-1bf951a075ce" style="display:block;scroll-margin-top:6rem"></span>
 
@@ -291,7 +291,7 @@ $$
 
 若覆盖改善，先对同一道题做配对比较，并在两方案共同覆盖的题目交集上比较答题能力；不能直接比较两组不同“已覆盖子集”的准确率，因为样本难度可能不同。若新增覆盖题的改进与总体变化吻合，而共同覆盖交集无明显差异，才更支持证据覆盖这一解释。覆盖相同但时序题改善，可进一步检验时间表示；加帧后OCR下降，检查是否迫使每帧分辨率下降。特征probe能预测顺序仅是相关证据，不能独自证明LLM忽视了信息。
 
-诊断顺序是原视频/标注→实际采样与时间戳→视觉编码和压缩→跨帧信息→生成监督→评价协议。然后才讨论[03-从RL基础推到PPO与GRPO](/notes/policy-gradient-ppo-grpo/)是否提供有效学习信号。没有视觉证据或可检验reward时，增加RL不会可靠补出缺失事件。
+诊断顺序是原视频/标注→实际采样与时间戳→视觉编码和压缩→跨帧信息→生成监督→评价协议。然后才讨论[从RL基础推到PPO与GRPO](/notes/policy-gradient-ppo-grpo/)是否提供有效学习信号。没有视觉证据或可检验reward时，增加RL不会可靠补出缺失事件。
 
 <span id="mm-e671af5c5023" style="display:block;scroll-margin-top:6rem"></span>
 
@@ -304,4 +304,4 @@ $$
 5. **帧打乱但答案不变，能断言没有时间编码吗？** 不能；问题可能无关时间、证据漏采或字幕捷径。要用答案应随顺序改变的题和控制组。
 6. **70%变72%是否宣布有效？** 还需样本量、配对错误变化、相关性与重复实验；总分不证明稳定收益或机制。
 
-回到[05-ZealD真实面试题与项目深挖](/notes/multimodal-interview-questions/)练口述，再把通用机制放进[08-模型家族与论文精读路线](/notes/multimodal-models-paper-reading/)的具体版本。掌握标准是能解释信息如何流到输出，并指出它什么时候会失败。
+回到[面试问题与项目深挖](/notes/multimodal-interview-questions/)练口述，再把通用机制放进[模型差异为什么必须落到具体版本](/notes/multimodal-models-paper-reading/)的具体版本。掌握标准是能解释信息如何流到输出，并指出它什么时候会失败。

@@ -15,9 +15,9 @@ series: multimodal-interview
 ---
 <span id="mm-38507a391c6e" style="display:block;scroll-margin-top:6rem"></span>
 
-本章解释“模型怎样把已经看见的内容变成下一步预测”。读完应能在纸上完成一次两 token 注意力计算，画出 Q/K/V 的形状，解释 RoPE、GQA、RMSNorm 和 SwiGLU 各自改变哪一步。这对应 ZealD 原帖明确披露的 QKV、位置编码题；题源及其证据范围见[05-ZealD真实面试题与项目深挖](/notes/multimodal-interview-questions/)。
+本章解释“模型怎样把已经看见的内容变成下一步预测”。读完应能在纸上完成一次两 token 注意力计算，画出 Q/K/V 的形状，解释 RoPE、GQA、RMSNorm 和 SwiGLU 各自改变哪一步。对应的复习问答见[面试问题与项目深挖](/notes/multimodal-interview-questions/)。
 
-如果点积、矩阵乘法或条件概率还不熟，先读[09-数学与张量预备课](/notes/multimodal-math-prerequisites/)。正文中的小矩阵均为教学构造，不是某个商业模型的参数。
+如果点积、矩阵乘法或条件概率还不熟，先读[读懂大模型公式之前：数学与张量预备课](/notes/multimodal-math-prerequisites/)。正文中的小矩阵均为教学构造，不是某个商业模型的参数。
 
 <span id="mm-b72f0e7cec69" style="display:block;scroll-margin-top:6rem"></span>
 
@@ -43,7 +43,7 @@ $$
 
 Attention 的主要作用是让不同位置交换信息；FFN 对每个位置的向量进行非线性加工。FFN 不直接在时间轴上混合 token，但其输入已经通过 Attention 包含上下文。残差保留原输入的直接路径；若写为 $Y=X+F(X)$，其局部雅可比是 $I+\partial F/\partial X$，这给梯度提供直接通路，却不保证任意深度下都不会梯度异常。
 
-最后一层隐藏向量经 LM head 映射成词表大小的 logits，再经 softmax 得到“下一个 token”的概率。输入位置 $t$ 的 logits 通常用于预测 $t+1$；这个错一位关系会在 SFT 的 label shift 中再次出现，见[02-SFT与DPO的训练信号](/notes/multimodal-sft-lora-dpo/)。
+最后一层隐藏向量经 LM head 映射成词表大小的 logits，再经 softmax 得到“下一个 token”的概率。输入位置 $t$ 的 logits 通常用于预测 $t+1$；这个错一位关系会在 SFT 的 label shift 中再次出现，见[SFT与DPO：训练信号从哪里来](/notes/multimodal-sft-lora-dpo/)。
 
 <span id="mm-6819ce0e9f13" style="display:block;scroll-margin-top:6rem"></span>
 
@@ -110,7 +110,7 @@ $$
 <figcaption style="font-size:0.9em">注意力手算与缓存掩码（点击查看原图）</figcaption>
 </figure>
 
-**读图**：上半部把“分数→被遮挡→概率→加权结果”画为同一行计算。下半部是有缓存时的非方形可见表：已有三个 token，新来两个 token 时，第一行允许看前四列、第二行允许看全部五列。不要把普通方形下三角直接截一块当缓存 mask。具体推导见[04-推理效率与手撕考点](/notes/prefill-decode-video-tokens/)。
+**读图**：上半部把“分数→被遮挡→概率→加权结果”画为同一行计算。下半部是有缓存时的非方形可见表：已有三个 token，新来两个 token 时，第一行允许看前四列、第二行允许看全部五列。不要把普通方形下三角直接截一块当缓存 mask。具体推导见[Prefill、Decode与视频token的计算代价](/notes/prefill-decode-video-tokens/)。
 
 <span id="mm-6cba75ce1249" style="display:block;scroll-margin-top:6rem"></span>
 
@@ -132,7 +132,7 @@ $$
 <figcaption style="font-size:0.9em">MHA-GQA-MQA-MLA（点击查看原图）</figcaption>
 </figure>
 
-**读图**：蓝色是 Q，绿色是 K，黄色是 V。MHA 每个 Q 头对应一套 K/V；图中 GQA 四个 Q 头分成两组，每组共用一套；MQA 所有 Q 共用一套。最右 MLA 的虚线 K/V 表示可从更小的潜表示获得相应信息，它是另一种压缩参数化，不能只理解为“更少的头”。MLA 的压缩与 RoPE 解耦见[08-模型家族与论文精读路线](/notes/multimodal-models-paper-reading/)。
+**读图**：蓝色是 Q，绿色是 K，黄色是 V。MHA 每个 Q 头对应一套 K/V；图中 GQA 四个 Q 头分成两组，每组共用一套；MQA 所有 Q 共用一套。最右 MLA 的虚线 K/V 表示可从更小的潜表示获得相应信息，它是另一种压缩参数化，不能只理解为“更少的头”。MLA 的压缩与 RoPE 解耦见[模型差异为什么必须落到具体版本](/notes/multimodal-models-paper-reading/)。
 
 若 $H_q=32,H_{kv}=8$，每 4 个 Q 头共用一组 K/V。不同 Q 仍得到不同的注意力权重，因为 Q 不同；共用的是供它们读取的 key/value。高效内核可以按映射共享，不必先把缓存复制四份。
 
@@ -237,7 +237,7 @@ Decoder-only 描述因果语言骨干；MoE 描述部分子层如何路由。一
 
 一个 $224\times224$ RGB 图像以 $16\times16$ patch 切分，得到 196 个 patch，每块原始向量宽度为 $16\cdot16\cdot3=768$。视觉塔可输出 $[196,d_v]$，线性 projector 可映射为 $[196,d]$；若另有 32-query 压缩器，则可能输出 $[32,d]$。后者节省上下文预算，也可能丢失细粒度信息。8 帧不压缩是 1568 个视觉 token，逐帧压到 32 个则为 256；真实模型还会加边界/时间信息，或在时空上联合合并。
 
-这条维度链只解释“能接上”，并不解释“接上之后为何理解正确”。视觉预训练、图文对齐、指令数据和视频时间建模继续见[06-视觉视频算法面试专项](/notes/vision-video-algorithms/)；不同 Qwen/DeepSeek/Llama 版本的设计见[08-模型家族与论文精读路线](/notes/multimodal-models-paper-reading/)。
+这条维度链只解释“能接上”，并不解释“接上之后为何理解正确”。视觉预训练、图文对齐、指令数据和视频时间建模继续见[为什么图像和视频能够进入语言模型](/notes/vision-video-algorithms/)；不同 Qwen/DeepSeek/Llama 版本的设计见[模型差异为什么必须落到具体版本](/notes/multimodal-models-paper-reading/)。
 
 <span id="mm-d5ec7e3f0c6b" style="display:block;scroll-margin-top:6rem"></span>
 
@@ -245,7 +245,7 @@ Decoder-only 描述因果语言骨干；MoE 描述部分子层如何路由。一
 
 QKV 题可先用一段话讲计算路径，再展开一个具体形状和一个数值例子：“本层隐藏状态分别经 Q/K/V 投影，按 head 计算缩放点积，加可见关系的 mask，沿 key 维 softmax 后加权 V，再合并头和输出投影。GQA 让多组 Q 共用较少 K/V，但各 Q 的注意力仍不同。”
 
-如果被追问“为什么”，依次解释缩放对应点积分布、mask 对应因果条件、softmax 对应归一化权重、V 对应被汇总内容。如果被追问“怎么证明没写错”，给出未来 token 不影响过去输出、缓存与整段 forward 一致的检查，见[04-推理效率与手撕考点](/notes/prefill-decode-video-tokens/)。完整练习与答案见[10-十四天练习与参考解答](/notes/multimodal-fourteen-day-workbook/)。
+如果被追问“为什么”，依次解释缩放对应点积分布、mask 对应因果条件、softmax 对应归一化权重、V 对应被汇总内容。如果被追问“怎么证明没写错”，给出未来 token 不影响过去输出、缓存与整段 forward 一致的检查，见[Prefill、Decode与视频token的计算代价](/notes/prefill-decode-video-tokens/)。完整练习与答案见[十四天练习册：从手算到多模态面试](/notes/multimodal-fourteen-day-workbook/)。
 
 <span id="mm-94cf8ab39d29" style="display:block;scroll-margin-top:6rem"></span>
 

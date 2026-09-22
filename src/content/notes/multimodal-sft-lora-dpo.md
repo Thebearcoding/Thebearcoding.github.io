@@ -17,7 +17,7 @@ series: multimodal-interview
 
 这篇解释一个贯穿多模态后训练的问题：**模型究竟根据什么信号改变参数，为什么 loss 下降不一定代表看懂了视频？**读完后，你应能给一条样本画出监督位置、手算交叉熵、解释 LoRA 的第一步梯度，并从偏好假设推到 DPO，而不只记住算法名字。
 
-先读 [01-模型骨干与多模态入口](/notes/transformer-attention-rope-gqa/) 中的自回归预测与 attention mask。本文的算例用“先开门，再进屋”这个视频问答贯穿；“开门”被当成单个教学 token，真实 tokenizer 未必如此切分。SFT/DPO 是训练目标，LoRA/QLoRA 是参数更新与存储方式，二者可以组合。ZealD 的[项目复盘](https://www.xiaohongshu.com/user/profile/68ff42af000000003702b1e5/6aaea91d0000000026017d0b)提供了数据分布和后续 GRPO 效果的讨论背景；下面的推导、练习是教程补充，不冒充他的原题。
+先读 [从一个token理解Transformer与多模态入口](/notes/transformer-attention-rope-gqa/) 中的自回归预测与 attention mask。本文的算例用“先开门，再进屋”这个视频问答贯穿；“开门”被当成单个教学 token，真实 tokenizer 未必如此切分。SFT/DPO 是训练目标，LoRA/QLoRA 是参数更新与存储方式，二者可以组合。本章还讨论数据分布如何影响后续训练；推导、练习和视频案例均用于教学，不代表已完成的实验。
 
 <span id="mm-fb4faa0cfd7f" style="display:block;scroll-margin-top:6rem"></span>
 
@@ -173,7 +173,7 @@ $$
 
 ### 3.3 token 平均与样本平均不是同一件事
 
-样本 A 有 2 个监督 token、总损失 2；样本 B 有 8 个监督 token、总损失 16。全 token 平均是 $18/10=1.8$；先按样本取均值再平均是 $(1+2)/2=1.5$。前者让长回答贡献更多 token，后者让每条样本权重相同。两者均可选择，但梯度累积、分布式训练和评估必须遵循同一约定，详见 [07-训练显存与实验排障](/notes/training-memory-debugging/)。
+样本 A 有 2 个监督 token、总损失 2；样本 B 有 8 个监督 token、总损失 16。全 token 平均是 $18/10=1.8$；先按样本取均值再平均是 $(1+2)/2=1.5$。前者让长回答贡献更多 token，后者让每条样本权重相同。两者均可选择，但梯度累积、分布式训练和评估必须遵循同一约定，详见 [训练显存与实验排障：把机制变成可检查的量](/notes/training-memory-debugging/)。
 
 <span id="mm-b7ee470fd875" style="display:block;scroll-margin-top:6rem"></span>
 
@@ -404,7 +404,7 @@ $\beta=0.1,1,10$ 时依次约为 $0.99995,0.73106,0.52498$；更大 $\beta$ 更�
 
 ## 8. 数据分布怎样把 SFT 和后续 GRPO 连起来
 
-SFT 改变了起始策略会生成什么。GRPO 随后在同一个问题下采多个答案，比较奖励；如果起始策略几乎从不生成正确证据链，二值奖励可能让整组全错。如果所有答案都正确、奖励完全相同，也没有组内优劣信号。公式与例题在 [03-从RL基础推到PPO与GRPO](/notes/policy-gradient-ppo-grpo/)。
+SFT 改变了起始策略会生成什么。GRPO 随后在同一个问题下采多个答案，比较奖励；如果起始策略几乎从不生成正确证据链，二值奖励可能让整组全错。如果所有答案都正确、奖励完全相同，也没有组内优劣信号。公式与例题在 [从RL基础推到PPO与GRPO](/notes/policy-gradient-ppo-grpo/)。
 
 这不是“同 prompt 做过 SFT，所以不能再做 RL”的定理。需要区分：
 
@@ -417,7 +417,7 @@ SFT 改变了起始策略会生成什么。GRPO 随后在同一个问题下采�
 
 视频数据应记录视频 ID、片段 ID、帧采样时间戳、问题、答案与证据区间；按源视频隔离 train/val/test，再检查相近片段、字幕和改写问题的重复。caption 数据主要描述静态场景；静态 VQA 训练问题条件下的取证；视频时序问答才直接训练先后、动作变化或时间定位。增加一种数据不代表自动覆盖另外两种能力。
 
-ZealD 的[GRPO 求助](https://www.xiaohongshu.com/user/profile/68ff42af000000003702b1e5/6a93fc92000000000303ceb8)和[项目复盘](https://www.xiaohongshu.com/user/profile/68ff42af000000003702b1e5/6aaea91d0000000026017d0b)可用来提出假设；没有其完整日志与对照实验，不能确定“失败就是过拟合”。
+“SFT 后 GRPO 没有提升”只能作为排障现象；缺少完整日志与对照实验时，不能确定“失败就是过拟合”。应当逐项验证数据分布、初始化、采样、奖励和优化条件。
 
 <span id="mm-3ea9dfb6dcce" style="display:block;scroll-margin-top:6rem"></span>
 
@@ -432,7 +432,7 @@ SFT 最大化示范回答在给定条件下的似然。DPO 用同题两回答的
 **问题：SFT loss 降了，视频 QA 为什么反而差？**  
 loss 只衡量训练标签拟合。先解释可能的目标错位：监督位置错误、视觉证据漏采、模板捷径、数据分布不同、标签噪声或泄漏；再用固定测试集的顺序题、OCR、字幕依赖等分桶验证。需要观测和对照，不能凭一条 loss 曲线归因。
 
-这三题是根据知识点整理的扩展练习；ZealD 确认的原始面试回忆、项目分享和评论观点分列于 [05-ZealD真实面试题与项目深挖](/notes/multimodal-interview-questions/)。
+这三题是根据知识点整理的扩展练习；更多口述题和项目追问见 [面试问题与项目深挖](/notes/multimodal-interview-questions/)。
 
 <span id="mm-1fa2dedf5dec" style="display:block;scroll-margin-top:6rem"></span>
 
@@ -458,7 +458,6 @@ loss 只衡量训练标签拟合。先解释可能的目标错位：监督位置
 
 ## 来源与进一步阅读
 
-- 余昌叶：[图解仓库 SFT](https://github.com/changyeyu/LLM-RL-Visualized#header-14)、[DPO](https://github.com/changyeyu/LLM-RL-Visualized#header-19)。保留原图署名，使用条件见 [00-图解大模型算法与ZealD面经总览](/notes/multimodal-interview-guide/)。
+- 余昌叶：[图解仓库 SFT](https://github.com/changyeyu/LLM-RL-Visualized#header-14)、[DPO](https://github.com/changyeyu/LLM-RL-Visualized#header-19)。保留原图署名，使用条件见 [学习总览](/notes/multimodal-interview-guide/)。
 - [DPO 原论文](https://arxiv.org/abs/2305.18290)：核对目标与附录推导；本文的数字例题为独立教学构造。
 - [LoRA 原论文](https://arxiv.org/abs/2106.09685)、[QLoRA 原论文](https://arxiv.org/abs/2305.14314)：区分低秩更新、初始化和量化存储。
-- ZealD：[数据与项目复盘](https://www.xiaohongshu.com/user/profile/68ff42af000000003702b1e5/6aaea91d0000000026017d0b)、[GRPO 求助帖](https://www.xiaohongshu.com/user/profile/68ff42af000000003702b1e5/6a93fc92000000000303ceb8)。

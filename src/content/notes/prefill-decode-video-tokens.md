@@ -17,7 +17,7 @@ series: multimodal-interview
 
 一段长视频的问题，可能等很久才出现第一个字，之后却流畅地逐字输出；也可能首字很快，后面每一步都慢。两种现象对应的计算工作不同。本章沿着一次真实生成的时间顺序，解释 Prefill、KV Cache、Decode、视觉 token 成本和采样策略。
 
-先读[01-模型骨干与多模态入口](/notes/transformer-attention-rope-gqa/)中的 Q/K/V 形状。Prefill/Decode 在既有 ZealD 采集记录中出现，但本轮没有找到评论原始记录，证据级别见[05-ZealD真实面试题与项目深挖](/notes/multimodal-interview-questions/)。技术讲解本身以原论文和官方文档为依据。
+先读[从一个token理解Transformer与多模态入口](/notes/transformer-attention-rope-gqa/)中的 Q/K/V 形状。本章从输入形状、缓存状态和硬件代价解释 Prefill/Decode，技术依据为原论文和官方文档；对应口述题见[面试问题与项目深挖](/notes/multimodal-interview-questions/)。
 
 <span id="mm-463ec88d4b5d" style="display:block;scroll-margin-top:6rem"></span>
 
@@ -109,7 +109,7 @@ $2$ 是 K 与 V 两份，$L$ 是层数，$B$ 是并发序列数，$T$ 是缓存�
 <figcaption style="font-size:0.9em">视频采帧与证据（点击查看原图）</figcaption>
 </figure>
 
-**读图**：视频时间轴上的选帧先决定哪些事件证据进入视觉塔，之后才形成 visual tokens 和语言模型前缀。减少帧数或压缩 patch 可以省预算，却可能先把待回答事件删掉；缓存或 attention 内核优化只改变已输入信息的处理成本。图的算法含义和漏采反例在[06-视觉视频算法面试专项](/notes/vision-video-algorithms/)中展开。
+**读图**：视频时间轴上的选帧先决定哪些事件证据进入视觉塔，之后才形成 visual tokens 和语言模型前缀。减少帧数或压缩 patch 可以省预算，却可能先把待回答事件删掉；缓存或 attention 内核优化只改变已输入信息的处理成本。图的算法含义和漏采反例在[为什么图像和视频能够进入语言模型](/notes/vision-video-algorithms/)中展开。
 
 <span id="mm-54d47931bd03" style="display:block;scroll-margin-top:6rem"></span>
 
@@ -130,7 +130,7 @@ $$
 
 这个在线 softmax 恒等式说明可以不保存完整概率矩阵而保留正确归一化；全被 mask 的空块要单独跳过或使用安全初始化，不能直接计算 $-\infty-(-\infty)$。实际内核还涉及反向重算、布局与硬件优化。
 
-KV Cache 解决历史 K/V 重算；分页 KV 管理解决缓存块的分配、碎片及复用；KV 量化降低每元素存储，但引入误差和反量化开销；GQA 改模型头共享；视觉压缩改输入内容量。它们可以组合，作用层次不同。标准 teacher-forced SFT 的显存重点是训练激活/梯度/优化器，生成缓存则主要出现在推理或 RL rollout，详见[07-训练显存与实验排障](/notes/training-memory-debugging/)。
+KV Cache 解决历史 K/V 重算；分页 KV 管理解决缓存块的分配、碎片及复用；KV 量化降低每元素存储，但引入误差和反量化开销；GQA 改模型头共享；视觉压缩改输入内容量。它们可以组合，作用层次不同。标准 teacher-forced SFT 的显存重点是训练激活/梯度/优化器，生成缓存则主要出现在推理或 RL rollout，详见[训练显存与实验排障：把机制变成可检查的量](/notes/training-memory-debugging/)。
 
 <span id="mm-d9647fdd28e1" style="display:block;scroll-margin-top:6rem"></span>
 
@@ -152,6 +152,6 @@ Beam search 保留若干条高分前缀，每步扩展并筛选。常用序列�
 
 “QKV 如何实现”常追到形状、mask、缓存位置；“Prefill/Decode 为什么不同”常追到完整计算项、带宽与 KV 账单；“视频为什么慢”常追到视觉塔、帧数、分辨率和语言前缀。回答时给一个可检验的数字和一个适用条件，比只背结论更有用。
 
-[10-十四天练习与参考解答](/notes/multimodal-fourteen-day-workbook/)安排了缓存可见矩阵、64 MiB 增量计算和采样归一练习。它还给出逐项检查路线：同一模型下，改变未来 token 不应影响过去 logits；关闭随机 dropout 后，整段 causal forward 与按 token 缓存 forward 应在合理浮点容差内一致。这些是实现验证的目标，不代表本文已训练或测试某款 7B 模型。
+[十四天练习册：从手算到多模态面试](/notes/multimodal-fourteen-day-workbook/)安排了缓存可见矩阵、64 MiB 增量计算和采样归一练习。它还给出逐项检查路线：同一模型下，改变未来 token 不应影响过去 logits；关闭随机 dropout 后，整段 causal forward 与按 token 缓存 forward 应在合理浮点容差内一致。这些是实现验证的目标，不代表本文已训练或测试某款 7B 模型。
 
-来源：[GQA](https://arxiv.org/abs/2305.13245)、[FlashAttention](https://arxiv.org/abs/2205.14135)、[PagedAttention](https://arxiv.org/abs/2309.06180)、[Top-p / Nucleus Sampling](https://arxiv.org/abs/1904.09751)、[PyTorch SDPA](https://docs.pytorch.org/docs/stable/generated/torch.nn.functional.scaled_dot_product_attention.html)。两幅图均为本教程自绘；仓库原图使用说明见[11-来源、图像许可与知识点覆盖](/notes/multimodal-sources-coverage/)。
+来源：[GQA](https://arxiv.org/abs/2305.13245)、[FlashAttention](https://arxiv.org/abs/2205.14135)、[PagedAttention](https://arxiv.org/abs/2309.06180)、[Top-p / Nucleus Sampling](https://arxiv.org/abs/1904.09751)、[PyTorch SDPA](https://docs.pytorch.org/docs/stable/generated/torch.nn.functional.scaled_dot_product_attention.html)。两幅图均为本教程自绘；仓库原图使用说明见[来源、图像许可与知识点覆盖](/notes/multimodal-sources-coverage/)。

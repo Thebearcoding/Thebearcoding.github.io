@@ -156,7 +156,7 @@ $$
 
 反方向约为 $0.2231$，确实不同。若 $p_j>0$ 而 $q_j=0$，KL 可无穷大，涉及支持集条件。
 
-单次从 $p$ 采到第 2 类时，$\log(p_2/q_2)=\log0.4<0$；单个样本的 log-ratio 可以为负，虽然完整 KL 非负。因此不能拿一个负的 token log-ratio 判断“KL 算错了”。近似 KL、无偏估计和训练时自动求导的目标还需看采样分布及是否 stop-gradient，见[03-从RL基础推到PPO与GRPO](/notes/policy-gradient-ppo-grpo/)。
+单次从 $p$ 采到第 2 类时，$\log(p_2/q_2)=\log0.4<0$；单个样本的 log-ratio 可以为负，虽然完整 KL 非负。因此不能拿一个负的 token log-ratio 判断“KL 算错了”。近似 KL、无偏估计和训练时自动求导的目标还需看采样分布及是否 stop-gradient，见[从RL基础推到PPO与GRPO](/notes/policy-gradient-ppo-grpo/)。
 
 <span id="mm-5ce0c9f8f446" style="display:block;scroll-margin-top:6rem"></span>
 
@@ -166,12 +166,12 @@ $$
 
 例如 $[2,8192,4096]$ 的 BF16 激活有 $2\cdot8192\cdot4096$ 个元素，占 $134{,}217{,}728$ 字节，即 128 MiB。第一项 2 是 batch，最后还乘一次 2 才是每元素字节数；少乘一个因子就会把量级估错。
 
-复杂度 $O(N^2d)$ 描述变量增大时的增长，不含全部常数、硬件、调度和通信。把输入长度翻倍，某个二次项变四倍，并不意味着整体运行时间也一定四倍。用[04-推理效率与手撕考点](/notes/prefill-decode-video-tokens/)的 Prefill/Decode 分项账单继续理解。
+复杂度 $O(N^2d)$ 描述变量增大时的增长，不含全部常数、硬件、调度和通信。把输入长度翻倍，某个二次项变四倍，并不意味着整体运行时间也一定四倍。用[Prefill、Decode与视频token的计算代价](/notes/prefill-decode-video-tokens/)的 Prefill/Decode 分项账单继续理解。
 
 <span id="mm-c88b41f09856" style="display:block;scroll-margin-top:6rem"></span>
 
 ## 接下来怎样检验理解
 
-在[10-十四天练习与参考解答](/notes/multimodal-fourteen-day-workbook/)第 1 天，先独立算矩阵乘法、softmax、条件概率和 KL，再对照过程。卡在某一步，就回到本章对应小节；无需一次把所有公式背下。
+在[十四天练习册：从手算到多模态面试](/notes/multimodal-fourteen-day-workbook/)第 1 天，先独立算矩阵乘法、softmax、条件概率和 KL，再对照过程。卡在某一步，就回到本章对应小节；无需一次把所有公式背下。
 
 这些基础定义支撑 [Transformer](https://arxiv.org/abs/1706.03762)、[CLIP](https://arxiv.org/abs/2103.00020)、[DPO](https://arxiv.org/abs/2305.18290) 和 [PPO](https://arxiv.org/abs/1707.06347) 的目标与计算。本章算例均为自拟，公式采用自然对数。

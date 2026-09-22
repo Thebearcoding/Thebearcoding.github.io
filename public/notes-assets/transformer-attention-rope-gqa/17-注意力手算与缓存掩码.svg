@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="780" viewBox="0 0 1200 780" role="img" aria-labelledby="title desc">
+<title id="title">两个 token 的因果注意力与增量缓存可见关系</title>
+<desc id="desc">两个单位向量经过缩放点积、因果遮挡和 softmax，第二行权重为0.33024与0.66976。已有三个历史token时，新来两个token应分别允许查看四列和五列。</desc>
+<defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#475569"/></marker></defs>
+<rect width="1200" height="780" rx="20" fill="#f8fafc"/>
+<g font-family="PingFang SC,Noto Sans CJK SC,Arial,sans-serif" fill="#172554">
+<text x="45" y="55" font-size="28" font-weight="bold">把一次注意力计算走完</text>
+<text x="45" y="91" font-size="19" fill="#475569">教学条件：X = Q = K = V = 二维单位矩阵；head dim = 2</text>
+<g fill="#fff" stroke="#cbd5e1" stroke-width="2"><rect x="40" y="130" width="240" height="180" rx="12"/><rect x="335" y="130" width="240" height="180" rx="12"/><rect x="630" y="130" width="240" height="180" rx="12"/><rect x="925" y="130" width="235" height="180" rx="12"/></g>
+<g text-anchor="middle" font-size="21"><text x="160" y="168">① 缩放点积分数</text><text x="455" y="168">② 未来位置遮挡</text><text x="750" y="168">③ 每行 softmax</text><text x="1042" y="168">④ 概率加权 V</text></g>
+<g text-anchor="middle" font-size="23" font-family="Menlo,monospace"><text x="160" y="227">[0.7071, 0]</text><text x="160" y="273">[0, 0.7071]</text><text x="455" y="227">[0.7071, −∞]</text><text x="455" y="273">[0, 0.7071]</text><text x="750" y="227">[1, 0]</text><text x="750" y="273">[.330, .670]</text><text x="1042" y="227">[1, 0]</text><text x="1042" y="273">[.330, .670]</text></g>
+<g stroke="#475569" stroke-width="3" marker-end="url(#a)"><path d="M285 222H326"/><path d="M580 222H621"/><path d="M875 222H916"/></g>
+<text x="45" y="362" font-size="20">第二个位置读到了第一个位置的信息；第一个位置完全看不到未来。</text>
+<path d="M40 392H1160" stroke="#cbd5e1"/>
+<text x="45" y="440" font-size="26" font-weight="bold">缓存后的 mask 不是左上对齐的普通下三角</text>
+<text x="45" y="474" font-size="18" fill="#475569">历史已有3个token，一次追加2个token。绿色=允许，粉色=遮挡。</text>
+<g text-anchor="middle" font-size="19"><text x="365" y="523">历史0</text><text x="505" y="523">历史1</text><text x="645" y="523">历史2</text><text x="785" y="523">新3</text><text x="925" y="523">新4</text></g>
+<g stroke="#94a3b8"><rect x="300" y="540" width="140" height="60" fill="#dcfce7"/><rect x="440" y="540" width="140" height="60" fill="#dcfce7"/><rect x="580" y="540" width="140" height="60" fill="#dcfce7"/><rect x="720" y="540" width="140" height="60" fill="#dcfce7"/><rect x="860" y="540" width="140" height="60" fill="#ffe4e6"/><rect x="300" y="600" width="140" height="60" fill="#dcfce7"/><rect x="440" y="600" width="140" height="60" fill="#dcfce7"/><rect x="580" y="600" width="140" height="60" fill="#dcfce7"/><rect x="720" y="600" width="140" height="60" fill="#dcfce7"/><rect x="860" y="600" width="140" height="60" fill="#dcfce7"/></g>
+<g font-size="22"><text x="65" y="578">新位置3的 query</text><text x="65" y="638">新位置4的 query</text></g>
+<g text-anchor="middle" font-size="24"><text x="370" y="578">1</text><text x="510" y="578">1</text><text x="650" y="578">1</text><text x="790" y="578">1</text><text x="930" y="578">0</text><text x="370" y="638">1</text><text x="510" y="638">1</text><text x="650" y="638">1</text><text x="790" y="638">1</text><text x="930" y="638">1</text></g>
+<text x="45" y="715" font-size="20">可见条件：key 的绝对位置 ≤ query 的绝对位置。</text>
+<text x="45" y="753" font-size="15" fill="#64748b">本教程自绘 · 数字为教学算例 · 2026-09-22</text>
+</g></svg>

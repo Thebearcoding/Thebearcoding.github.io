@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="390" viewBox="0 0 1100 390">
+ <rect width="1100" height="390" rx="22" fill="#f7f9fd"/>
+ <text x="35" y="45" font-family="Arial Unicode MS, PingFang SC, sans-serif" font-size="26" font-weight="700" fill="#17233d">同一视频，两种采样可能给出相反答案</text>
+ <text x="35" y="86" font-family="Arial Unicode MS, PingFang SC, sans-serif" font-size="18" fill="#40516d">问题：人先拿起杯子，还是先放下杯子？</text>
+ <g font-family="Arial Unicode MS, PingFang SC, sans-serif" text-anchor="middle" font-size="17"><rect x="35" y="125" width="205" height="74" rx="12" fill="#dceaff"/><text x="137" y="167">00:01 伸手</text><rect x="270" y="125" width="205" height="74" rx="12" fill="#bfe8d6"/><text x="372" y="167">00:02 拿起</text><rect x="505" y="125" width="205" height="74" rx="12" fill="#fff0d7"/><text x="607" y="167">00:04 移动</text><rect x="740" y="125" width="205" height="74" rx="12" fill="#ffdede"/><text x="842" y="167">00:05 放下</text></g>
+ <path d="M50 219H946" stroke="#7f94b8" stroke-width="5"/><g font-family="Arial Unicode MS, PingFang SC, sans-serif" font-size="17" fill="#264366"><text x="45" y="258">只看首尾帧：可能看不清“拿起”动作</text><text x="45" y="298">覆盖事件边界 + 时间戳：更容易保留先后证据</text></g>
+ <rect x="36" y="323" width="1027" height="43" rx="9" fill="#e9edf8"/><text x="53" y="351" font-family="Arial Unicode MS, PingFang SC, sans-serif" font-size="16" fill="#243959">诊断顺序：原视频证据 → 抽帧是否覆盖 → 顺序/时间戳 → token 压缩 → 输出是否编造</text>
+</svg>

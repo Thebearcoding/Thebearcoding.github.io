@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="420" viewBox="0 0 1100 420" role="img" aria-labelledby="title desc">
+<title id="title">双塔召回的离线和在线分工</title>
+<desc id="desc">物品特征经物品塔编码为向量，离线构建版本化索引。在线请求的用户特征经用户塔得到查询向量，查询索引得到候选。两个塔、特征和索引须保持兼容版本。</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10" fill="#89776b"/></marker></defs>
+<rect width="1100" height="420" rx="20" fill="#f5f3ec"/>
+<g font-family="PingFang SC, Noto Sans SC, sans-serif" fill="#28241f">
+<text x="42" y="48" font-size="23" font-weight="600">可分离计算，才有提前建库的空间</text>
+<text x="42" y="79" font-size="15" fill="#74695f">物品编码独立于当前用户；在线仅产生查询向量并检索</text>
+<g stroke="#89776b" stroke-width="2" fill="none" marker-end="url(#arrow)"><path d="M235 156H273"/><path d="M473 156H515"/><path d="M741 156H781"/><path d="M235 294H273"/><path d="M473 294H515"/><path d="M741 294H890V216"/></g>
+<g stroke="#d8d0c4"><rect x="40" y="114" width="195" height="91" rx="12" fill="#e7e3d8"/><rect x="281" y="114" width="192" height="91" rx="12" fill="#e1e8ed"/><rect x="523" y="114" width="218" height="91" rx="12" fill="#e1e8ed"/><rect x="790" y="114" width="268" height="91" rx="12" fill="#e6eadb"/><rect x="40" y="252" width="195" height="91" rx="12" fill="#e7e3d8"/><rect x="281" y="252" width="192" height="91" rx="12" fill="#f3e0d5"/><rect x="523" y="252" width="218" height="91" rx="12" fill="#f3e0d5"/></g>
+<g text-anchor="middle" font-size="21" font-weight="600"><text x="137" y="151">物品特征</text><text x="377" y="151">物品塔</text><text x="632" y="151">物品向量索引</text><text x="924" y="151">近似检索 → 候选</text><text x="137" y="289">用户与上下文</text><text x="377" y="289">用户塔</text><text x="632" y="289">查询向量</text></g>
+<g text-anchor="middle" font-size="16" fill="#5b5148"><text x="137" y="183">ID、内容、属性</text><text x="377" y="183">离线批量编码</text><text x="632" y="183">度量与版本一致</text><text x="924" y="183">ANN 召回率单独检验</text><text x="137" y="321">历史、场景、实时信息</text><text x="377" y="321">每请求编码一次</text><text x="632" y="321">同维度、同归一化</text></g>
+<text x="42" y="382" font-size="16" fill="#74695f">更新时关联：特征 schema ＋ 用户塔 ＋ 物品塔 ＋ 索引；删除与新物品入库也要验证。</text>
+</g></svg>

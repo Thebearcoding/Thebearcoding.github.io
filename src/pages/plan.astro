@@ -5,7 +5,7 @@ import plan from '../data/prep-plan.json';
 const first = plan.days[0].date;
 const last = plan.days[plan.days.length - 1].date;
 ---
-<Base title="备战看板 · athebear" description="28 届算法实习备战的逐日计划：每天的时间块、任务和教程链接，勾选进度保存在本机浏览器。">
+<Base bodyClass="reading" title="备战看板 · athebear" description="28 届算法实习备战的逐日计划：每天的时间块、任务和教程链接，勾选进度保存在本机浏览器。">
 <meta slot="head" name="robots" content="noindex" />
 <div class="container pb">
   <header class="prose-head pb-head">
@@ -91,6 +91,7 @@ const last = plan.days[plan.days.length - 1].date;
   --s-code: #5E8DBE; --s-proj: #D97757; --s-study: #6A8A4F; --s-know: #A9822F;
   --s-paper: #8A6AA8; --s-job: #B5524A; --s-review: #7D7A72; --s-rest: #8FA07E;
 }
+.container.pb { max-width: 1160px; }
 .pb-head { padding-top: 54px; }
 .pb-kicker {
   display: inline-block; padding: 4px 12px; margin-bottom: 10px;

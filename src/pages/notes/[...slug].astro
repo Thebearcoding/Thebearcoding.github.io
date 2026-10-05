@@ -4,17 +4,31 @@ import { getCollection, render } from 'astro:content';
 
 export async function getStaticPaths() {
   const notes = await getCollection('notes', ({ data }) => !data.draft);
-  return notes.map((n) => ({ params: { slug: n.id }, props: { note: n } }));
+  return notes.map((n) => ({ params: { slug: n.id }, props: { note: n, all: notes } }));
 }
 
-const { note } = Astro.props;
-const { Content } = await render(note);
+const { note, all } = Astro.props;
+const { Content, headings } = await render(note);
 const fmt = (d: Date) => d.toISOString().slice(0, 10);
+
+// 同系列:以文件名第一个连字符前的前缀分组
+const seriesOf = (id: string) => id.split('-')[0];
+const series = all
+  .filter((n) => seriesOf(n.id) === seriesOf(note.id))
+  .sort((a, b) => a.id.localeCompare(b.id));
+const seriesName: Record<string, string> = {
+  recsys: '推荐系统与 LLM4Rec',
+  wangshusen: '王树森推荐系统',
+  multimodal: '多模态算法',
+};
+const toc = headings.filter((h) => h.depth === 2);
 ---
-<Base title={`${note.data.title} · athebear`} description={note.data.summary} math={true}>
-<div class="container">
+<Base title={`${note.data.title} · athebear`} description={note.data.summary} math={true} bodyClass="reading">
+<div class="read-progress" id="read-progress" aria-hidden="true"></div>
+<div class="container read-wrap">
   <header class="prose-head">
     <h1>{note.data.title}</h1>
+    {note.data.summary && <p class="read-summary">{note.data.summary}</p>}
     <div class="meta">
       <time datetime={fmt(note.data.date)}>{fmt(note.data.date)}</time>
       {note.data.tags.length > 0 && (
@@ -23,10 +37,53 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     </div>
   </header>
 
-  <article class="prose">
-    <Content />
-  </article>
+  <div class:list={['read-grid', { 'has-toc': toc.length > 2 }]}>
+    {toc.length > 2 && (
+      <aside class="read-toc" aria-label="本页目录">
+        <div class="read-toc-title">本页目录</div>
+        <ol>
+          {toc.map((h) => <li><a href={`#${h.slug}`}>{h.text}</a></li>)}
+        </ol>
+      </aside>
+    )}
+    <article class="prose prose-card">
+      <Content />
+    </article>
+  </div>
 
-  <p style="margin-top:48px"><a href="/notes/">← 回到全部笔记</a></p>
+  {series.length > 1 && (
+    <nav class="series-nav" aria-label="同系列笔记">
+      <div class="series-title">同系列 · {seriesName[seriesOf(note.id)] ?? seriesOf(note.id)}</div>
+      <ul>
+        {series.map((n) => (
+          <li>
+            {n.id === note.id
+              ? <span class="series-current" aria-current="page">{n.data.title}</span>
+              : <a href={`/notes/${n.id}/`}>{n.data.title}</a>}
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )}
+
+  <p style="margin-top:32px"><a href="/notes/">← 回到全部笔记</a></p>
 </div>
 </Base>
+
+<script is:inline>
+  (function () {
+    var bar = document.getElementById('read-progress');
+    var links = Array.prototype.slice.call(document.querySelectorAll('.read-toc a'));
+    var heads = links.map(function (a) { return document.getElementById(decodeURIComponent(a.getAttribute('href').slice(1))); });
+    function onScroll() {
+      var h = document.documentElement;
+      var max = h.scrollHeight - h.clientHeight;
+      if (bar) bar.style.transform = 'scaleX(' + (max > 0 ? Math.min(1, h.scrollTop / max) : 0) + ')';
+      var cur = -1;
+      for (var i = 0; i < heads.length; i++) { if (heads[i] && heads[i].getBoundingClientRect().top < 120) cur = i; }
+      links.forEach(function (a, i) { a.classList.toggle('on', i === cur); });
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  })();
+</script>

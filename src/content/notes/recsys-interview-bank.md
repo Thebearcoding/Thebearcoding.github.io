@@ -2,7 +2,7 @@
 title: 推荐与 LLM4Rec 面试题库：九十问
 date: '2026-10-05'
 tags: [推荐系统, LLM4Rec, 复习问答, 面试, 手撕代码]
-summary: 九十道题按系统评估、召回、排序、长序列、scaling、语义 ID、LLM4Rec、多模态、广告、手撕代码和项目追问分组，每题附参考解答和对应章节。
+summary: 九十道题按系统评估、召回、排序、长序列、scaling、语义 ID、LLM4Rec、多模态、广告、手撕代码和项目追问分组，每题附参考解答和对应章节；末尾另有一节取自公开面经的补充问题清单。
 draft: false
 ---
 
@@ -837,3 +837,93 @@ def allowed_next(trie, prefix):
 先诊断瓶颈：看漏斗，好内容在哪一层消失（召回覆盖、排序误判、重排规则）。再挑成本低、可验证的改动（加一路召回、修正一个特征穿越、调整融分权重）。设计 A/B：主指标、保护指标、样本量与时长。最后准备回滚方案。不要第一天就换模型结构。[涨指标](/notes/wangshusen-recommender-coldstart/)
 
 </details>
+
+## L. 面经补充：2025–2026 年公开面经里的高频问题
+
+检索日期：**2026 年 10 月 5 日**。渠道是牛客网公开帖子；小红书因验证码拦截，本次没有读到正文，所以不在来源里。下面 51 个问题是读完帖子后用自己的话概括的，按主题合并了同类问法，已去掉与上面九十问重复的题。每条只列出能核对到的帖子链接（标题与日期与题目相符），不转录原文，也**不附参考解答**：这一节只是题目清单，用来查漏补缺。有“相关教程”链接的题，可以先去对应章节读机制，再自己写答案。
+
+出现次数只说明有多少篇公开帖子提到，不代表某家公司的真实题库，也不代表面试官一定会问。
+
+### 召回
+
+- **L1.** 双塔召回的固有缺陷有哪些？长尾物品表征学不好怎么办？不换范式、只改双塔结构怎么提升长尾质量？ 来源:[2913652](https://www.nowcoder.com/discuss/2913652)
+- **L2.** 双塔 pointwise、pairwise、listwise 三种训练范式的区别和对应 loss？ 相关教程:[入口](/notes/wangshusen-recommender-retrieval/)。 来源:[2913652](https://www.nowcoder.com/discuss/2913652)、[2833239](https://www.nowcoder.com/discuss/2833239)
+- **L3.** 数据预处理时直接过滤交互很少的新物品有什么问题？如何打压热门物品？ 来源:[2833249](https://www.nowcoder.com/discuss/2833249)
+- **L4.** 图召回解决什么问题？节点、边、多跳怎么设计？如何避免热门偏置？为何不用双塔或矩阵分解？ 相关教程:[入口](/notes/wangshusen-recommender-retrieval/)。 来源:[2907543](https://www.nowcoder.com/discuss/2907543)
+- **L5.** 召回阶段做多兴趣建模，多兴趣双塔训练的标签怎么设？SIM 的原理与 top-k 召回改进思路？ 相关教程:[入口](/notes/wangshusen-recommender-retrieval/)。 来源:[2917383](https://www.nowcoder.com/discuss/2917383)
+- **L6.** UserCF 与 ItemCF 的核心区别；协同过滤的局限？ 来源:[2753479](https://www.nowcoder.com/discuss/2753479)
+- **L7.** 热度召回怎么做，会不会引入未来信息？Word2Vec 用物品 ID 序列训练的做法与理由？ 来源:[2751519](https://www.nowcoder.com/discuss/2751519)
+- **L8.** 新上线的独播剧/新商品冷启动，如何快速找到目标用户？ 相关教程:[入口](/notes/wangshusen-recommender-coldstart/)。 来源:[2846992](https://www.nowcoder.com/discuss/2846992)、[2839719](https://www.nowcoder.com/discuss/2839719)
+
+### 排序（粗排/精排/重排）
+
+- **L9.** 粗排样本怎么构造？能否直接用精排的 embedding？怎样让粗排感知未曝光数据？粗精排一致性越高越好吗？ 相关教程:[入口](/notes/wangshusen-recommender-ranking/)。 来源:[2883759](https://www.nowcoder.com/discuss/2883759)
+- **L10.** 精排训练的样本、标签、特征与分组怎么构造？静态分与动态分作用？LightGBM 与 LambdaRank 为何同时用？ 相关教程:[入口](/notes/wangshusen-recommender-ranking/)。 来源:[2907543](https://www.nowcoder.com/discuss/2907543)
+- **L11.** Wide&Deep、DeepFM、DCN、DIN 分别适合什么场景，各自优缺点？ 来源:[2820690](https://www.nowcoder.com/discuss/2820690)、[2801431](https://www.nowcoder.com/discuss/2801431)
+- **L12.** 重排与多样性：MMR 原理；如何从召回到重排全链路提升多样性？ 相关教程:[入口](/notes/wangshusen-recommender-reranking/)。 来源:[2833249](https://www.nowcoder.com/discuss/2833249)、[2913652](https://www.nowcoder.com/discuss/2913652)
+
+### 多任务与评估指标
+
+- **L13.** 多任务跷跷板现象如何发现、如何解决？专家坍缩/同质化的原因与对策？ 相关教程:[入口](/notes/wangshusen-recommender-ranking/)。 来源:[2917383](https://www.nowcoder.com/discuss/2917383)、[2652615](https://www.nowcoder.com/discuss/2652615)
+- **L14.** 训练用多个目标（点赞、收藏、评论、关注），推理只用其中几个，这样设计的理由？ 来源:[2837321](https://www.nowcoder.com/discuss/2837321)
+- **L15.** AUC 的定义、物理意义、工业计算方法；分数整体放大两倍 AUC 变吗？加一批全正样本 AUC 怎么变？ 相关教程:[入口](/notes/recsys-eval-bias/)。 来源:[2883759](https://www.nowcoder.com/discuss/2883759)、[2870581](https://www.nowcoder.com/discuss/2870581)、[2801431](https://www.nowcoder.com/discuss/2801431)
+- **L16.** 正负样本极不均衡（1:1000 或更极端）会带来什么问题？为什么用 Focal Loss？ 相关教程:[入口](/notes/recsys-eval-bias/)。 来源:[2823593](https://www.nowcoder.com/discuss/2823593)、[2917383](https://www.nowcoder.com/discuss/2917383)
+- **L17.** CTR 校准用的 listwise 模型结构，如何评估校准效果？ 相关教程:[入口](/notes/recsys-eval-bias/)。 来源:[2652615](https://www.nowcoder.com/discuss/2652615)
+
+### 序列建模与 Scaling
+
+- **L18.** 长短期行为序列的时间窗口与序列长度怎么设，多种行为序列怎么融合？ 相关教程:[入口](/notes/recsys-sequence-long/)。 来源:[2891309](https://www.nowcoder.com/discuss/2891309)、[2823593](https://www.nowcoder.com/discuss/2823593)
+- **L19.** 异构特征 Token 化的方案有哪些？非序列特征为何用异构 FFN/QKV，序列特征为何可同构？causal mask 如何支撑一个用户多个物品的推理优化？ 相关教程:[入口](/notes/recsys-scaling-ranking/)。 来源:[2839272](https://www.nowcoder.com/discuss/2839272)
+- **L20.** 多模态 embedding 接入精排的融合方式？离线如何评估 embedding？ 相关教程:[入口](/notes/recsys-multimodal-i2i/)。 来源:[2883914](https://www.nowcoder.com/discuss/2883914)
+
+### 生成式推荐与语义 ID
+
+- **L21.** RQ-VAE 的流程、模块、损失与梯度传播？stop-gradient 项代码怎么写？除 STE 外还有哪些办法（如 rotation trick）？ 相关教程:[入口](/notes/recsys-semantic-id/)。 来源:[2917383](https://www.nowcoder.com/discuss/2917383)
+- **L22.** 构建 SID 时如何加曝光容量约束？约束带来的量化误差怎么权衡？ 相关教程:[入口](/notes/recsys-semantic-id/)。 来源:[2913652](https://www.nowcoder.com/discuss/2913652)
+- **L23.** 生成式召回的 SFT 数据怎么构造与筛选？LoRA 的核心优势？ 相关教程:[入口](/notes/recsys-llm4rec-paradigms/)。 来源:[2913652](https://www.nowcoder.com/discuss/2913652)
+- **L24.** 生成式召回延迟高，从哪些维度降？线上延迟多少？ 相关教程:[入口](/notes/recsys-llm4rec-paradigms/)。 来源:[2913652](https://www.nowcoder.com/discuss/2913652)、[2807968](https://www.nowcoder.com/discuss/2807968)
+- **L25.** RQ-Kmeans 聚类召回做了什么改进？生成式召回与传统通路如何融合、兜底、配比？拓展到多目标多场景时框架怎么改？ 相关教程:[入口](/notes/recsys-semantic-id/)。 来源:[2917077](https://www.nowcoder.com/discuss/2917077)
+- **L26.** 生成式召回为什么优于传统方法，训练有无上限，如何突破？ 相关教程:[入口](/notes/recsys-llm4rec-paradigms/)。 来源:[2807968](https://www.nowcoder.com/discuss/2807968)
+
+### 多模态与表征
+
+- **L27.** BERT 的核心设计思想与训练输入输出；ViT 与文本 Transformer 结构差异及各自做分类的方式？ 来源:[2918287](https://www.nowcoder.com/discuss/2918287)
+- **L28.** Qwen-VL、LLaVA、DeepSeek 等多模态模型各自特点？ 相关教程:[入口](/notes/multimodal-models-paper-reading/)。 来源:[2858047](https://www.nowcoder.com/discuss/2858047)
+
+### 搜索与 RAG
+
+- **L29.** 传统检索方式有哪些？RAG 的作用与流程？大模型结合 RAG 为何仍会幻觉，怎么缓解？ 来源:[2822391](https://www.nowcoder.com/discuss/2822391)、[2768568](https://www.nowcoder.com/discuss/2768568)、[2763740](https://www.nowcoder.com/discuss/2763740)
+- **L30.** 如何量化检索质量；召回率与准确率；chunk 大小、滑动窗口、知识库动态更新？ 来源:[2818415](https://www.nowcoder.com/discuss/2818415)
+- **L31.** 讲讲 Deep Search；ReAct 架构；Agent 如何判断信息已足够、陷入死循环怎么办？ 来源:[2768568](https://www.nowcoder.com/discuss/2768568)
+
+### LLM 基础与后训练
+
+- **L32.** MHA / MQA / GQA / MLA 的区别，KV Cache 的作用与优化，FlashAttention？ 相关教程:[入口](/notes/transformer-attention-rope-gqa/)。 来源:[2907543](https://www.nowcoder.com/discuss/2907543)、[2870581](https://www.nowcoder.com/discuss/2870581)
+- **L33.** MHA 的时间复杂度，怎么降？Adam 存什么状态，显存占用与 SGD 对比，一阶二阶矩与偏差修正公式？ 来源:[2822196](https://www.nowcoder.com/discuss/2822196)、[2868452](https://www.nowcoder.com/discuss/2868452)
+- **L34.** PPO、DPO、GRPO（含 GSPO、DAPO）的区别；DPO 为什么省掉 critic、DPO 自己有什么问题？ 相关教程:[入口](/notes/policy-gradient-ppo-grpo/)。 来源:[2891972](https://www.nowcoder.com/discuss/2891972)、[2820690](https://www.nowcoder.com/discuss/2820690)、[2814199](https://www.nowcoder.com/discuss/2814199)
+- **L35.** GAE 原理，λ、γ 的含义；MC 与 TD 的偏差方差权衡？ 相关教程:[入口](/notes/policy-gradient-ppo-grpo/)。 来源:[2891972](https://www.nowcoder.com/discuss/2891972)
+- **L36.** 为什么先 SFT 再 RL？SFT 混入通用数据的比例？SFT 与 DPO 的数据制作差异？ 相关教程:[入口](/notes/multimodal-sft-lora-dpo/)。 来源:[2836470](https://www.nowcoder.com/discuss/2836470)
+- **L37.** LoRA 原理与公式、两个矩阵的初始化（A 全零 B 随机行不行）、rank 与 alpha 怎么选、灾难性遗忘怎么办？ 相关教程:[入口](/notes/multimodal-sft-lora-dpo/)。 来源:[2893356](https://www.nowcoder.com/discuss/2893356)、[2838681](https://www.nowcoder.com/discuss/2838681)、[2814199](https://www.nowcoder.com/discuss/2814199)
+- **L38.** 从大模型蒸馏到小模型有哪些方法？大模型打标签的延迟、幻觉、冲突怎么解？ 来源:[2907543](https://www.nowcoder.com/discuss/2907543)
+
+### 机器学习基础
+
+- **L39.** 交叉熵与 KL 散度的关系；Dropout 训练与测试的差别及"预估偏高"问题；BN 训练与推理差异？ 来源:[2907543](https://www.nowcoder.com/discuss/2907543)、[2883759](https://www.nowcoder.com/discuss/2883759)
+- **L40.** L1 与 L2 正则的区别，为何 L1 产生稀疏解；过拟合怎么判断、怎么缓解？ 来源:[2883759](https://www.nowcoder.com/discuss/2883759)、[2801431](https://www.nowcoder.com/discuss/2801431)、[2804764](https://www.nowcoder.com/discuss/2804764)
+- **L41.** GBDT、XGBoost、随机森林的区别；为什么树模型常优于 LR？ 来源:[2751519](https://www.nowcoder.com/discuss/2751519)、[2804764](https://www.nowcoder.com/discuss/2804764)
+
+### 系统设计与业务场景
+
+- **L42.** 结合具体产品（B站、爱奇艺），分析推荐问题；如何把 70% 流量扶持中小创作者？ 来源:[2913652](https://www.nowcoder.com/discuss/2913652)、[2917077](https://www.nowcoder.com/discuss/2917077)、[2846992](https://www.nowcoder.com/discuss/2846992)
+- **L43.** 一键三连这类稀疏高价值信号放在链路哪里、怎么建模？弹幕如何变成特征？ 相关教程:[入口](/notes/recsys-ads-business/)。 来源:[2917077](https://www.nowcoder.com/discuss/2917077)
+- **L44.** 如何度量同质化、信息茧房、多样性，如何把长期生态健康度放进优化目标？ 来源:[2917077](https://www.nowcoder.com/discuss/2917077)
+- **L45.** 广告主价值（advv）怎么定义，转化怎么定义？商业价值与用户体验如何平衡？ 相关教程:[入口](/notes/recsys-ads-business/)。 来源:[2837321](https://www.nowcoder.com/discuss/2837321)
+
+### 代码题（高频）
+
+- **L46.** 手写 MHA / self-attention / cross-attention / MMoE / DeepFM（PyTorch）。 相关教程:[入口](/notes/recsys-interview-bank/)。 来源:[2833239](https://www.nowcoder.com/discuss/2833239)、[2870581](https://www.nowcoder.com/discuss/2870581)、[2893356](https://www.nowcoder.com/discuss/2893356)、[2804764](https://www.nowcoder.com/discuss/2804764)
+- **L47.** 第 K 大数（O(N)）、前 K 小、前 K 高频、中位数、快排。 来源:[2837321](https://www.nowcoder.com/discuss/2837321)、[2833249](https://www.nowcoder.com/discuss/2833249)
+- **L48.** 括号类：括号生成、最长有效括号；链表类：K 个一组翻转、合并 K 个升序链表。 来源:[2883914](https://www.nowcoder.com/discuss/2883914)、[2891309](https://www.nowcoder.com/discuss/2891309)、[2801888](https://www.nowcoder.com/discuss/2801888)、[2753479](https://www.nowcoder.com/discuss/2753479)
+- **L49.** DP/图类：零钱兑换、最长回文子序列、岛屿数量/面积、不同路径变形（最大乘积路径）。 来源:[2896097](https://www.nowcoder.com/discuss/2896097)
+- **L50.** 同时在线人数最多的时刻（区间扫描线）。 来源:[2822196](https://www.nowcoder.com/discuss/2822196)
+- **L51.** 智力题：12 球称重找异常球、25 马选前 3、圆上三点成锐角三角形概率、掷骰期望。 来源:[2870581](https://www.nowcoder.com/discuss/2870581)、[2801888](https://www.nowcoder.com/discuss/2801888)、[2883759](https://www.nowcoder.com/discuss/2883759)

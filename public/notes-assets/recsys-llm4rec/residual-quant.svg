@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="420" viewBox="0 0 1100 420" role="img" aria-labelledby="title desc">
+<title id="title">残差量化生成语义 ID</title>
+<desc id="desc">物品向量 z 先在第一层码本中找最近码字得到 c1，残差 r1 等于 z 减去该码字；r1 再在第二层码本中量化得到 c2 与残差 r2；逐层得到语义 ID。重建等于各层码字之和。示例数值为教学构造。</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10" fill="#89776b"/></marker></defs>
+<rect width="1100" height="420" rx="20" fill="#f5f3ec"/>
+<g font-family="PingFang SC, Noto Sans SC, sans-serif" fill="#28241f">
+<text x="42" y="48" font-size="23" font-weight="600">残差量化：每一层只量化上一层剩下的部分</text>
+<text x="42" y="78" font-size="15" fill="#74695f">第一个码是粗类别，后面逐层细化；语义 ID = (c1, c2, …, cL)</text>
+<g stroke="#d8d0c4">
+<rect x="40" y="118" width="170" height="120" rx="13" fill="#e7e3d8"/>
+<rect x="260" y="118" width="220" height="120" rx="13" fill="#e1e8ed"/>
+<rect x="530" y="118" width="220" height="120" rx="13" fill="#e1e8ed"/>
+<rect x="800" y="118" width="260" height="120" rx="13" fill="#f3e0d5"/>
+</g>
+<g font-size="19" font-weight="600" text-anchor="middle"><text x="125" y="160">物品向量 z</text><text x="370" y="160">第 1 层码本</text><text x="640" y="160">第 2 层码本</text><text x="930" y="160">语义 ID</text></g>
+<g font-size="14.5" text-anchor="middle" fill="#5b5148">
+<text x="125" y="190">内容编码器输出</text><text x="125" y="214">例：(0.9, 0.2)</text>
+<text x="370" y="190">最近码字 e(c1) = (1, 0)</text><text x="370" y="214">c1 = 0</text>
+<text x="640" y="190">最近码字 e(c2) = (0, 0.2)</text><text x="640" y="214">c2 = 0</text>
+<text x="930" y="190">(c1, c2) = (0, 0)</text><text x="930" y="214">冲突时末尾加去重位</text>
+</g>
+<g stroke="#89776b" stroke-width="2" fill="none" marker-end="url(#arrow)"><path d="M210 178H252"/><path d="M480 178H522"/><path d="M750 178H792"/></g>
+<g font-size="13.5" fill="#74695f" text-anchor="middle"><text x="505" y="262">残差 r1 = z − e(c1) = (−0.1, 0.2)</text><text x="775" y="262">残差 r2 = (−0.1, 0)</text></g>
+<rect x="260" y="296" width="800" height="54" rx="12" fill="#fffaf2" stroke="#d8d0c4"/>
+<text x="660" y="329" font-size="17" font-weight="600" text-anchor="middle">重建 ẑ = e(c1) + e(c2) = (1, 0.2)，平方误差 0.01</text>
+<text x="42" y="392" font-size="15" fill="#74695f">K = 256、L = 3 时容量约 1677 万；物品分布不均，冲突仍常见。数值为教学构造。</text>
+</g></svg>

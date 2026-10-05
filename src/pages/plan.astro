@@ -1,0 +1,531 @@
+---
+import Base from '../layouts/Base.astro';
+import plan from '../data/prep-plan.json';
+
+const first = plan.days[0].date;
+const last = plan.days[plan.days.length - 1].date;
+---
+<Base title="备战看板 · athebear" description="28 届算法实习备战的逐日计划：每天的时间块、任务和教程链接，勾选进度保存在本机浏览器。">
+<meta slot="head" name="robots" content="noindex" />
+<div class="container pb">
+  <header class="prose-head pb-head">
+    <span class="pb-kicker">28 届 · 算法实习 · 2026 秋</span>
+    <h1>备战看板</h1>
+    <div class="meta">
+      <span>{first} → {last}</span>
+      <span>每天 6–8 小时 · 周日半天</span>
+      <a href="/notes/recsys-llm4rec-guide/">配套教程 →</a>
+    </div>
+    <div class="pb-clocks" id="pb-clocks" aria-live="polite"></div>
+  </header>
+
+  <div class="pb-grid">
+    <section class="pb-today" aria-labelledby="pb-day-title">
+      <div class="pb-daynav">
+        <button type="button" class="pb-btn" id="pb-prev" aria-label="前一天">←</button>
+        <button type="button" class="pb-btn pb-btn-today" id="pb-today">回到今天</button>
+        <button type="button" class="pb-btn" id="pb-next" aria-label="后一天">→</button>
+      </div>
+      <div class="pb-dayhead">
+        <div class="pb-date" id="pb-date"></div>
+        <div class="pb-dayinfo">
+          <span class="pb-phase" id="pb-phase"></span>
+          <h2 id="pb-day-title"></h2>
+          <p class="pb-out"><b>今日产出</b><span id="pb-out"></span></p>
+        </div>
+      </div>
+      <p class="pb-note" id="pb-note" hidden></p>
+      <div class="pb-progress" aria-hidden="true"><i id="pb-bar"></i></div>
+      <p class="pb-count" id="pb-count"></p>
+      <ol class="pb-tasks" id="pb-tasks"></ol>
+      <label class="pb-reflect-label" for="pb-reflect">一句话复盘（只存在这台设备的浏览器里）</label>
+      <textarea id="pb-reflect" class="pb-reflect" rows="2" placeholder="今天卡在哪？明天先做什么？"></textarea>
+    </section>
+
+    <aside class="pb-side">
+      <section class="pb-card">
+        <h3>这一周</h3>
+        <div class="pb-week" id="pb-week"></div>
+      </section>
+      <section class="pb-card">
+        <h3>按方向</h3>
+        <ul class="pb-streams" id="pb-streams"></ul>
+      </section>
+      <section class="pb-card">
+        <h3>节点</h3>
+        <ul class="pb-miles" id="pb-miles"></ul>
+      </section>
+    </aside>
+  </div>
+
+  <section class="section">
+    <div class="section-head"><h2>阶段</h2></div>
+    <div class="pb-phases" id="pb-phases"></div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><h2>全部日程</h2><span class="more" id="pb-total"></span></div>
+    <div id="pb-all"></div>
+  </section>
+
+  <section class="section pb-backup">
+    <details>
+      <summary>换设备？导出或导入进度</summary>
+      <p>勾选和复盘只保存在当前浏览器。换电脑或手机前，复制下面的进度码，到新设备粘贴导入。</p>
+      <div class="pb-backup-row">
+        <button type="button" class="pb-btn" id="pb-export">复制进度码</button>
+        <span id="pb-export-msg" class="pb-msg" aria-live="polite"></span>
+      </div>
+      <textarea id="pb-code" class="pb-reflect" rows="3" placeholder="在这里粘贴进度码"></textarea>
+      <div class="pb-backup-row">
+        <button type="button" class="pb-btn" id="pb-import">导入进度码</button>
+        <button type="button" class="pb-btn pb-danger" id="pb-reset">清空本机进度</button>
+        <span id="pb-import-msg" class="pb-msg" aria-live="polite"></span>
+      </div>
+    </details>
+  </section>
+</div>
+
+<style is:global>
+.pb {
+  --s-code: #5E8DBE; --s-proj: #D97757; --s-study: #6A8A4F; --s-know: #A9822F;
+  --s-paper: #8A6AA8; --s-job: #B5524A; --s-review: #7D7A72; --s-rest: #8FA07E;
+}
+.pb-head { padding-top: 54px; }
+.pb-kicker {
+  display: inline-block; padding: 4px 12px; margin-bottom: 10px;
+  border: 1px solid rgba(217, 119, 87, 0.6); border-radius: 999px;
+  color: var(--accent); font-family: var(--font-heading); font-size: 11.5px; letter-spacing: 2px;
+}
+.pb-clocks { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+.pb-clock {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 8px 14px; min-width: 128px;
+}
+.pb-clock b { display: block; font-family: var(--font-display); font-weight: 400; font-size: 26px; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.pb-clock span { font-family: var(--font-heading); font-size: 12px; color: var(--text-dim); }
+.pb-clock.hot { border-color: var(--accent); background: rgba(217, 119, 87, 0.08); }
+.pb-clock.hot b { color: var(--accent); }
+
+.pb-grid { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr); gap: 20px; align-items: start; margin-bottom: 18px; }
+.pb-today, .pb-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  box-shadow: 0 2px 12px rgba(20, 20, 19, 0.04);
+}
+.pb-today { padding: 22px 24px 24px; }
+.pb-card { padding: 16px 18px; }
+.pb-card + .pb-card { margin-top: 14px; }
+.pb-card h3, .pb-today h2 { font-family: var(--font-heading); font-weight: 500; }
+.pb-card h3 { font-size: 14px; color: var(--text-dim); letter-spacing: 1px; margin-bottom: 10px; }
+
+.pb-daynav { display: flex; gap: 8px; margin-bottom: 16px; }
+.pb-btn {
+  appearance: none; border: 1px solid var(--border); background: var(--bg); color: var(--text);
+  font-family: var(--font-heading); font-size: 13px; font-weight: 500; border-radius: 999px;
+  padding: 5px 14px; cursor: pointer; transition: all 0.2s var(--ease);
+}
+.pb-btn:hover { border-color: var(--accent); color: var(--accent); }
+.pb-btn-today { margin-right: auto; }
+.pb-danger { color: var(--error); }
+.pb-btn:disabled { opacity: 0.4; cursor: default; border-color: var(--border); color: var(--text-dim); }
+
+.pb-dayhead { display: flex; gap: 18px; align-items: flex-start; }
+.pb-date {
+  flex: none; width: 74px; text-align: center; border-radius: 14px; padding: 8px 0 6px;
+  background: var(--ink); color: var(--ink-text);
+}
+.pb-date .m { font-family: var(--font-heading); font-size: 11px; letter-spacing: 1.5px; opacity: 0.75; }
+.pb-date .d { font-family: var(--font-display); font-size: 34px; line-height: 1.1; }
+.pb-date .w { font-family: var(--font-heading); font-size: 12px; opacity: 0.8; }
+.pb-date.is-today { background: var(--accent); }
+.pb-dayinfo { min-width: 0; }
+.pb-phase {
+  display: inline-block; font-family: var(--font-heading); font-size: 11.5px; color: var(--accent2);
+  background: rgba(106, 155, 204, 0.1); border: 1px solid rgba(106, 155, 204, 0.35);
+  border-radius: 999px; padding: 1px 10px; margin-bottom: 6px;
+}
+.pb-today h2 { font-size: 21px; line-height: 1.4; margin: 0 0 4px; text-wrap: balance; }
+.pb-out { color: var(--text-dim); font-size: 14.5px; margin: 0; }
+.pb-out b { font-family: var(--font-heading); font-weight: 500; font-size: 12px; color: var(--text); margin-right: 8px; letter-spacing: 1px; }
+.pb-note {
+  margin: 14px 0 0; padding: 8px 12px; border-left: 3px solid var(--accent2);
+  background: var(--bg); border-radius: 0 10px 10px 0; font-size: 14px; color: var(--text-dim);
+}
+.pb-progress { height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; margin: 18px 0 6px; }
+.pb-progress i { display: block; height: 100%; width: 0; background: var(--good); border-radius: 3px; transition: width 0.35s var(--ease); }
+.pb-count { font-family: var(--font-mono); font-size: 12px; color: var(--text-dim); margin: 0 0 6px; }
+
+.pb-tasks { list-style: none; margin: 0; padding: 0; }
+.pb-task {
+  display: grid; grid-template-columns: 96px 1fr; gap: 12px;
+  padding: 12px 8px; border-bottom: 1px dashed var(--border); border-radius: 10px;
+}
+.pb-task:last-child { border-bottom: none; }
+.pb-task.now { background: rgba(217, 119, 87, 0.08); box-shadow: inset 3px 0 0 var(--accent); }
+.pb-time { font-family: var(--font-mono); font-size: 12.5px; color: var(--text-dim); padding-top: 3px; font-variant-numeric: tabular-nums; }
+.pb-task.now .pb-time { color: var(--accent); font-weight: 600; }
+.pb-body { display: flex; gap: 10px; align-items: flex-start; min-width: 0; }
+.pb-body input { flex: none; width: 18px; height: 18px; margin-top: 4px; accent-color: var(--good); cursor: pointer; }
+.pb-text { min-width: 0; }
+.pb-text label { cursor: pointer; font-size: 15.5px; line-height: 1.65; }
+.pb-task.done .pb-text label { color: var(--text-dim); text-decoration: line-through; text-decoration-color: rgba(107, 104, 96, 0.5); }
+.pb-tagline { display: flex; gap: 8px; align-items: center; margin-top: 3px; flex-wrap: wrap; }
+.pb-tag {
+  font-family: var(--font-heading); font-size: 11px; font-weight: 500; letter-spacing: 0.5px;
+  border-radius: 999px; padding: 1px 9px; color: #fff;
+}
+.pb-link { font-family: var(--font-heading); font-size: 12.5px; }
+
+.pb-reflect-label { display: block; margin-top: 18px; font-family: var(--font-heading); font-size: 12.5px; color: var(--text-dim); }
+.pb-reflect {
+  width: 100%; margin-top: 6px; resize: vertical; font: inherit; font-size: 14.5px; color: var(--text);
+  background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 9px 12px;
+}
+.pb-reflect:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(217, 119, 87, 0.18); }
+
+.pb-week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.pb-wd {
+  appearance: none; border: 1px solid var(--border); background: var(--bg); border-radius: 10px;
+  padding: 6px 2px 7px; cursor: pointer; text-align: center; color: var(--text); font: inherit;
+  display: flex; flex-direction: column; gap: 4px; align-items: center; min-width: 0;
+}
+.pb-wd:hover { border-color: var(--accent); }
+.pb-wd .w { font-family: var(--font-heading); font-size: 11px; color: var(--text-dim); }
+.pb-wd .d { font-family: var(--font-display); font-size: 18px; line-height: 1; }
+.pb-wd .b { width: 70%; height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+.pb-wd .b i { display: block; height: 100%; background: var(--good); }
+.pb-wd.sel { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.pb-wd.today .d { color: var(--accent); }
+.pb-wd.off { visibility: hidden; }
+
+.pb-streams, .pb-miles { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+.pb-srow { display: grid; grid-template-columns: 44px 1fr 52px; gap: 10px; align-items: center; font-size: 13px; }
+.pb-srow .n { font-family: var(--font-heading); font-weight: 500; }
+.pb-srow .bar { height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+.pb-srow .bar i { display: block; height: 100%; border-radius: 3px; }
+.pb-srow .v { font-family: var(--font-mono); font-size: 11.5px; color: var(--text-dim); text-align: right; font-variant-numeric: tabular-nums; }
+.pb-miles li { display: flex; justify-content: space-between; gap: 10px; font-size: 13.5px; }
+.pb-miles .d { font-family: var(--font-mono); font-size: 12px; color: var(--text-dim); white-space: nowrap; }
+.pb-miles li.past { color: var(--text-dim); text-decoration: line-through; }
+.pb-miles li.next { color: var(--accent); }
+
+.pb-phases { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+.pb-ph {
+  appearance: none; text-align: left; font: inherit; color: var(--text); cursor: pointer;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 13px 15px; display: flex; flex-direction: column; gap: 6px;
+  transition: all 0.2s var(--ease);
+}
+.pb-ph:hover { border-color: var(--accent); transform: translateY(-2px); }
+.pb-ph.cur { border-color: var(--accent); background: rgba(217, 119, 87, 0.06); }
+.pb-ph .t { font-family: var(--font-heading); font-weight: 500; font-size: 14.5px; }
+.pb-ph .r { font-family: var(--font-mono); font-size: 11.5px; color: var(--text-dim); }
+.pb-ph .g { font-size: 13.5px; color: var(--text-dim); line-height: 1.55; }
+.pb-ph .bar { height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; margin-top: 2px; }
+.pb-ph .bar i { display: block; height: 100%; background: var(--good); }
+
+.pb-group { margin-bottom: 22px; }
+.pb-group h3 { font-family: var(--font-heading); font-weight: 500; font-size: 15px; margin: 0 0 6px; }
+.pb-row {
+  appearance: none; width: 100%; font: inherit; color: var(--text); text-align: left; cursor: pointer;
+  background: none; border: none; border-bottom: 1px dashed var(--border);
+  display: grid; grid-template-columns: 92px 1fr 64px; gap: 12px; padding: 9px 6px; align-items: baseline;
+}
+.pb-row:hover { background: rgba(245, 243, 236, 0.75); }
+.pb-row .d { font-family: var(--font-mono); font-size: 12.5px; color: var(--text-dim); white-space: nowrap; }
+.pb-row .t { font-size: 14.5px; min-width: 0; }
+.pb-row .c { font-family: var(--font-mono); font-size: 12px; color: var(--text-dim); text-align: right; font-variant-numeric: tabular-nums; }
+.pb-row.full .c { color: var(--good); font-weight: 600; }
+.pb-row.today .d, .pb-row.today .t { color: var(--accent); }
+.pb-row.sel { background: rgba(217, 119, 87, 0.07); }
+
+.pb-backup details { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; }
+.pb-backup summary { cursor: pointer; font-family: var(--font-heading); font-weight: 500; font-size: 14.5px; }
+.pb-backup p { color: var(--text-dim); font-size: 14px; margin: 10px 0; }
+.pb-backup-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 10px 0; }
+.pb-msg { font-family: var(--font-heading); font-size: 12.5px; color: var(--good); }
+
+@media (max-width: 860px) {
+  .pb-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .pb-today { padding: 18px 16px 20px; }
+  .pb-task { grid-template-columns: 1fr; gap: 4px; padding: 11px 4px; }
+  .pb-dayhead { gap: 12px; }
+  .pb-date { width: 62px; }
+  .pb-date .d { font-size: 28px; }
+  .pb-today h2 { font-size: 18.5px; }
+  .pb-row { grid-template-columns: 78px 1fr 48px; gap: 8px; }
+  .pb-clock { min-width: 0; flex: 1 1 40%; }
+}
+</style>
+
+<script is:inline define:vars={{ PLAN: plan }}>
+(() => {
+  const KEY = 'athebear-prep-v1';
+  const days = PLAN.days;
+  const byDate = Object.fromEntries(days.map((d, i) => [d.date, i]));
+  const streamName = Object.fromEntries(PLAN.streams.map((s) => [s.k, s.name]));
+  const $ = (id) => document.getElementById(id);
+
+  const load = () => {
+    try { const v = JSON.parse(localStorage.getItem(KEY) || '{}'); return { done: v.done || {}, notes: v.notes || {} }; }
+    catch (e) { return { done: {}, notes: {} }; }
+  };
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} };
+  let state = load();
+
+  const pad = (n) => String(n).padStart(2, '0');
+  const localISO = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const todayISO = localISO(new Date());
+  const diffDays = (a, b) => Math.round((Date.parse(b + 'T00:00:00') - Date.parse(a + 'T00:00:00')) / 864e5);
+  const md = (iso) => `${+iso.slice(5, 7)}/${+iso.slice(8, 10)}`;
+
+  const clampIndex = (iso) => {
+    if (iso in byDate) return byDate[iso];
+    return iso < days[0].date ? 0 : days.length - 1;
+  };
+  let sel = clampIndex(location.hash.length > 1 && /^\d{4}-\d{2}-\d{2}$/.test(location.hash.slice(1)) ? location.hash.slice(1) : todayISO);
+
+  const countDay = (d) => {
+    const n = d.tasks.length;
+    const k = d.tasks.filter((t) => state.done[t.id]).length;
+    return [k, n];
+  };
+  const phaseOf = (k) => PLAN.phases.find((p) => p.k === k);
+  const color = (s) => `var(--s-${s})`;
+
+  function renderClocks() {
+    const box = $('pb-clocks');
+    box.textContent = '';
+    const items = [];
+    const m = PLAN.milestones.find((x) => x.date >= todayISO);
+    if (m) items.push({ v: diffDays(todayISO, m.date), l: `距${m.name} · ${md(m.date)}`, hot: true });
+    const sub = PLAN.milestones.find((x) => x.name === '第一轮投递');
+    if (sub && sub !== m && sub.date >= todayISO) items.push({ v: diffDays(todayISO, sub.date), l: `距第一轮投递 · ${md(sub.date)}` });
+    const idx = byDate[todayISO];
+    if (idx !== undefined) items.push({ v: `第 ${idx + 1} 天`, l: `计划共 ${days.length} 天`, raw: true });
+    let k = 0, n = 0;
+    days.forEach((d) => { const [a, b] = countDay(d); k += a; n += b; });
+    items.push({ v: n ? Math.round((k / n) * 100) + '%' : '0%', l: `总完成 ${k} / ${n}`, raw: true });
+    for (const it of items) {
+      const el = document.createElement('div');
+      el.className = 'pb-clock' + (it.hot ? ' hot' : '');
+      const b = document.createElement('b');
+      b.textContent = it.raw ? String(it.v) : (it.v === 0 ? '今天' : `${it.v} 天`);
+      const s = document.createElement('span');
+      s.textContent = it.l;
+      el.append(b, s);
+      box.append(el);
+    }
+  }
+
+  const nowMinutes = () => { const n = new Date(); return n.getHours() * 60 + n.getMinutes(); };
+  const parseRange = (t) => {
+    const m = t.match(/(\d{2}):(\d{2})\D+(\d{2}):(\d{2})/);
+    return m ? [+m[1] * 60 + +m[2], +m[3] * 60 + +m[4]] : null;
+  };
+
+  function renderDayCount() {
+    const [k, n] = countDay(days[sel]);
+    $('pb-bar').style.width = n ? `${(k / n) * 100}%` : '0';
+    $('pb-count').textContent = `${k} / ${n} 完成` + (k === n && n ? ' · 今天收工' : '');
+  }
+
+  function renderDay() {
+    const d = days[sel];
+    const isToday = d.date === todayISO;
+    const dateBox = $('pb-date');
+    dateBox.className = 'pb-date' + (isToday ? ' is-today' : '');
+    dateBox.innerHTML = '';
+    const m = document.createElement('div'); m.className = 'm'; m.textContent = `${+d.date.slice(5, 7)} 月`;
+    const dd = document.createElement('div'); dd.className = 'd'; dd.textContent = String(+d.date.slice(8, 10));
+    const w = document.createElement('div'); w.className = 'w'; w.textContent = (isToday ? '今天 · ' : '') + '周' + d.wd;
+    dateBox.append(m, dd, w);
+    const ph = phaseOf(d.phase);
+    $('pb-phase').textContent = ph ? ph.name : '';
+    $('pb-day-title').textContent = d.theme;
+    $('pb-out').textContent = d.out;
+    const note = $('pb-note');
+    if (d.note) { note.hidden = false; note.textContent = d.note; } else { note.hidden = true; }
+
+    const list = $('pb-tasks');
+    list.textContent = '';
+    const nowM = nowMinutes();
+    d.tasks.forEach((t) => {
+      const li = document.createElement('li');
+      const r = parseRange(t.t);
+      const isNow = isToday && r && nowM >= r[0] && nowM < r[1];
+      li.className = 'pb-task' + (state.done[t.id] ? ' done' : '') + (isNow ? ' now' : '');
+      const time = document.createElement('div'); time.className = 'pb-time'; time.textContent = t.t;
+      const body = document.createElement('div'); body.className = 'pb-body';
+      const cb = document.createElement('input'); cb.type = 'checkbox'; cb.id = 'cb-' + t.id; cb.checked = !!state.done[t.id];
+      cb.addEventListener('change', () => {
+        if (cb.checked) state.done[t.id] = 1; else delete state.done[t.id];
+        save();
+        li.classList.toggle('done', cb.checked);
+        renderDayCount(); renderSide();
+      });
+      const tx = document.createElement('div'); tx.className = 'pb-text';
+      const lab = document.createElement('label'); lab.htmlFor = cb.id; lab.textContent = t.x;
+      const tl = document.createElement('div'); tl.className = 'pb-tagline';
+      const tag = document.createElement('span'); tag.className = 'pb-tag'; tag.style.background = color(t.s); tag.textContent = streamName[t.s] || t.s;
+      tl.append(tag);
+      if (t.l) { const a = document.createElement('a'); a.className = 'pb-link'; a.href = t.l; a.textContent = '打开教程 →'; tl.append(a); }
+      tx.append(lab, tl);
+      body.append(cb, tx);
+      li.append(time, body);
+      list.append(li);
+    });
+    renderDayCount();
+    const ta = $('pb-reflect');
+    if (document.activeElement !== ta) ta.value = state.notes[d.date] || '';
+    $('pb-prev').disabled = sel === 0;
+    $('pb-next').disabled = sel === days.length - 1;
+  }
+
+  function renderWeek() {
+    const box = $('pb-week');
+    box.textContent = '';
+    const d0 = new Date(days[sel].date + 'T00:00:00');
+    const mondayOffset = (d0.getDay() + 6) % 7;
+    for (let i = 0; i < 7; i++) {
+      const x = new Date(d0); x.setDate(d0.getDate() - mondayOffset + i);
+      const iso = localISO(x);
+      const b = document.createElement('button'); b.type = 'button';
+      const idx = byDate[iso];
+      b.className = 'pb-wd' + (idx === undefined ? ' off' : '') + (idx === sel ? ' sel' : '') + (iso === todayISO ? ' today' : '');
+      const w = document.createElement('span'); w.className = 'w'; w.textContent = '一二三四五六日'[i];
+      const dd = document.createElement('span'); dd.className = 'd'; dd.textContent = String(x.getDate());
+      const bar = document.createElement('span'); bar.className = 'b';
+      const fill = document.createElement('i');
+      if (idx !== undefined) { const [k, n] = countDay(days[idx]); fill.style.width = n ? `${(k / n) * 100}%` : '0'; b.addEventListener('click', () => go(idx)); b.setAttribute('aria-label', `${iso}`); }
+      bar.append(fill);
+      b.append(w, dd, bar);
+      box.append(b);
+    }
+  }
+
+  function renderStreams() {
+    const box = $('pb-streams');
+    box.textContent = '';
+    const tot = {}, dn = {};
+    days.forEach((d) => d.tasks.forEach((t) => { tot[t.s] = (tot[t.s] || 0) + 1; if (state.done[t.id]) dn[t.s] = (dn[t.s] || 0) + 1; }));
+    PLAN.streams.filter((s) => tot[s.k] && s.k !== 'rest').forEach((s) => {
+      const li = document.createElement('li'); li.className = 'pb-srow';
+      const n = document.createElement('span'); n.className = 'n'; n.style.color = color(s.k); n.textContent = s.name;
+      const bar = document.createElement('span'); bar.className = 'bar';
+      const i = document.createElement('i'); i.style.background = color(s.k); i.style.width = `${((dn[s.k] || 0) / tot[s.k]) * 100}%`;
+      bar.append(i);
+      const v = document.createElement('span'); v.className = 'v'; v.textContent = `${dn[s.k] || 0}/${tot[s.k]}`;
+      li.append(n, bar, v); box.append(li);
+    });
+  }
+
+  function renderMiles() {
+    const box = $('pb-miles');
+    box.textContent = '';
+    let nextMarked = false;
+    PLAN.milestones.forEach((m) => {
+      const li = document.createElement('li');
+      const past = m.date < todayISO;
+      if (!past && !nextMarked) { li.className = 'next'; nextMarked = true; } else if (past) li.className = 'past';
+      const n = document.createElement('span'); n.textContent = m.name;
+      const d = document.createElement('span'); d.className = 'd'; d.textContent = md(m.date);
+      li.append(n, d); box.append(li);
+    });
+  }
+
+  function renderPhases() {
+    const box = $('pb-phases');
+    box.textContent = '';
+    PLAN.phases.forEach((p) => {
+      const ds = days.filter((d) => d.phase === p.k);
+      let k = 0, n = 0; ds.forEach((d) => { const [a, b] = countDay(d); k += a; n += b; });
+      const b = document.createElement('button'); b.type = 'button';
+      b.className = 'pb-ph' + (todayISO >= p.s && todayISO <= p.e ? ' cur' : '');
+      const t = document.createElement('span'); t.className = 't'; t.textContent = p.name;
+      const r = document.createElement('span'); r.className = 'r'; r.textContent = p.s === p.e ? md(p.s) : `${md(p.s)}–${md(p.e)} · ${k}/${n}`;
+      const g = document.createElement('span'); g.className = 'g'; g.textContent = p.goal;
+      const bar = document.createElement('span'); bar.className = 'bar';
+      const i = document.createElement('i'); i.style.width = n ? `${(k / n) * 100}%` : '0'; bar.append(i);
+      b.append(t, r, g, bar);
+      b.addEventListener('click', () => go(byDate[ds[0].date], true));
+      box.append(b);
+    });
+  }
+
+  function renderAllDays() {
+    const box = $('pb-all');
+    box.textContent = '';
+    let k = 0, n = 0;
+    PLAN.phases.forEach((p) => {
+      const ds = days.filter((d) => d.phase === p.k);
+      if (!ds.length) return;
+      const g = document.createElement('div'); g.className = 'pb-group';
+      const h = document.createElement('h3'); h.textContent = p.name; g.append(h);
+      ds.forEach((d) => {
+        const [a, c] = countDay(d); k += a; n += c;
+        const row = document.createElement('button'); row.type = 'button';
+        row.className = 'pb-row' + (a === c && c ? ' full' : '') + (d.date === todayISO ? ' today' : '') + (byDate[d.date] === sel ? ' sel' : '');
+        const dd = document.createElement('span'); dd.className = 'd'; dd.textContent = `${md(d.date)} 周${d.wd}`;
+        const t = document.createElement('span'); t.className = 't'; t.textContent = d.theme;
+        const cc = document.createElement('span'); cc.className = 'c'; cc.textContent = `${a}/${c}`;
+        row.append(dd, t, cc);
+        row.addEventListener('click', () => go(byDate[d.date], true));
+        g.append(row);
+      });
+      box.append(g);
+    });
+    $('pb-total').textContent = `${days.length} 天 · 已完成 ${k} / ${n} 项`;
+  }
+
+  function renderSide() {
+    renderClocks(); renderWeek(); renderStreams(); renderMiles(); renderPhases(); renderAllDays();
+  }
+
+  function renderAll() {
+    renderDay(); renderSide();
+  }
+
+  function go(i, scroll) {
+    sel = Math.max(0, Math.min(days.length - 1, i));
+    try { history.replaceState(null, '', '#' + days[sel].date); } catch (e) {}
+    renderAll();
+    if (scroll) document.querySelector('.pb-grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  $('pb-prev').addEventListener('click', () => go(sel - 1));
+  $('pb-next').addEventListener('click', () => go(sel + 1));
+  $('pb-today').addEventListener('click', () => go(clampIndex(todayISO)));
+  let tmr;
+  $('pb-reflect').addEventListener('input', (e) => {
+    clearTimeout(tmr);
+    const v = e.target.value; const date = days[sel].date;
+    tmr = setTimeout(() => { if (v.trim()) state.notes[date] = v; else delete state.notes[date]; save(); }, 400);
+  });
+  $('pb-export').addEventListener('click', async () => {
+    const code = btoa(unescape(encodeURIComponent(JSON.stringify(state))));
+    $('pb-code').value = code;
+    try { await navigator.clipboard.writeText(code); $('pb-export-msg').textContent = '已复制，到新设备粘贴导入'; }
+    catch (e) { $('pb-code').select(); $('pb-export-msg').textContent = '已放进下面的框里，手动复制即可'; }
+  });
+  $('pb-import').addEventListener('click', () => {
+    try {
+      const v = JSON.parse(decodeURIComponent(escape(atob($('pb-code').value.trim()))));
+      state = { done: v.done || {}, notes: v.notes || {} };
+      save(); renderAll(); $('pb-import-msg').textContent = '已导入';
+    } catch (e) { $('pb-import-msg').textContent = '进度码不完整，请重新复制'; }
+  });
+  let armed = false;
+  $('pb-reset').addEventListener('click', (e) => {
+    if (!armed) { armed = true; e.target.textContent = '再点一次确认清空'; setTimeout(() => { armed = false; e.target.textContent = '清空本机进度'; }, 4000); return; }
+    state = { done: {}, notes: {} }; save(); renderAll(); armed = false; e.target.textContent = '清空本机进度'; $('pb-import-msg').textContent = '已清空';
+  });
+  window.addEventListener('hashchange', () => { const h = location.hash.slice(1); if (h in byDate) { sel = byDate[h]; renderAll(); } });
+  setInterval(() => { if (days[sel].date === todayISO) renderDay(); }, 60000);
+
+  renderAll();
+})();
+</script>
+</Base>

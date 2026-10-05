@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="440" viewBox="0 0 1100 440" role="img" aria-labelledby="title desc">
+<title id="title">长序列建模的两阶段结构</title>
+<desc id="desc">上万条历史行为先经过 GSU，用类目、SimHash、哈希碰撞或简化的目标注意力挑出几百条；ESU 对这几百条做目标注意力并加入时间间隔，输出兴趣向量给 CTR 模型。候选物品同时参与两个阶段。</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10" fill="#89776b"/></marker></defs>
+<rect width="1100" height="440" rx="20" fill="#f5f3ec"/>
+<g font-family="PingFang SC, Noto Sans SC, sans-serif" fill="#28241f">
+<text x="42" y="48" font-size="23" font-weight="600">长序列：先挑，再细读</text>
+<text x="42" y="78" font-size="15" fill="#74695f">各方法的差别，在于 GSU 用什么相关性、是否与 ESU 一致</text>
+<rect x="420" y="96" width="420" height="40" rx="10" fill="#fffaf2" stroke="#d8d0c4"/>
+<text x="630" y="122" font-size="16" font-weight="600" text-anchor="middle">候选物品 q 参与两个阶段的打分</text>
+<g stroke="#89776b" stroke-width="1.6" fill="none" stroke-dasharray="5 4" marker-end="url(#arrow)"><path d="M520 136V160"/><path d="M790 136V160"/></g>
+<g stroke="#d8d0c4">
+<rect x="40" y="166" width="200" height="138" rx="13" fill="#e7e3d8"/>
+<rect x="290" y="166" width="330" height="138" rx="13" fill="#e1e8ed"/>
+<rect x="670" y="166" width="150" height="138" rx="13" fill="#e7e3d8"/>
+<rect x="870" y="166" width="190" height="138" rx="13" fill="#f3e0d5"/>
+</g>
+<g font-size="19" font-weight="600" text-anchor="middle"><text x="140" y="214">终身行为</text><text x="455" y="194">GSU：便宜地挑</text><text x="745" y="214">Top-K</text><text x="965" y="214">ESU：精细读</text></g>
+<g font-size="14.5" text-anchor="middle" fill="#5b5148">
+<text x="140" y="244">上万条</text><text x="140" y="268">大多是长尾物品</text>
+<text x="455" y="221">SIM：类目 / embedding 内积</text>
+<text x="455" y="244">ETA：SimHash 的汉明距离</text>
+<text x="455" y="267">SDIM：哈希碰撞直接聚合</text>
+<text x="455" y="290" fill="#9a4f33">TWIN：与 ESU 同款注意力</text>
+<text x="745" y="244">几十到几百条</text><text x="745" y="268">进入精细计算</text>
+<text x="965" y="244">目标注意力</text><text x="965" y="268">+ 时间间隔</text>
+</g>
+<g stroke="#89776b" stroke-width="2" fill="none" marker-end="url(#arrow)"><path d="M240 235H282"/><path d="M620 235H662"/><path d="M820 235H862"/><path d="M965 304V326"/></g>
+<rect x="830" y="332" width="230" height="46" rx="12" fill="#e6eadb" stroke="#d8d0c4"/>
+<text x="945" y="361" font-size="16" font-weight="600" text-anchor="middle">兴趣向量 → CTR 模型</text>
+<text x="42" y="410" font-size="15" fill="#74695f">GSU 漏掉的行为，ESU 无法补救；把与候选无关的用户侧计算拆出来复用，是所有降本方法的共同点。</text>
+</g></svg>

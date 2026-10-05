@@ -3,6 +3,18 @@ import Base from '../layouts/Base.astro';
 
 const items = [
   {
+    status: 'live', badge: '教程 · 9 篇',
+    title: '推荐与 LLM4Rec 全覆盖教程',
+    desc: '写给多模态背景、没系统学过推荐的人:评估与偏差、长序列、排序 scaling、语义 ID、LLM4Rec、多模态 I2I、广告机制,附九十道面试题和覆盖清单。',
+    href: '/notes/recsys-llm4rec-guide/', go: '开始阅读 →',
+  },
+  {
+    status: 'wip', badge: '进行中 · 每日看板',
+    title: '28 届算法实习备战看板',
+    desc: '10 月到 12 月的逐日计划:每天的时间块、任务和教程链接,勾选进度保存在本机浏览器。',
+    href: '/plan/', go: '打开看板 →',
+  },
+  {
     status: 'live', badge: '在线 · 12 课',
     title: 'MiniMind-V:从零看懂并训练一个视觉语言模型',
     desc: '以 65M 参数的开源 VLM MiniMind-V 为骨架,从 token 与注意力讲起,拆解视觉编码器、模态投影、两阶段训练与推理。每课 4~5 个交互动画、真实源码逐行讲解、零依赖 Python 练习。',

@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="560" viewBox="0 0 1100 560" role="img" aria-labelledby="title desc">
+<title id="title">推荐与 LLM4Rec 知识地图</title>
+<desc id="desc">左列是经典链路：召回、排序、重排与冷启动；中列是规模变大后的序列与长序列建模、可扩展排序；右列是语义 ID 与 LLM4Rec。底部三块贯穿全部：评估与偏差、多模态与 I2I、广告与业务。</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10" fill="#89776b"/></marker></defs>
+<rect width="1100" height="560" rx="20" fill="#f5f3ec"/>
+<g font-family="PingFang SC, Noto Sans SC, sans-serif" fill="#28241f">
+<text x="42" y="48" font-size="23" font-weight="600">推荐与 LLM4Rec：同一个问题越来越大</text>
+<text x="42" y="78" font-size="15" fill="#74695f">从左到右，候选、历史和模型依次变大；底部三块贯穿每一层</text>
+<g font-size="15" font-weight="600" fill="#74695f" text-anchor="middle"><text x="185" y="112">经典链路</text><text x="545" y="112">规模变大</text><text x="910" y="112">新范式</text></g>
+<g stroke="#d8d0c4">
+<rect x="40" y="126" width="290" height="74" rx="13" fill="#e7e3d8"/>
+<rect x="40" y="212" width="290" height="74" rx="13" fill="#e7e3d8"/>
+<rect x="40" y="298" width="290" height="74" rx="13" fill="#e7e3d8"/>
+<rect x="400" y="140" width="290" height="100" rx="13" fill="#e1e8ed"/>
+<rect x="400" y="258" width="290" height="100" rx="13" fill="#e1e8ed"/>
+<rect x="760" y="140" width="300" height="100" rx="13" fill="#f3e0d5"/>
+<rect x="760" y="258" width="300" height="100" rx="13" fill="#f3e0d5"/>
+</g>
+<g font-size="19" font-weight="600" text-anchor="middle">
+<text x="185" y="157">召回</text><text x="185" y="243">排序</text><text x="185" y="329">重排与冷启动</text>
+<text x="545" y="178">序列与长序列</text><text x="545" y="296">可扩展排序</text>
+<text x="910" y="178">语义 ID</text><text x="910" y="296">LLM4Rec</text>
+</g>
+<g font-size="14.5" text-anchor="middle" fill="#5b5148">
+<text x="185" y="184">ItemCF · Swing · 双塔 · ANN</text>
+<text x="185" y="270">多目标 · MMoE · FM/DCN · DIN</text>
+<text x="185" y="356">MMR · DPP · 流量扶持 · 实验</text>
+<text x="545" y="206">SASRec · SIM · ETA · SDIM</text><text x="545" y="228">TWIN · LONGER · MUSE</text>
+<text x="545" y="324">DLRM 的瓶颈 · MFU</text><text x="545" y="346">HSTU · RankMixer · OneTrans</text>
+<text x="910" y="206">RQ-VAE · RQ-KMeans · OPQ · FSQ</text><text x="910" y="228">坍塌 · 冲突 · 约束解码</text>
+<text x="910" y="324">编码器 · 文本推荐器 · 生成器</text><text x="910" y="346">LC-Rec · OneRec · MiniOneRec</text>
+</g>
+<g stroke="#89776b" stroke-width="2" fill="none" marker-end="url(#arrow)"><path d="M330 249H392"/><path d="M690 249H752"/></g>
+<g font-size="13" fill="#74695f" text-anchor="middle"><text x="365" y="238">历史变长</text><text x="725" y="238">模型变大</text></g>
+<path d="M40 394H1060" stroke="#d8d0c4" stroke-dasharray="6 6"/>
+<text x="42" y="418" font-size="15" font-weight="600" fill="#74695f">贯穿每一层</text>
+<g stroke="#d8d0c4">
+<rect x="40" y="430" width="320" height="76" rx="13" fill="#e6eadb"/>
+<rect x="390" y="430" width="320" height="76" rx="13" fill="#e6eadb"/>
+<rect x="740" y="430" width="320" height="76" rx="13" fill="#e6eadb"/>
+</g>
+<g font-size="18" font-weight="600" text-anchor="middle"><text x="200" y="461">评估与偏差</text><text x="550" y="461">多模态与 I2I</text><text x="900" y="461">广告与业务</text></g>
+<g font-size="14.5" text-anchor="middle" fill="#5b5148"><text x="200" y="488">AUC · GAUC · NDCG · logQ · ESMM</text><text x="550" y="488">CLIP · QARM · VLM2Vec · EGES</text><text x="900" y="488">eCPM · GSP · oCPM · 校准</text></g>
+<text x="42" y="540" font-size="15" fill="#74695f">每读一篇，用一句话写出它在省什么计算，或纠正什么偏差。</text>
+</g></svg>

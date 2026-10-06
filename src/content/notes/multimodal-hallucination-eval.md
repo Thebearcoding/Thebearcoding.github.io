@@ -33,7 +33,7 @@ draft: false
 
 **③ 训练数据本身有幻觉。** 图文对数据里的描述常常包含图中没有的内容（网页上的 alt 文本、人为写的背景信息）；用 GPT-4V 等模型生成的合成描述也会有幻觉。模型在 SFT 时学着去生成这些“超出图像”的内容。
 
-**④ 长文本生成的漂移。** 描述越长，后面的内容越依赖已经生成的文字而不是图像。有研究观察到幻觉更集中出现在长描述的后半部分。这也是“想得越多，看得越少”的一种表现。
+**④ 长文本生成的漂移。** 描述越长，后面的内容越依赖已经生成的文字而不是图像。LURE（Zhou et al., arXiv 2310.00754）的统计分析把物体幻觉归结为三个因素：共现（经常一起出现的物体）、不确定性（解码时不确定性高的物体）和位置（幻觉更多出现在生成文本的后半部分）。推理模型上也有同样的现象：推理链越长，对视觉输入的注意越少，幻觉越多（arXiv 2505.21523）。
 
 **⑤ 指令与偏好训练的副作用。** 如果偏好数据倾向于更详细、更长的回答，模型会学着写更多细节，包括编造的细节。
 
@@ -82,10 +82,10 @@ POPE（Li et al., arXiv 2305.10355）把开放描述换成是非题：“图中�
 
 | 基准 | 测什么 |
 |---|---|
-| AMBER | 同时覆盖生成式（描述）与判别式（是非题）评估，包含存在、属性、关系三类幻觉 |
-| HallusionBench | 用经过编辑的图（改动图中的关键信息）测模型是否依赖图像而非常识，以及视觉错觉 |
-| MMHal-Bench | 开放式问答，用 GPT-4 对照人工撰写的图像信息打分 |
-| Object HalBench | 基于 CHAIR 思路的物体幻觉评估，配合更细致的物体抽取 |
+| AMBER | 不依赖 LLM 打分（LLM-free），同时覆盖生成式（描述）与判别式（是非题）评估，包含存在、属性、关系三类幻觉 |
+| HallusionBench | 约 1129 道人工编写的问答，165 张原图加 181 张由专业人员修改过的图（修改后正确答案随之改变），测模型是依赖图像还是依赖常识，以及视觉错觉 |
+| MMHal-Bench | 96 个图像–问题对（8 类问题 × 12 个物体主题），问题针对原始 LLaVA 做过对抗筛选；用 GPT-4 对照图像信息和标准答案打分（LLaVA-RLHF 论文附录 G） |
+| Object HalBench | 基于 CHAIR 的详细描述物体幻觉评估；RLHF-V 在评测时加入 8 种不同的详细描述提示以提高稳定性 |
 
 **HallusionBench 的思路值得借鉴**：同一个问题配原图和编辑过的图（例如把图表里的某个数值改掉），如果模型对两张图给出相同的答案，说明它是在凭知识作答，而不是在读图。这和 [多模态 RL](/notes/multimodal-rl/) 第 4 节用空白图测视觉依赖度是同一个思路：**用对照的输入，测输出是否真的随图像变化**。
 
@@ -113,7 +113,7 @@ $$
 
 **代价与边界**：每生成一个 token 都要多做一次前向（加噪图的那一路），推理开销约翻倍；$\alpha$ 太大会损害流畅性；它只能纠正语言先验带来的幻觉，对视觉编码器根本没看清的情况无能为力。
 
-**OPERA**（arXiv 2311.17911）是另一种解码期方法：观察到幻觉常伴随着注意力过度集中在少数几个“总结性” token 上，在束搜索中对这种模式施加惩罚并允许回退。
+**OPERA**（arXiv 2311.17911）是另一种解码期方法：论文发现幻觉与自注意力中的“知识聚合”模式密切相关：模型生成新 token 时过度关注少数几个总结性 token（over-trust）。它在束搜索中对这种模式施加惩罚，并在检测到时回退重新选择（retrospection-allocation）。
 
 ## 7. 训练期缓解
 
@@ -150,4 +150,4 @@ $$
 
 不看资料列出六种幻觉类型及能否自动检测；说出幻觉的五个成因，并对应到信息路径上的环节；写出 $\text{CHAIR}_i$ 与 $\text{CHAIR}_s$ 的定义并对给定例子手算，说出 CHAIR 的三个局限；说出 POPE 三种负例设置的区别；对给定的两个模型的混淆矩阵手算准确率、精确率、召回率、F1 和答“有”的比例，并解释为什么单看一个指标会误判；说出 AMBER、HallusionBench、MMHal-Bench 各测什么；写出 VCD 的公式，对给定的三个候选手算调整后的 logit 和 softmax，说出代价和边界；列出四类训练期缓解方法，并说明不同方法修的是哪个成因；最后按五步诊断流程描述你会怎样分析一个模型的幻觉。
 
-**参考。** [CHAIR（Object Hallucination in Image Captioning）](https://arxiv.org/abs/1809.02156)；[POPE](https://arxiv.org/abs/2305.10355)；[AMBER](https://arxiv.org/abs/2311.07397)；[HallusionBench](https://arxiv.org/abs/2310.14566)；[MMHal-Bench（LLaVA-RLHF）](https://arxiv.org/abs/2309.14525)；[VCD](https://arxiv.org/abs/2311.16922)；[OPERA](https://arxiv.org/abs/2311.17911)；[RLHF-V](https://arxiv.org/abs/2312.00849)；[RLAIF-V](https://arxiv.org/abs/2405.17220)；[mDPO](https://arxiv.org/abs/2406.11839)；[A Survey on Hallucination in Large Vision-Language Models](https://arxiv.org/abs/2402.00253)。
+**参考。** [CHAIR（Object Hallucination in Image Captioning）](https://arxiv.org/abs/1809.02156)；[POPE](https://arxiv.org/abs/2305.10355)；[AMBER](https://arxiv.org/abs/2311.07397)；[HallusionBench](https://arxiv.org/abs/2310.14566)；[MMHal-Bench（LLaVA-RLHF）](https://arxiv.org/abs/2309.14525)；[VCD](https://arxiv.org/abs/2311.16922)；[OPERA](https://arxiv.org/abs/2311.17911)；[RLHF-V](https://arxiv.org/abs/2312.00849)；[RLAIF-V](https://arxiv.org/abs/2405.17220)；[mDPO](https://arxiv.org/abs/2406.11839)；[LURE](https://arxiv.org/abs/2310.00754)；[More Thinking, Less Seeing?](https://arxiv.org/abs/2505.21523)；[A Survey on Hallucination in Large Vision-Language Models](https://arxiv.org/abs/2402.00253)。

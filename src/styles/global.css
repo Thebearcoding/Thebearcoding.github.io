@@ -612,7 +612,7 @@ body.reading .site-footer .footer-inner { max-width: 1160px; }
 }
 
 /* ---- 首页:专题入口、仓库条、最近更新 ---- */
-.topic-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.topic-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .topic-card {
   display: flex; flex-direction: column; gap: 10px;
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);

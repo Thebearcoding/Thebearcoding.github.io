@@ -27,7 +27,7 @@ CLIP 把图像和文本各自编码成一个向量，算余弦相似度就能检
 
 ## 2. 为什么用 VLM 当编码器
 
-CLIP 的文本塔是一个小 Transformer，上下文只有 77 个 token，读不懂长指令；图像塔和文本塔之间没有交叉注意力。VLM 本身就把图像 token 和文本 token 放在同一个序列里做因果注意力，天然支持图文混合输入，也能读懂“这是一个检索任务，请关注图中的文字”这类指令。缺点是它被训练来生成下一个 token，不是输出一个可比较的向量，所以要用对比学习重新训练。
+CLIP 的文本塔是一个小 Transformer，论文里最大长度截断为 76 个 token（§2.4），读不懂长指令；图像塔和文本塔之间没有交叉注意力。VLM 本身就把图像 token 和文本 token 放在同一个序列里做因果注意力，天然支持图文混合输入，也能读懂“这是一个检索任务，请关注图中的文字”这类指令。缺点是它被训练来生成下一个 token，不是输出一个可比较的向量，所以要用对比学习重新训练。
 
 VLM2Vec（Jiang et al., arXiv 2410.05160，ICLR 2025）的做法很直接：
 
@@ -66,7 +66,7 @@ $$
 | 0.05 | 0.7275 | 0.1356 |
 | 0.10 | 0.5922 | 0.3154 |
 
-温度越低，分布越尖，损失越集中在最难的那个负例上；温度越高，所有负例被均匀地推。VLM2Vec 用的是固定的 $\tau=0.02$（论文 §4 实验设置）。CLIP 让温度可学习并截断在 100 倍以内（即 $\tau\ge0.01$）。低温度的风险是：一个**假负例**（其实也是对的候选）会拿到很大的梯度，把正确语义推开。
+温度越低，分布越尖，损失越集中在最难的那个负例上；温度越高，所有负例被均匀地推。VLM2Vec 用的是固定的 $\tau=0.02$（论文 §4 实验设置）。CLIP 让温度可学习，初始化为 0.07，并截断使 logit 的缩放不超过 100 倍（即 $\tau\ge0.01$，CLIP 论文 §2.5），原因是防止训练不稳定。低温度的风险是：一个**假负例**（其实也是对的候选）会拿到很大的梯度，把正确语义推开。
 
 **双向还是单向。** CLIP 是对称损失（图到文、文到图取平均）。VLM2Vec 只用查询到候选的方向，因为查询和候选并不对称（查询带指令，候选可能只是类别名）。上面的矩阵如果按列再算一次文到图方向，平均损失是 0.1213，与行方向不同，说明两个方向的约束确实不同。
 
@@ -113,13 +113,13 @@ InfoNCE 的每个查询只能和 batch 里的 $B-1$ 个负例比。负例越多�
 
 看这张表要注意三点。一是 VLM2Vec 在 20 个 IND 数据集上训练过，IND 的提升里有一部分是“见过同分布数据”，衡量泛化要看 OOD 列；公平的对照是同样在 MMEB 上微调过的 CLIP（45.4），而不是零样本 CLIP。二是同一骨干下，分辨率从 336 提到 1344，LLaVA-1.6 版总分从 55.0 涨到 62.9，说明图像细节对 embedding 也很重要。三是论文指出 LLaVA-1.6 的预训练数据公开，几乎不与 OOD 集重叠，所以它的 OOD 分数不是靠见过测试数据得来的。
 
-**后续工作。** VLM2Vec-V2 把评测扩展到视频和视觉文档检索（MMEB-V2）；GME、UniME、LLaVE 等工作沿着更强的骨干（Qwen2-VL 系列）、难负例加权、从生成模型蒸馏等方向推进。读这些论文时先看三件事：骨干是谁、训练数据是否包含 MMEB 的 IND 集、OOD 分数是多少。
+**后续工作。** VLM2Vec-V2（arXiv 2507.04590）提出 MMEB-V2，在 MMEB 上新增五类任务：视觉文档检索、视频检索、时间定位、视频分类和视频问答，模型也扩展到视频与文档输入。LLaVE 在损失里按难度给负例加权（第 5 节）。读这些论文时先看三件事：骨干是谁、训练数据是否包含 MMEB 的 IND 集、OOD 分数是多少。
 
 ## 7. 和推荐、RAG 的接口
 
 多模态 embedding 在工业界最直接的用途是**召回**：商品图 + 标题编码成向量建 ANN 索引，用户的查询或行为序列编码后检索，这和 [推荐里的多模态 I2I](/notes/recsys-multimodal-i2i/) 是同一件事。另一个用途是**多模态 RAG** 的检索器：知识库里的截图、表格、图表直接编码，不必先 OCR。你 11 月的 Agent RL 项目里，可选的第 4 组消融就是把 10 月训出的 embedding 换进检索服务，看检索器质量怎样传导到策略的最终 EM，见 [Agent RAG](/notes/agent-rag/)。
 
-上线时三个工程问题：**① 维度与存储**，3072 维 fp32 每个向量 12 KB，一亿条就是 1.2 TB，通常降到 512–1024 维（训练时加投影层或用 Matryoshka 式多粒度损失）并量化；**② 模型与索引成套更新**，换模型必须重编码全库，原因同 [召回第 9 节](/notes/wangshusen-recommender-retrieval/)；**③ 查询延迟**，4B 的 VLM 编码一个带图查询要几十毫秒，比 CLIP 慢一个量级，查询端可以蒸馏到小模型。
+上线时三个工程问题：**① 维度与存储**，3072 维 fp32 每个向量 12 KB，一亿条就是 1.2 TB，通常降到 512–1024 维（训练时加投影层或用 Matryoshka 式多粒度损失）并量化；**② 模型与索引成套更新**，换模型必须重编码全库，原因同 [召回第 9 节](/notes/wangshusen-recommender-retrieval/)；**③ 查询延迟**，4B 级的 VLM 编码一个带图查询比 CLIP 的双塔贵得多（参数量差一个数量级以上，图像还会被切成多个子图），上线前要实测延迟，必要时把查询端蒸馏到小模型。
 
 ## 8. 最小可行项目：2–3 周、单机 4 卡
 
@@ -152,4 +152,4 @@ InfoNCE 的每个查询只能和 batch 里的 $B-1$ 个负例比。负例越多�
 
 不看资料写出 VLM2Vec 的四个设计选择（骨干、指令、池化、损失）；解释为什么因果模型要取最后一个 token、为什么要左填充；对给定的 $3\times3$ 相似度矩阵和温度手算行 softmax、单行损失与平均损失，并算出正样本、难负例、易负例各自对相似度的梯度；说清温度从 0.1 降到 0.02 时损失和梯度怎样变化；写出 GradCache 的四步、为什么得到精确梯度、多出多少计算；说出 MMEB 的元任务、数据集数、IND/OOD 划分和 Precision@1 协议；解释 VLM2Vec 与 CLIP 比较时哪一列更能说明泛化；最后讲出一个 4 卡、2–3 周的复现与 4 组消融计划，以及每一步的验收单测。
 
-**参考。** [VLM2Vec / MMEB](https://arxiv.org/abs/2410.05160)（[代码](https://github.com/TIGER-AI-Lab/VLM2Vec)，[排行榜](https://huggingface.co/spaces/TIGER-Lab/MMEB)）；[CLIP](https://arxiv.org/abs/2103.00020)；[SigLIP](https://arxiv.org/abs/2303.15343)；[GradCache: Scaling Deep Contrastive Learning Batch Size under Memory Limited Setup](https://arxiv.org/abs/2101.06983)；[E5-V](https://arxiv.org/abs/2407.12580)；[LLaVE](https://arxiv.org/abs/2503.04812)；[Matryoshka Representation Learning](https://arxiv.org/abs/2205.13147)；[InfoNCE / CPC](https://arxiv.org/abs/1807.03748)。
+**参考。** [VLM2Vec / MMEB](https://arxiv.org/abs/2410.05160)（[代码](https://github.com/TIGER-AI-Lab/VLM2Vec)，[排行榜](https://huggingface.co/spaces/TIGER-Lab/MMEB)）；[CLIP](https://arxiv.org/abs/2103.00020)；[SigLIP](https://arxiv.org/abs/2303.15343)；[GradCache: Scaling Deep Contrastive Learning Batch Size under Memory Limited Setup](https://arxiv.org/abs/2101.06983)；[E5-V](https://arxiv.org/abs/2407.12580)；[VLM2Vec-V2 / MMEB-V2](https://arxiv.org/abs/2507.04590)；[LLaVE](https://arxiv.org/abs/2503.04812)；[Matryoshka Representation Learning](https://arxiv.org/abs/2205.13147)；[InfoNCE / CPC](https://arxiv.org/abs/1807.03748)。

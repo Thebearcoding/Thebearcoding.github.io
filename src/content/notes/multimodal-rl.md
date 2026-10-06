@@ -57,7 +57,7 @@ VLM 有很强的语言先验。很多视觉问答题不看图也能猜个大概�
 
 （教学构造。）总分涨了 8 个点，但空白图准确率涨了 12 个点，视觉依赖反而从 0.14 降到 0.10。**这次 RL 主要提升的是不看图答题的能力**。这种结果在原图准确率上完全看不出来。
 
-**为什么会这样。** 训练数据里很多题的答案能从题干推出（数学题的题干常常已经给出了全部数值，图只是示意）；而且长推理链会让模型越来越依赖自己生成的文字，越写越远离图像。有研究观察到思维链越长、对视觉信息的注意越弱的现象，“想得越多，看得越少”。
+**为什么会这样。** 训练数据里很多题的答案能从题干推出：MathVerse（arXiv 2403.14624）指出现有视觉数学基准的题干里塞了过多本应从图中读取的信息，模型可能不看图就推出答案；它因此把 2612 道题各改写成六个版本，逐步把信息从文字移到图里，共 15K 个样本，用来测模型到底有没有读图。另一个原因是长推理链会让模型越来越依赖自己生成的文字：*More Thinking, Less Seeing?*（arXiv 2505.21523）的注意力分析显示，推理链越长，对视觉输入的关注越少，幻觉随之增加；它提出的 RH-AUC 指标衡量感知准确率随推理长度的变化。
 
 **怎样让 RL 真正提升视觉能力。** ① **筛数据**：去掉不看图也能答对的题（用空白图测一遍初始模型），保留必须依赖视觉信息的题；② **对比奖励**：同一题同时用原图和扰动图（遮挡关键区域）生成，奖励只给依赖原图才能答对的情况；③ **感知任务混训**：加入定位、计数这类答案只能从图中得到的任务；④ **每次评测都报告视觉依赖度**，不只报告总分。
 
@@ -114,4 +114,4 @@ $$
 
 不看资料列出六类视觉任务的奖励计算方式和注意点；说出 Visual-RFT、VLM-R1、MM-Eureka、Vision-R1 各自的侧重；手算 $G=8$ 时有无前缀共享的 rollout token 数和训练前向 token 数，解释为什么多数工作冻结视觉塔；手算四选一随机猜时一组 8 条全错、全对、有对有错的概率，并解释为什么这是噪声；对给定的 RL 前后原图与空白图准确率计算视觉依赖度并下结论；说出让 RL 真正提升视觉能力的四种方法；列出多模态 RL 与文本 RL 在训练细节上的五点差别；写出 mDPO 的图像条件偏好项并解释奖励锚点的作用；最后设计一个包含数据过滤、对照组和视觉依赖度评测的小实验。
 
-**参考。** [DeepSeek-R1](https://arxiv.org/abs/2501.12948)；[DeepSeekMath / GRPO](https://arxiv.org/abs/2402.03300)；[Visual-RFT](https://arxiv.org/abs/2503.01785)；[VLM-R1](https://arxiv.org/abs/2504.07615)；[MM-Eureka](https://arxiv.org/abs/2503.07365)；[Vision-R1](https://arxiv.org/abs/2503.06749)；[RLHF-V](https://arxiv.org/abs/2312.00849)；[RLAIF-V](https://arxiv.org/abs/2405.17220)；[mDPO](https://arxiv.org/abs/2406.11839)；[DPO](https://arxiv.org/abs/2305.18290)；[MathVista](https://arxiv.org/abs/2310.02255)；[MathVerse](https://arxiv.org/abs/2403.14624)；[MMMU](https://arxiv.org/abs/2311.16502)。
+**参考。** [DeepSeek-R1](https://arxiv.org/abs/2501.12948)；[DeepSeekMath / GRPO](https://arxiv.org/abs/2402.03300)；[Visual-RFT](https://arxiv.org/abs/2503.01785)；[VLM-R1](https://arxiv.org/abs/2504.07615)；[MM-Eureka](https://arxiv.org/abs/2503.07365)；[Vision-R1](https://arxiv.org/abs/2503.06749)；[RLHF-V](https://arxiv.org/abs/2312.00849)；[RLAIF-V](https://arxiv.org/abs/2405.17220)；[mDPO](https://arxiv.org/abs/2406.11839)；[DPO](https://arxiv.org/abs/2305.18290)；[MathVista](https://arxiv.org/abs/2310.02255)；[MathVerse](https://arxiv.org/abs/2403.14624)；[MMMU](https://arxiv.org/abs/2311.16502)；[More Thinking, Less Seeing?](https://arxiv.org/abs/2505.21523)。

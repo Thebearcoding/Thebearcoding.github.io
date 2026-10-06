@@ -8,7 +8,7 @@ draft: false
 
 做过 CLIP 和跨模态检索的人进推荐团队，最常接到的活是两类：**给物品做多模态表征**（冷启动、长尾、长序列检索），以及**做 item-to-item（I2I）召回**。两类工作都要面对同一个落差：内容相似不等于用户觉得相似。本篇讲怎样把“内容向量”变成“推荐好用的向量”。
 
-阅读入口：[全覆盖教程](/notes/recsys-llm4rec-guide/)。CLIP、SigLIP、难负例与假负例的基础见 [CLIP 与多模态检索](/notes/vision-video-algorithms/)。
+阅读入口：[全覆盖教程](/notes/recsys-llm4rec-guide/)。2025–2026 年各家已上线系统（抖音 SAIL-Embedding、DME、LEMUR，快手 OneRec，小红书 UniNote、IDProxy 等）的细节和线上数字见 [工业界多模态表征](/notes/multimodal-industrial-representation/)。CLIP、SigLIP、难负例与假负例的基础见 [CLIP 与多模态检索](/notes/vision-video-algorithms/)。
 
 ## 1. 多模态信号进推荐的三种方式
 

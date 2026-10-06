@@ -11,7 +11,7 @@ export const SERIES: Series[] = [
   {
     key: 'multimodal',
     name: '多模态算法',
-    desc: '从数学与张量预备讲到 Transformer、视觉进入语言模型、视觉定位与视频理解、对比学习与多模态 embedding、SFT/DPO、PPO/GRPO 与多模态 RL、幻觉评测与训练排障,配十四天练习册和复习问答。',
+    desc: '从数学与张量预备讲到 Transformer、视觉进入语言模型、视觉定位与视频理解、对比学习与多模态 embedding、工业界多模态表征、SFT/DPO、PPO/GRPO 与多模态 RL、幻觉评测与训练排障,配十四天练习册和复习问答。',
     notes: [
       'multimodal-interview-guide',
       'multimodal-math-prerequisites',
@@ -22,6 +22,7 @@ export const SERIES: Series[] = [
       'multimodal-video-understanding',
       'contrastive-learning',
       'multimodal-embedding-retrieval',
+      'multimodal-industrial-representation',
       'multimodal-sft-lora-dpo',
       'policy-gradient-ppo-grpo',
       'multimodal-rl',
@@ -29,6 +30,7 @@ export const SERIES: Series[] = [
       'training-memory-debugging',
       'multimodal-models-paper-reading',
       'multimodal-interview-questions',
+      'multimodal-representation-interview',
       'multimodal-fourteen-day-workbook',
       'multimodal-sources-coverage',
     ],

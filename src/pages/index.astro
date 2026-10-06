@@ -2,10 +2,19 @@
 import Base from '../layouts/Base.astro';
 import PillIcon from '../components/PillIcon.astro';
 import { getCollection } from 'astro:content';
+import { SERIES, seriesOf } from '../data/series';
 
 const notes = (await getCollection('notes', ({ data }) => !data.draft))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-  .slice(0, 4);
+  .slice(0, 5);
+const all = await getCollection('notes', ({ data }) => !data.draft);
+const byId = new Map(all.map((n) => [n.id, n]));
+const series = SERIES.map((s) => ({
+  ...s,
+  count: s.notes.filter((id) => byId.has(id)).length,
+  hub: byId.get(s.notes[0]),
+  picks: s.notes.slice(1, 5).map((id) => byId.get(id)).filter((n) => n !== undefined),
+}));
 const fmt = (d: Date) => d.toISOString().slice(0, 10);
 ---
 <Base title="Xinran Xiong · athebear" bodyClass="home-page">
@@ -57,61 +66,80 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
 
   <section class="section">
     <div class="section-head">
-      <h2>最新笔记</h2>
-      <a class="more" href="/notes/">全部笔记 →</a>
+      <h2>专题</h2>
+      <a class="more" href="/notes/">全部 {all.length} 篇笔记 →</a>
     </div>
-    <div class="note-cards">
-      {notes.map((n) => (
-        <a class="note-card" href={`/notes/${n.id}/`}>
-          <time datetime={fmt(n.data.date)}>{fmt(n.data.date)}</time>
-          <h3>{n.data.title}</h3>
-          {n.data.summary && <p>{n.data.summary}</p>}
-          {n.data.tags.length > 0 && (
-            <div class="tag-row">{n.data.tags.slice(0, 3).map((t) => <span class="tag">{t}</span>)}</div>
-          )}
-        </a>
+    <div class="topic-grid">
+      {series.map((s) => (
+        <article class="topic-card">
+          <div class="topic-top">
+            <h3><a href={`/notes/${s.notes[0]}/`}>{s.name}</a></h3>
+            <span class="topic-count">{s.count} 篇</span>
+          </div>
+          <p class="topic-desc">{s.desc}</p>
+          <ol class="topic-picks">
+            {s.picks.map((n) => <li><a href={`/notes/${n.id}/`}>{n.data.title.split(/[:：]/)[0]}</a></li>)}
+          </ol>
+          <div class="topic-actions">
+            <a class="topic-start" href={`/notes/${s.notes[0]}/`}>从总览开始 →</a>
+            <a class="topic-all" href={`/notes/#s-${s.key}`}>目录</a>
+          </div>
+        </article>
       ))}
     </div>
   </section>
 
   <section class="section">
     <div class="section-head">
-      <h2>互动课程</h2>
+      <h2>课程与工具</h2>
       <a class="more" href="/teaching/">全部教学与学习 →</a>
     </div>
     <div class="card-grid card-grid-3">
       <a class="t-card" href="https://athebear.me/minimind-v-course/course/" target="_blank" rel="noopener">
-        <span class="t-status live">在线 · 12 课</span>
+        <span class="t-status live">互动课程 · 12 课</span>
         <h3>MiniMind-V:从零看懂并训练一个视觉语言模型</h3>
-        <p>以 65M 参数的开源 VLM 为骨架,原子粒度拆解结构、训练与推理。每课 4~5 个交互动画 + 真实源码逐行讲解 + 零依赖练习。</p>
+        <p>以 65M 参数的开源 VLM 为骨架,拆解结构、训练与推理。每课 4~5 个交互动画、真实源码逐行讲解和零依赖练习。</p>
         <span class="t-go">开始学习 →</span>
       </a>
       <a class="t-card" href="https://athebear.me/defect-detection-course/" target="_blank" rel="noopener">
-        <span class="t-status live">在线 · 13 课</span>
+        <span class="t-status live">互动课程 · 13 课</span>
         <h3>缺陷检测:从深度学习基础到主流方法全景</h3>
         <p>工业缺陷检测中文交互课程,30+ 交互演示,从卷积讲到主流检测范式,配零依赖 Python 练习。</p>
         <span class="t-go">开始学习 →</span>
       </a>
-      <a class="t-card" href="/notes/recsys-llm4rec-guide/">
-        <span class="t-status live">教程 · 14 篇</span>
-        <h3>推荐与 LLM4Rec 全覆盖教程</h3>
-        <p>写给多模态背景、没系统学过推荐的人:从召回、排序、评估讲到语义 ID、生成式推荐、搜索与系统设计,每篇附手算例子和闭卷验收。</p>
-        <span class="t-go">开始阅读 →</span>
+      <a class="t-card" href="https://paper.athebear.me" target="_blank" rel="noopener">
+        <span class="t-status live">在线工具</span>
+        <h3>Paper Insight:论文初筛工具</h3>
+        <p>按会议批量浏览论文,自动回答四个初筛问题:代码开源吗、什么任务、什么指标、为何优于基线;支持 arXiv 直投与全文对话。</p>
+        <span class="t-go">开始筛论文 →</span>
       </a>
+    </div>
+    <div class="repo-strip">
+      <span class="repo-label">代码与学习仓库</span>
+      <a href="https://github.com/Thebearcoding/minimind-v-course" target="_blank" rel="noopener">MiniMind-V 从零复现 ↗</a>
+      <a href="https://github.com/Thebearcoding/assignment1-basics" target="_blank" rel="noopener">CS336 作业 ↗</a>
+      <a href="https://github.com/Thebearcoding/cs336-mllm-learning" target="_blank" rel="noopener">CS336 多模态笔记 ↗</a>
+      <a href="https://github.com/Thebearcoding/ARIS-in-AI-Offer" target="_blank" rel="noopener">AI 面试速查 ↗</a>
     </div>
   </section>
 
   <section class="section">
-    <div class="section-head"><h2>研究工具</h2></div>
-    <a class="t-card wide" href="https://paper.athebear.me" target="_blank" rel="noopener">
-      <div class="wide-main">
-        <span class="t-status live">在线服务</span>
-        <h3>Paper Insight:AI 帮你快速初筛,把好论文留给自己精读</h3>
-        <p>我做的顶会论文筛选工具:按会议批量浏览 ICLR / CVPR / NeurIPS / ICML / CHI,自动回答四个初筛问题(代码开源?什么任务?什么指标?为何优于 baseline?),支持 arXiv 直投、HF Daily 与全文对话。初筛交给它,精读留给自己——精读后的洞见会沉淀到这里的笔记。</p>
-        <span class="t-go">开始筛论文 →</span>
-      </div>
-      <div class="wide-art" aria-hidden="true">📄</div>
-    </a>
+    <div class="section-head">
+      <h2>最近更新</h2>
+      <a class="more" href="/rss.xml">RSS 订阅 →</a>
+    </div>
+    <ul class="recent-list">
+      {notes.map((n) => {
+        const s = seriesOf(n.id);
+        return (
+          <li>
+            <time datetime={fmt(n.data.date)}>{fmt(n.data.date)}</time>
+            <a href={`/notes/${n.id}/`}>{n.data.title}</a>
+            {s && <span class="recent-series">{s.name}</span>}
+          </li>
+        );
+      })}
+    </ul>
   </section>
 
 </div>

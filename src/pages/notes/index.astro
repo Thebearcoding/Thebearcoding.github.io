@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import { getCollection } from 'astro:content';
+import { SERIES } from '../../data/series';
 
 const notes = (await getCollection('notes', ({ data }) => !data.draft))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
@@ -20,14 +21,23 @@ notes.forEach((n) => {
   yearMap.get(y)!.push(n);
 });
 const yearGroups = [...yearMap.entries()].sort((a, b) => b[0] - a[0]);
+
+// 按专题分组(阅读顺序),不属于任何专题的归入“独立笔记”
+const byId = new Map(notes.map((n) => [n.id, n]));
+const inSeries = new Set(SERIES.flatMap((s) => s.notes));
+const seriesGroups = [
+  ...SERIES.map((s) => ({ key: s.key, name: s.name, desc: s.desc, hub: s.notes[0], items: s.notes.map((id) => byId.get(id)).filter((n) => n !== undefined) })),
+  { key: 'misc', name: '独立笔记', desc: '不属于专题的想法、复盘与单篇笔记。', hub: undefined, items: notes.filter((n) => !inSeries.has(n.id)) },
+].filter((g) => g.items.length > 0);
+const topTags = tags.slice(0, 16);
 ---
-<Base title="笔记 · athebear" description="研究笔记、学习记录与想法,按标签与年份归档。">
+<Base title="笔记 · athebear" description="研究笔记与教程,按专题和阅读顺序组织,也可按时间浏览。">
 <div class="container">
   <header class="prose-head notes-head">
     <div>
       <h1>笔记</h1>
       <div class="meta">
-        <span>想法、实验记录、读文献的碎片——不追求完整,追求诚实。</span>
+        <span>专题教程按阅读顺序排列,单篇想法与复盘放在最后;也可以按时间浏览。</span>
         <a href="/rss.xml">RSS 订阅</a>
       </div>
     </div>
@@ -37,17 +47,55 @@ const yearGroups = [...yearMap.entries()].sort((a, b) => b[0] - a[0]);
     </div>
   </header>
 
+  <div class="view-switch" role="tablist" aria-label="浏览方式">
+    <button type="button" role="tab" class="view-btn active" data-view="series" aria-selected="true">按专题</button>
+    <button type="button" role="tab" class="view-btn" data-view="time" aria-selected="false">按时间</button>
+    <nav class="series-jump" aria-label="跳到专题">
+      {seriesGroups.map((g) => <a href={`#s-${g.key}`}>{g.name} <i>{g.items.length}</i></a>)}
+    </nav>
+  </div>
+
   <div class="filter-bar" role="group" aria-label="按标签筛选">
     <button class="filter-chip active" data-tag="">全部 <i>{notes.length}</i></button>
-    {tags.map(([t, c]) => (
+    {topTags.map(([t, c]) => (
       <button class="filter-chip" data-tag={t}>{t} <i>{c}</i></button>
     ))}
   </div>
 
   <p class="filter-status" id="filter-status" hidden></p>
 
+  <div class="view" data-view="series">
+    {seriesGroups.map((g) => (
+      <section class="series-group note-group" id={`s-${g.key}`}>
+        <header class="series-head">
+          <div>
+            <h2>{g.name} <i>{g.items.length} 篇</i></h2>
+            <p>{g.desc}</p>
+          </div>
+          {g.hub && <a class="series-start" href={`/notes/${g.hub}/`}>从总览开始 →</a>}
+        </header>
+        <ol class="note-list series-list">
+          {g.items.map((n, i) => (
+            <li
+              class="note-item series-item"
+              data-tags={n.data.tags.join('|')}
+              data-text={`${n.data.title} ${n.data.summary ?? ''} ${n.data.tags.join(' ')}`.toLowerCase()}
+            >
+              <span class="series-no">{g.hub ? String(i + 1).padStart(2, '0') : md(n.data.date)}</span>
+              <div>
+                <a class="note-title" href={`/notes/${n.id}/`}>{n.data.title}</a>
+                {n.data.summary && <p class="note-summary">{n.data.summary}</p>}
+              </div>
+            </li>
+          ))}
+        </ol>
+      </section>
+    ))}
+  </div>
+
+  <div class="view" data-view="time" hidden>
   {yearGroups.map(([year, group]) => (
-    <section class="year-group" data-year={year}>
+    <section class="year-group note-group" data-year={year}>
       <div class="year-mark" aria-hidden="true">{year}</div>
       <div class="note-list">
         {group.map((n) => (
@@ -69,6 +117,7 @@ const yearGroups = [...yearMap.entries()].sort((a, b) => b[0] - a[0]);
       </div>
     </section>
   ))}
+  </div>
 
   <div class="empty-state" id="empty-state" hidden>
     <span class="es-icon">🗂️</span>
@@ -78,8 +127,11 @@ const yearGroups = [...yearMap.entries()].sort((a, b) => b[0] - a[0]);
 
 <script>
   const chips = [...document.querySelectorAll('.filter-chip')] as HTMLButtonElement[];
-  const items = [...document.querySelectorAll('.note-item')] as HTMLElement[];
-  const groups = [...document.querySelectorAll('.year-group')] as HTMLElement[];
+  const views = [...document.querySelectorAll('.view')] as HTMLElement[];
+  const viewBtns = [...document.querySelectorAll('.view-btn')] as HTMLButtonElement[];
+  const jump = document.querySelector('.series-jump') as HTMLElement;
+  let view = 'series';
+  const activeView = () => views.find((v) => v.dataset.view === view)!;
   const search = document.getElementById('note-search') as HTMLInputElement;
   const status = document.getElementById('filter-status') as HTMLElement;
   const empty = document.getElementById('empty-state') as HTMLElement;
@@ -88,6 +140,7 @@ const yearGroups = [...yearMap.entries()].sort((a, b) => b[0] - a[0]);
   function apply() {
     const q = search.value.trim().toLowerCase();
     let shown = 0;
+    const items = [...activeView().querySelectorAll('.note-item')] as HTMLElement[];
     for (const it of items) {
       const tagOk = !activeTag || (it.dataset.tags || '').split('|').includes(activeTag);
       const textOk = !q || (it.dataset.text || '').includes(q);
@@ -95,7 +148,7 @@ const yearGroups = [...yearMap.entries()].sort((a, b) => b[0] - a[0]);
       it.hidden = !show;
       if (show) shown++;
     }
-    for (const g of groups) {
+    for (const g of [...activeView().querySelectorAll('.note-group')] as HTMLElement[]) {
       g.hidden = ![...g.querySelectorAll('.note-item')].some((it) => !(it as HTMLElement).hidden);
     }
     const filtering = activeTag || q;
@@ -112,6 +165,15 @@ const yearGroups = [...yearMap.entries()].sort((a, b) => b[0] - a[0]);
     if (pushHash) history.replaceState(null, '', tag ? `#tag=${encodeURIComponent(tag)}` : location.pathname);
     apply();
   }
+
+  function setView(v: string) {
+    view = v;
+    views.forEach((el) => (el.hidden = el.dataset.view !== v));
+    viewBtns.forEach((b) => { const on = b.dataset.view === v; b.classList.toggle('active', on); b.setAttribute('aria-selected', String(on)); });
+    jump.hidden = v !== 'series';
+    apply();
+  }
+  viewBtns.forEach((b) => b.addEventListener('click', () => setView(b.dataset.view || 'series')));
 
   chips.forEach((c) => c.addEventListener('click', () => setTag(c.dataset.tag || '')));
   document.querySelectorAll('.tag-btn').forEach((b) =>

@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import { getCollection, render } from 'astro:content';
+import { seriesOf } from '../../data/series';
 
 export async function getStaticPaths() {
   const notes = await getCollection('notes', ({ data }) => !data.draft);
@@ -11,16 +12,13 @@ const { note, all } = Astro.props;
 const { Content, headings } = await render(note);
 const fmt = (d: Date) => d.toISOString().slice(0, 10);
 
-// 同系列:以文件名第一个连字符前的前缀分组
-const seriesOf = (id: string) => id.split('-')[0];
-const series = all
-  .filter((n) => seriesOf(n.id) === seriesOf(note.id))
-  .sort((a, b) => a.id.localeCompare(b.id));
-const seriesName: Record<string, string> = {
-  recsys: '推荐系统与 LLM4Rec',
-  wangshusen: '王树森推荐系统',
-  multimodal: '多模态算法',
-};
+// 专题:按 src/data/series.ts 的阅读顺序
+const ser = seriesOf(note.id);
+const byId = new Map(all.map((n) => [n.id, n]));
+const series = ser ? ser.notes.map((id) => byId.get(id)).filter((n) => n !== undefined) : [];
+const idx = series.findIndex((n) => n.id === note.id);
+const prev = idx > 0 ? series[idx - 1] : undefined;
+const next = idx >= 0 && idx < series.length - 1 ? series[idx + 1] : undefined;
 const toc = headings.filter((h) => h.depth === 2);
 ---
 <Base title={`${note.data.title} · athebear`} description={note.data.summary} math={true} bodyClass="reading">
@@ -51,10 +49,17 @@ const toc = headings.filter((h) => h.depth === 2);
     </article>
   </div>
 
-  {series.length > 1 && (
-    <nav class="series-nav" aria-label="同系列笔记">
-      <div class="series-title">同系列 · {seriesName[seriesOf(note.id)] ?? seriesOf(note.id)}</div>
-      <ul>
+  {(prev || next) && (
+    <nav class="pager" aria-label="上一篇与下一篇">
+      {prev ? <a class="pager-link" href={`/notes/${prev.id}/`}><span>← 上一篇</span>{prev.data.title}</a> : <span />}
+      {next ? <a class="pager-link next" href={`/notes/${next.id}/`}><span>下一篇 →</span>{next.data.title}</a> : <span />}
+    </nav>
+  )}
+
+  {ser && series.length > 1 && (
+    <nav class="series-nav" aria-label="专题目录">
+      <div class="series-title">专题 · {ser.name} · 第 {idx + 1} / {series.length} 篇</div>
+      <ol>
         {series.map((n) => (
           <li>
             {n.id === note.id
@@ -62,7 +67,7 @@ const toc = headings.filter((h) => h.depth === 2);
               : <a href={`/notes/${n.id}/`}>{n.data.title}</a>}
           </li>
         ))}
-      </ul>
+      </ol>
     </nav>
   )}
 

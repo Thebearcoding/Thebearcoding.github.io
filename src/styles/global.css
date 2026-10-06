@@ -518,3 +518,40 @@ body.reading::after {
 
 body.reading .site-nav .nav-inner { max-width: 1160px; }
 body.reading .site-footer .footer-inner { max-width: 1160px; }
+
+/* ---- 主页排版 ---- */
+.hero-chips { display: flex; gap: 8px; flex-wrap: wrap; margin: -8px 0 24px; }
+.hero-chips .chip {
+  padding: 5px 13px; font-size: 12.5px;
+  background: rgba(245, 243, 236, 0.78); backdrop-filter: blur(4px);
+}
+.home-page .section { padding: 40px 0; }
+
+.note-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.note-card {
+  display: flex; flex-direction: column; gap: 6px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 20px 22px; color: var(--text);
+  box-shadow: 0 2px 12px rgba(20, 20, 19, 0.04);
+  transition: all 0.25s var(--ease);
+}
+.note-card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(20, 20, 19, 0.08); text-decoration: none; }
+.note-card time { font-family: var(--font-mono); font-size: 12px; color: var(--text-dim); }
+.note-card h3 { font-family: var(--font-heading); font-weight: 500; font-size: 16px; line-height: 1.5; }
+.note-card:hover h3 { color: var(--accent); }
+.note-card p {
+  color: var(--text-dim); font-size: 14px; line-height: 1.7;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.note-card .tag-row { margin-top: auto; padding-top: 6px; }
+@media (max-width: 680px) { .note-cards { grid-template-columns: 1fr; } }
+
+.card-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.card-grid-3 .t-card { display: flex; flex-direction: column; }
+.card-grid-3 .t-card .t-status { align-self: flex-start; }
+.card-grid-3 .t-card .t-go { margin-top: auto; padding-top: 14px; }
+@media (max-width: 880px) { .card-grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .card-grid-3 { grid-template-columns: 1fr; } }
+.hero-chips .chip { padding: 4px 11px; font-size: 12px; }
+.home-page .container { padding-bottom: 48px; }
+.home-page .hero-copy { width: min(100%, 600px); }

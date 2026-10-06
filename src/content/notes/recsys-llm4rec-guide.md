@@ -2,7 +2,7 @@
 title: 推荐与 LLM4Rec 全覆盖教程：从一条请求到生成式推荐
 date: '2026-10-05'
 tags: [推荐系统, LLM4Rec, 生成式推荐, 学习路线, 面试]
-summary: 给多模态背景、没系统学过推荐的人：十五篇笔记串起链路、评估、长序列、语义 ID、LLM4Rec、多模态 I2I 与广告，附覆盖清单和逐日看板。
+summary: 给多模态背景、没系统学过推荐的人：二十篇笔记串起链路、评估、长序列、多任务与多场景、图推荐、搜索、语义 ID、LLM4Rec、多模态 I2I、广告、系统设计与 Agent RL，附覆盖清单和逐日看板。
 draft: false
 ---
 
@@ -30,7 +30,7 @@ draft: false
 
 读图的方法：从左往右是“同一个问题越来越大”。经典链路解决的是全库太大、只能分段计算；序列建模解决的是用户历史越来越长；可扩展排序和生成式推荐解决的是模型想变大、但 embedding 表和特征交叉不好扩展。底部三块贯穿所有层：评估决定你信不信一个改动，多模态表征决定新物品和长尾物品有没有信号，广告业务决定分数最后怎样变成钱。
 
-## 3. 十五篇怎样连起来读
+## 3. 二十篇怎样连起来读
 
 | 顺序 | 笔记 | 读完应当能回答 | 看板对应 |
 |---|---|---|---|
@@ -49,8 +49,13 @@ draft: false
 | 12 | [广告机制与业务直觉](/notes/recsys-ads-business/) | GSP 为什么不鼓励如实出价？oCPM 依赖哪两个预估？ | W4 |
 | 13 | [面试题库：九十问](/notes/recsys-interview-bank/) | 能否在两分钟内讲清一个机制并给出验证方案？ | W4 起反复做 |
 | 14 | [CLIP 与多模态检索](/notes/vision-video-algorithms/) | 难负例和假负例在图文匹配与推荐里有何异同？ | 随时回看 |
+| 15 | [多任务与多场景：PLE、STAR](/notes/recsys-multitask-scenario/) | 怎样从实验里看出跷跷板？CGC 比 MMoE 少了哪些连接？ | W3 |
+| 16 | [图推荐：从 GCN 到 LightGCN](/notes/recsys-graph/) | LightGCN 为什么删掉特征变换和非线性反而更好？ | W3 |
+| 17 | [搜索算法入门](/notes/recsys-search/) | 搜索和推荐在输入、目标、评估上差在哪？BM25 的 $k_1$、$b$ 各管什么？ | W4 |
+| 18 | [推荐系统设计题](/notes/recsys-system-design/) | 能否从 DAU 推到峰值 QPS、精排算力和延迟预算？ | W4 起反复练 |
+| 19 | [Agent RL 预备：Search-R1 与 verl](/notes/recsys-agent-rl/) | 为什么检索返回的 token 不计入损失？检索器怎样作为环境接入？ | 面试期 |
 
-第 0–5 篇是推荐的地基，第 6 篇是判断力，第 7–12 篇是你这一届面试最常被追问的新内容。第 13 篇不是最后才做，从 W1 周末开始每周抽一节。
+第 0–5 篇是推荐的地基，第 6 篇是判断力，第 7–12 篇是你这一届面试最常被追问的新内容。第 13 篇不是最后才做，从 W1 周末开始每周抽一节。第 15–16 篇补排序与召回的进阶结构，第 17 篇给投搜索岗的人，第 18 篇是开放题的答题框架，第 19 篇是下一个项目方向的预备。
 
 ## 4. 覆盖清单
 
@@ -74,6 +79,9 @@ draft: false
 - [ ] FM、DCN V2、SENet 的交叉方式与 shape → [排序](/notes/wangshusen-recommender-ranking/)
 - [ ] DIN 与 SIM → [排序](/notes/wangshusen-recommender-ranking/)
 - [ ] MMR 与 DPP 的手算 → [重排](/notes/wangshusen-recommender-reranking/)
+- [ ] 跷跷板与负迁移；CGC、PLE 的门控与专家划分；多任务 loss 的样本空间与加权 → [多任务](/notes/recsys-multitask-scenario/)
+- [ ] 多场景建模：STAR 的星形 FCN 与分区归一化 → [多任务](/notes/recsys-multitask-scenario/)
+- [ ] 系统设计题：约束澄清、指标体系、容量与延迟估算 → [设计题](/notes/recsys-system-design/)
 - [ ] 冷启动的召回通道与流量扶持；实验干扰 → [冷启动](/notes/wangshusen-recommender-coldstart/)
 
 **必会：偏差**
@@ -81,6 +89,14 @@ draft: false
 - [ ] 曝光偏差、位置偏差、流行度偏差分别从哪来 → [评估](/notes/recsys-eval-bias/)
 - [ ] CVR 的样本选择偏差；ESMM 与 IPW 两种做法 → [评估](/notes/recsys-eval-bias/)
 - [ ] 负采样后的概率校准公式 → [评估](/notes/recsys-eval-bias/)
+
+**常问：搜索与图**
+
+- [ ] 搜索与推荐的区别；query 理解各步的输入输出 → [搜索](/notes/recsys-search/)
+- [ ] BM25 公式与手算；双塔、cross-encoder、ColBERT 的形状与成本 → [搜索](/notes/recsys-search/)
+- [ ] 相关性与个性化的融合；分级 NDCG 与线上指标的陷阱 → [搜索](/notes/recsys-search/)
+- [ ] GCN 的对称归一化；NGCF 的消息构造；LightGCN 的传播与层组合 → [图推荐](/notes/recsys-graph/)
+- [ ] 过平滑；PinSage 的随机游走邻居与难负例 → [图推荐](/notes/recsys-graph/)
 
 **常问：序列与长序列**
 
@@ -124,6 +140,7 @@ draft: false
 - [ ] GSP、VCG、保留价；为什么出价要校准 → [广告](/notes/recsys-ads-business/)
 - [ ] 用 CTR 训练文案生成模型时的奖励设计与 reward hacking → [LLM4Rec](/notes/recsys-llm4rec-paradigms/)
 - [ ] 训练显存估算与 LoRA、DDP、all-gather 负样本 → [训练显存](/notes/training-memory-debugging/)
+- [ ] Search-R1 的多轮 rollout、检索 token 掩码与 EM 奖励；verl 的角色划分与多轮工具配置 → [Agent RL](/notes/recsys-agent-rl/)
 
 ## 5. 你的背景怎样接上推荐
 

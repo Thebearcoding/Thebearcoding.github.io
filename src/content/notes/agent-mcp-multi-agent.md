@@ -87,7 +87,7 @@ MCP 让接入工具变得极其容易，也让风险变得容易扩散：
 
 ## 7. 常见结构
 
-**Orchestrator-worker（主从）**：主 Agent 分解任务、派发给多个子 Agent 并行执行、汇总结果。Anthropic 的多智能体调研系统就是这种结构：主 Agent 规划调研方向，派出多个子 Agent 各自搜索，再综合成报告。它在官方博客中报告，在内部调研评测上多智能体比单 Agent 显著更好，但 token 用量也高得多（大约是普通对话的 15 倍），所以只适合价值足够高的任务。
+**Orchestrator-worker（主从）**：主 Agent 分解任务、派发给多个子 Agent 并行执行、汇总结果。Anthropic 的多智能体调研系统就是这种结构：主 Agent 规划调研方向，派出多个子 Agent 各自搜索，再综合成报告。官方博客（*How we built our multi-agent research system*）报告：以 Claude Opus 4 为主 Agent、Claude Sonnet 4 为子 Agent 的多智能体系统，在内部调研评测上比单个 Claude Opus 4 高 90.2%；代价是 token 用量，按他们的数据，单 Agent 大约是普通对话的 4 倍，多智能体大约是 15 倍。所以它只适合价值足够高的任务。
 
 **流水线**：任务按固定阶段顺序传递（检索 → 抽取 → 写作 → 校对），每个阶段一个 Agent。结构清晰，但前一阶段的错误会传到后面，而且无法并行。
 

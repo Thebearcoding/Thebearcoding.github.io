@@ -21,7 +21,7 @@ series: multimodal-interview
 
 ## 1. 从哪里开始，不要按文件编号硬读
 
-文件编号保留了原有 Obsidian 链接；实际学习顺序由依赖决定。主线是数学→Transformer→视觉与视频→具体模型→监督训练→实验与面试；PPO/GRPO 是后训练补充线。
+文件编号保留了原有 Obsidian 链接；实际学习顺序由依赖决定。主线是数学→Transformer→视觉与视频→具体模型→监督训练→实验与面试；PPO/GRPO 是后训练补充线。标“扩展”的五篇是后来补充的专题：视觉定位、视频理解和多模态 embedding 接在视觉一章之后，多模态 RL 和幻觉评测接在 PPO/GRPO 之后；对应的 Agent 方向见 [Agent 总览](/notes/agent-guide/)。
 
 | 阅读入口 | 读完应该能够做到 | 对应练习 |
 |---|---|---|
@@ -29,8 +29,13 @@ series: multimodal-interview
 | [从一个token理解Transformer与多模态入口](/notes/transformer-attention-rope-gqa/) | 手算注意力，推 RoPE 角差，说明 GQA、RMSNorm、SwiGLU 改了什么 | 第 2–3 天 |
 | [Prefill、Decode与视频token的计算代价](/notes/prefill-decode-video-tokens/) | 画缓存 mask，算 KV 显存，解释首 token 与后续生成瓶颈 | 第 4 天 |
 | [为什么图像和视频能够进入语言模型](/notes/vision-video-algorithms/) | 从 patch 推到 CLIP/连接器，再解释采帧、时间、数据和评测 | 第 5–6 天 |
+| [视觉定位：把一句话对应到图中的一个框](/notes/multimodal-grounding/) | 换算预处理前后的坐标，手算 IoU/GIoU，解释 IoU 奖励的 RL | 扩展 |
+| [视频理解：token 预算、时间编码、时间定位与长视频](/notes/multimodal-video-understanding/) | 算视频 token 账与漏帧概率，讲清绝对时间编码，设计打乱帧诊断 | 扩展 |
+| [多模态 embedding：从 CLIP 双塔到 VLM2Vec 与 MMEB](/notes/multimodal-embedding-retrieval/) | 手算 InfoNCE 与温度，讲清 GradCache，读懂 MMEB 的 IND/OOD | 扩展 |
 | [SFT与DPO：训练信号从哪里来](/notes/multimodal-sft-lora-dpo/) | 对齐 labels，推 CE/LoRA 梯度和 DPO，识别监督与事实的错位 | 第 7–8 天 |
 | [从RL基础推到PPO与GRPO](/notes/policy-gradient-ppo-grpo/) | 从回报推到 PG、GAE、PPO/GRPO，区分估计器、目标与实现 | 第 9–11 天 |
+| [多模态强化学习：可验证奖励、视觉依赖与多模态 DPO](/notes/multimodal-rl/) | 用原图与空白图测视觉依赖度，解释选择题奖励噪声与 mDPO | 扩展 |
+| [多模态幻觉：成因、CHAIR 与 POPE 怎样算、怎样缓解](/notes/multimodal-hallucination-eval/) | 手算 CHAIR、POPE 与 VCD，按五步诊断幻觉成因 | 扩展 |
 | [训练显存与实验排障：把机制变成可检查的量](/notes/training-memory-debugging/) | 列显存账单，解释 AdamW、混精和累积，设计逐项排障 | 第 12 天 |
 | [模型差异为什么必须落到具体版本](/notes/multimodal-models-paper-reading/) | 用固定版本比较 Qwen、DeepSeek、Llama，讲清 MLA/多模态位置与消融 | 第 13 天 |
 | [面试问题与项目深挖](/notes/multimodal-interview-questions/) | 从复习问题讲到机制、边界和项目证据，区分假设与结果 | 第 14 天 |

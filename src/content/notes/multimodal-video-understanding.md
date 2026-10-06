@@ -60,7 +60,7 @@ $$
 
 **任务**：给一段视频和一句描述（“男人打开冰箱”），输出事件的开始和结束时间。典型数据集有 Charades-STA、ActivityNet Captions、QVHighlights。
 
-**输出方式**与 [视觉定位](/notes/multimodal-visual-grounding/) 第 2 节一一对应：可以回归连续的时间值，可以用离散的时间 token，也可以直接生成文本 `12.0 - 20.0 seconds`。通用视频 LLM 大多采用最后一种，前提是模型对真实时间有感知（第 4 节）。
+**输出方式**与 [视觉定位](/notes/multimodal-grounding/) 第 2 节一一对应：可以回归连续的时间值，可以用离散的时间 token，也可以直接生成文本 `12.0 - 20.0 seconds`。通用视频 LLM 大多采用最后一种，前提是模型对真实时间有感知（第 4 节）。
 
 **评估**：时间上的 IoU（tIoU）：
 

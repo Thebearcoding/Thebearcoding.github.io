@@ -8,7 +8,7 @@ draft: false
 
 [Agent RL 预备](/notes/recsys-agent-rl/) 讲了 Search-R1 的完整流程：多轮 rollout、检索 token 掩码、EM 奖励、GRPO。跑通之后，训练曲线上会陆续出现一些“奇怪”的现象：回答长度不断变长、熵快速下降后奖励停滞、很多 step 几乎没有学习信号、奖励涨了但评测没涨。这一篇逐个解释这些现象背后的机制和社区给出的修正。PPO、GRPO 的推导见 [从 RL 基础推到 PPO 与 GRPO](/notes/policy-gradient-ppo-grpo/)，本篇假设你已经熟悉组内优势和裁剪目标。
 
-阅读入口：Agent 专题（总览即将上线，可先从 [工具调用](/notes/agent-tool-calling/) 读起）。数值算例为教学构造；论文结论注明出处，以原文为准。
+阅读入口：[Agent 总览](/notes/agent-guide/)。数值算例为教学构造；论文结论注明出处，以原文为准。
 
 ## 1. 从单轮到多轮，问题变在哪
 

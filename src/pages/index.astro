@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import PillIcon from '../components/PillIcon.astro';
 import { getCollection } from 'astro:content';
 import { SERIES, seriesOf } from '../data/series';
+import plan from '../data/prep-plan.json';
 
 const notes = (await getCollection('notes', ({ data }) => !data.draft))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
@@ -16,6 +17,11 @@ const series = SERIES.map((s) => ({
   picks: s.notes.slice(1, 5).map((id) => byId.get(id)).filter((n) => n !== undefined),
 }));
 const fmt = (d: Date) => d.toISOString().slice(0, 10);
+// 看板横幅:只把日期、主题和节点交给客户端,按访问当天显示
+const planLite = {
+  days: plan.days.map((d) => ({ date: d.date, theme: d.theme })),
+  milestones: plan.milestones,
+};
 ---
 <Base title="Xinran Xiong · athebear" bodyClass="home-page">
 <div class="container">
@@ -63,6 +69,32 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       </div>
     </div>
   </header>
+
+  <a class="now-banner" href="/plan/">
+    <span class="now-tag">进行中</span>
+    <span class="now-main">
+      <b>28 届算法实习备战看板</b>
+      <span class="now-today" id="now-today">每天的时间块、任务和教程链接</span>
+    </span>
+    <span class="now-next" id="now-next"></span>
+    <span class="now-go">打开看板 →</span>
+  </a>
+  <script is:inline type="application/json" id="plan-lite" set:html={JSON.stringify(planLite)}></script>
+  <script is:inline>
+    (function () {
+      try {
+        var p = JSON.parse(document.getElementById('plan-lite').textContent);
+        var d = new Date(); var iso = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        var day = p.days.find(function (x) { return x.date === iso; });
+        if (day) document.getElementById('now-today').textContent = '今天 · ' + day.theme;
+        var m = p.milestones.find(function (x) { return x.date >= iso; });
+        if (m) {
+          var n = Math.round((new Date(m.date + 'T00:00:00') - new Date(iso + 'T00:00:00')) / 864e5);
+          document.getElementById('now-next').textContent = (n === 0 ? '今天' : n + ' 天后') + ' · ' + m.name;
+        }
+      } catch (e) {}
+    })();
+  </script>
 
   <section class="section">
     <div class="section-head">

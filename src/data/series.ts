@@ -45,13 +45,14 @@ export const SERIES: Series[] = [
   {
     key: 'multimodal',
     name: '多模态算法',
-    desc: '从数学与张量预备讲到 Transformer、视觉进入语言模型、SFT/DPO、PPO/GRPO 与训练排障,配十四天练习册和复习问答。',
+    desc: '从数学与张量预备讲到 Transformer、视觉进入语言模型、对比学习、SFT/DPO、PPO/GRPO 与训练排障,配十四天练习册和复习问答。',
     notes: [
       'multimodal-interview-guide',
       'multimodal-math-prerequisites',
       'transformer-attention-rope-gqa',
       'prefill-decode-video-tokens',
       'vision-video-algorithms',
+      'contrastive-learning',
       'multimodal-sft-lora-dpo',
       'policy-gradient-ppo-grpo',
       'training-memory-debugging',

@@ -659,3 +659,20 @@ body.reading .site-footer .footer-inner { max-width: 1160px; }
   .recent-list li { grid-template-columns: 1fr; gap: 2px; }
   .recent-series { justify-self: start; }
 }
+
+/* ---- 首页:看板横幅 ---- */
+.now-banner {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  margin: 0 0 8px; padding: 14px 20px;
+  background: var(--ink); color: var(--ink-text); border-radius: var(--radius-lg);
+  font-family: var(--font-heading); font-size: 14px;
+  transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+}
+.now-banner:hover { text-decoration: none; transform: translateY(-2px); box-shadow: 0 10px 28px rgba(20, 20, 19, 0.18); }
+.now-tag { padding: 3px 10px; border-radius: 999px; background: var(--accent); color: #fff; font-size: 11.5px; letter-spacing: 1px; }
+.now-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.now-main b { font-weight: 500; font-size: 15px; color: #fff; }
+.now-today { color: rgba(240, 238, 230, 0.72); font-size: 13px; }
+.now-next { color: #F3C9B9; font-family: var(--font-mono); font-size: 12.5px; }
+.now-go { color: #fff; font-weight: 500; font-size: 13.5px; }
+@media (max-width: 640px) { .now-next { order: 3; width: 100%; } }

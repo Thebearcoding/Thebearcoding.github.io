@@ -21,7 +21,7 @@ series: multimodal-interview
 
 ## 1. 从哪里开始，不要按文件编号硬读
 
-文件编号保留了原有 Obsidian 链接；实际学习顺序由依赖决定。主线是数学→Transformer→视觉与视频→具体模型→监督训练→实验与面试；PPO/GRPO 是后训练补充线。标“扩展”的五篇是后来补充的专题：视觉定位、视频理解和多模态 embedding 接在视觉一章之后，多模态 RL 和幻觉评测接在 PPO/GRPO 之后；对应的 Agent 方向见 [Agent 总览](/notes/agent-guide/)。
+文件编号保留了原有 Obsidian 链接；实际学习顺序由依赖决定。主线是数学→Transformer→视觉与视频→具体模型→监督训练→实验与面试；PPO/GRPO 是后训练补充线。标“扩展”的是后来补充的专题：视觉定位、视频理解、多模态 embedding 和工业界多模态表征接在视觉一章之后，多模态 RL 和幻觉评测接在 PPO/GRPO 之后，表征项目面试题库接在复习问答之后；对应的 Agent 方向见 [Agent 总览](/notes/agent-guide/)。
 
 | 阅读入口 | 读完应该能够做到 | 对应练习 |
 |---|---|---|
@@ -32,6 +32,7 @@ series: multimodal-interview
 | [视觉定位：把一句话对应到图中的一个框](/notes/multimodal-grounding/) | 换算预处理前后的坐标，手算 IoU/GIoU，解释 IoU 奖励的 RL | 扩展 |
 | [视频理解：token 预算、时间编码、时间定位与长视频](/notes/multimodal-video-understanding/) | 算视频 token 账与漏帧概率，讲清绝对时间编码，设计打乱帧诊断 | 扩展 |
 | [多模态 embedding：从 CLIP 双塔到 VLM2Vec 与 MMEB](/notes/multimodal-embedding-retrieval/) | 手算 InfoNCE 与温度，讲清 GradCache，读懂 MMEB 的 IND/OOD | 扩展 |
+| [工业界多模态表征：已上线的系统怎样训练、怎样接入、怎样评测](/notes/multimodal-industrial-representation/) | 说出抖音、快手、小红书等系统的训练信号、接入方式与线上结果，设计行为对齐的表征项目 | 扩展 |
 | [SFT与DPO：训练信号从哪里来](/notes/multimodal-sft-lora-dpo/) | 对齐 labels，推 CE/LoRA 梯度和 DPO，识别监督与事实的错位 | 第 7–8 天 |
 | [从RL基础推到PPO与GRPO](/notes/policy-gradient-ppo-grpo/) | 从回报推到 PG、GAE、PPO/GRPO，区分估计器、目标与实现 | 第 9–11 天 |
 | [多模态强化学习：可验证奖励、视觉依赖与多模态 DPO](/notes/multimodal-rl/) | 用原图与空白图测视觉依赖度，解释选择题奖励噪声与 mDPO | 扩展 |
@@ -39,6 +40,7 @@ series: multimodal-interview
 | [训练显存与实验排障：把机制变成可检查的量](/notes/training-memory-debugging/) | 列显存账单，解释 AdamW、混精和累积，设计逐项排障 | 第 12 天 |
 | [模型差异为什么必须落到具体版本](/notes/multimodal-models-paper-reading/) | 用固定版本比较 Qwen、DeepSeek、Llama，讲清 MLA/多模态位置与消融 | 第 13 天 |
 | [面试问题与项目深挖](/notes/multimodal-interview-questions/) | 从复习问题讲到机制、边界和项目证据，区分假设与结果 | 第 14 天 |
+| [表征项目面试题库：从 VLM embedding 到工业落地](/notes/multimodal-representation-interview/) | 按面试官深挖顺序回答四十道表征项目题，避开泄漏与不公平对比的陷阱 | 扩展 |
 | [十四天练习册：从手算到多模态面试](/notes/multimodal-fourteen-day-workbook/) | 完成 24 道编号练习及项目、模拟面试任务，按错因返工 | 全程使用 |
 | [来源、图像许可与知识点覆盖](/notes/multimodal-sources-coverage/) | 查询知识来源、原图、模型版本和本系列未覆盖范围 | 按需查询 |
 

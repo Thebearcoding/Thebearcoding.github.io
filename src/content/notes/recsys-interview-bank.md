@@ -840,7 +840,7 @@ def allowed_next(trie, prefix):
 
 ## L. 面经补充：2025–2026 年公开面经里的高频问题
 
-检索日期：**2026 年 10 月 5 日**。渠道是牛客网公开帖子；小红书因验证码拦截，本次没有读到正文，所以不在来源里。下面 51 个问题是读完帖子后用自己的话概括的，按主题合并了同类问法，已去掉与上面九十问重复的题。每条只列出能核对到的帖子链接（标题与日期与题目相符），不转录原文，也**不附参考解答**：这一节只是题目清单，用来查漏补缺。有“相关教程”链接的题，可以先去对应章节读机制，再自己写答案。
+检索日期：**2026 年 10 月 5 日**。渠道是牛客网公开帖子；小红书的补充题放在本节末尾，于 2026 年 10 月 6 日检索。下面 51 个问题是读完帖子后用自己的话概括的，按主题合并了同类问法，已去掉与上面九十问重复的题。每条只列出能核对到的帖子链接（标题与日期与题目相符），不转录原文，也**不附参考解答**：这一节只是题目清单，用来查漏补缺。有“相关教程”链接的题，可以先去对应章节读机制，再自己写答案。
 
 出现次数只说明有多少篇公开帖子提到，不代表某家公司的真实题库，也不代表面试官一定会问。
 
@@ -927,3 +927,44 @@ def allowed_next(trie, prefix):
 - **L49.** DP/图类：零钱兑换、最长回文子序列、岛屿数量/面积、不同路径变形（最大乘积路径）。 来源:[2896097](https://www.nowcoder.com/discuss/2896097)
 - **L50.** 同时在线人数最多的时刻（区间扫描线）。 来源:[2822196](https://www.nowcoder.com/discuss/2822196)
 - **L51.** 智力题：12 球称重找异常球、25 马选前 3、圆上三点成锐角三角形概率、掷骰期望。 来源:[2870581](https://www.nowcoder.com/discuss/2870581)、[2801888](https://www.nowcoder.com/discuss/2801888)、[2883759](https://www.nowcoder.com/discuss/2883759)
+
+### 小红书补充（2026 年 10 月 6 日检索）
+
+下面的题来自小红书公开面经的正文（帖子日期 2025 年 11 月至 2026 年 9 月），同样用自己的话概括，已去掉与上文重复的题。只有题目写在图片里的帖子没有收录。
+
+#### 排序与生成式推荐的结构细节
+
+- **L52.** HyFormer 里的全局 query token 怎样和行为序列特征交互？它和 RankMixer 的 token mixing 有何不同？ 相关教程:[入口](/notes/recsys-scaling-ranking/)。 来源:[小红书 6aba58](https://www.xiaohongshu.com/explore/6aba58930000000012039fc8)
+- **L53.** HSTU 的 Q、K、V、U 用一个大投影再切分，和四个独立投影有区别吗？门控 U 起什么作用？ 相关教程:[入口](/notes/recsys-scaling-ranking/)。 来源:[小红书 6aba58](https://www.xiaohongshu.com/explore/6aba58930000000012039fc8)、[小红书 691854](https://www.xiaohongshu.com/explore/691854dc0000000005010a67)
+- **L54.** HSTU 怎样加入位置与时间偏置？时间间隔为什么常先取对数？ 相关教程:[入口](/notes/recsys-scaling-ranking/)。 来源:[小红书 6aba58](https://www.xiaohongshu.com/explore/6aba58930000000012039fc8)、[小红书 691854](https://www.xiaohongshu.com/explore/691854dc0000000005010a67)
+- **L55.** 生成式推荐里用户序列越来越长，显存怎样控制？把长历史塞进 LLM 上下文延迟太高，除了摘要还有什么轻量办法？ 相关教程:[入口](/notes/recsys-sequence-long/)。 来源:[小红书 6a5511](https://www.xiaohongshu.com/explore/6a551178000000000f01e738)
+- **L56.** 端到端生成式推荐要同时优化点击、时长等多个目标，损失怎样设计？ 相关教程:[入口](/notes/recsys-multitask-scenario/)。 来源:[小红书 6a5511](https://www.xiaohongshu.com/explore/6a551178000000000f01e738)
+
+#### 语义 ID 的工程问题
+
+- **L57.** 码本为什么常用聚类结果初始化？不这样做会怎样？ 相关教程:[入口](/notes/recsys-semantic-id/)。 来源:[小红书 6aba58](https://www.xiaohongshu.com/explore/6aba58930000000012039fc8)
+- **L58.** 重建损失能否把 MSE 换成余弦距离？各自约束了向量的什么？ 相关教程:[入口](/notes/recsys-semantic-id/)。 来源:[小红书 691854](https://www.xiaohongshu.com/explore/691854dc0000000005010a67)
+- **L59.** 码本坍缩一定要解决吗？“很多物品落到少数码字”和“有码字从未被用到”是不是同一个问题？ 相关教程:[入口](/notes/recsys-semantic-id/)。 来源:[小红书 691854](https://www.xiaohongshu.com/explore/691854dc0000000005010a67)、[小红书 6aa3a6](https://www.xiaohongshu.com/explore/6aa3a6a80000000028000688)
+- **L60.** SID 的层级粒度为什么对不上业务类目数？怎样检验各层真的带有从粗到细的语义？ 相关教程:[入口](/notes/recsys-semantic-id/)。 来源:[小红书 691854](https://www.xiaohongshu.com/explore/691854dc0000000005010a67)、[小红书 6aba58](https://www.xiaohongshu.com/explore/6aba58930000000012039fc8)
+- **L61.** 数据更新或换随机种子重训 tokenizer 后，SID 会不会大面积变化？对线上模型有什么影响，怎样缓解？ 相关教程:[入口](/notes/recsys-semantic-id/)。 来源:[小红书 691854](https://www.xiaohongshu.com/explore/691854dc0000000005010a67)
+- **L62.** tokenizer（RQ-VAE）和生成模型（如 HSTU）能否联合训练？联合训练时物品的辅助信息会不会漂移？ 相关教程:[入口](/notes/recsys-semantic-id/)。 来源:[小红书 691854](https://www.xiaohongshu.com/explore/691854dc0000000005010a67)
+- **L63.** SID 用在排序模型里时，实时和动态特征怎样补进来？ 相关教程:[入口](/notes/recsys-semantic-id/)。 来源:[小红书 6aba58](https://www.xiaohongshu.com/explore/6aba58930000000012039fc8)
+
+#### 生成式推荐的上线与对齐
+
+- **L64.** 只用点击当奖励做 RL，为什么会带来分布偏移和奖励黑客？有哪些简单的补救？ 相关教程:[入口](/notes/recsys-llm4rec-paradigms/)。 来源:[小红书 6a5511](https://www.xiaohongshu.com/explore/6a551178000000000f01e738)
+- **L65.** 解码阶段可以加哪些约束，减少生成不存在的物品或推荐结果过于同质？ 相关教程:[入口](/notes/recsys-semantic-id/)。 来源:[小红书 6a5511](https://www.xiaohongshu.com/explore/6a551178000000000f01e738)
+- **L66.** 生成式推荐线上成本高，除了蒸馏还有哪些分级降级策略？高流量下 KV cache 还能用吗？ 相关教程:[入口](/notes/recsys-system-design/)。 来源:[小红书 6a5511](https://www.xiaohongshu.com/explore/6a551178000000000f01e738)、[小红书 69aa9a](https://www.xiaohongshu.com/explore/69aa9a26000000002801efe1)
+
+#### 多模态与后训练
+
+- **L67.** 怎样发现或证明某个模态训练不足？怎样证明提升来自视觉输入，而不是主要来自文本？ 相关教程:[入口](/notes/recsys-multimodal-i2i/)。 来源:[小红书 6ab02d](https://www.xiaohongshu.com/explore/6ab02dc800000000290194b2)、[小红书 6a9c34](https://www.xiaohongshu.com/explore/6a9c34a00000000027009fc6)
+- **L68.** 多模态训练数据和推理数据怎样构造、过滤和做质量检查？ 相关教程:[入口](/notes/multimodal-sft-lora-dpo/)。 来源:[小红书 6a9c34](https://www.xiaohongshu.com/explore/6a9c34a00000000027009fc6)
+- **L69.** SFT 到瓶颈后为什么转 RL？开放式回答的奖励怎样设计，用 LLM 当裁判有哪些风险？ 相关教程:[入口](/notes/policy-gradient-ppo-grpo/)。 来源:[小红书 6a9c34](https://www.xiaohongshu.com/explore/6a9c34a00000000027009fc6)
+- **L70.** Agent RL 里，怎样教模型判断何时调用工具、避免无谓调用？结果奖励、格式约束、过程奖励和工具合法性检查分别怎样设计？训练后工具调用率怎么看？ 相关教程:[入口](/notes/recsys-agent-rl/)。 来源:[小红书 6ab02d](https://www.xiaohongshu.com/explore/6ab02dc800000000290194b2)、[小红书 6a9c34](https://www.xiaohongshu.com/explore/6a9c34a00000000027009fc6)
+- **L71.** on-policy 蒸馏前为什么学生要先做 SFT？词表不同的模型之间怎样蒸馏？ 相关教程:[入口](/notes/multimodal-sft-lora-dpo/)。 来源:[小红书 6ab02d](https://www.xiaohongshu.com/explore/6ab02dc800000000290194b2)
+
+#### 机器学习基础与代码
+
+- **L72.** MLE 和 MAP 的区别；训练 loss 震荡可能有哪些原因，你会记录哪些量来定位？ 相关教程:[入口](/notes/training-memory-debugging/)。 来源:[小红书 69cf87](https://www.xiaohongshu.com/explore/69cf87080000000022025e39)、[小红书 69e4db](https://www.xiaohongshu.com/explore/69e4db6f000000001f0069b0)
+- **L73.** 手撕补充：扑克牌随机打乱（Fisher–Yates）；用均匀生成 0 到 4 的随机数生成器得到 0 到 6 的均匀分布；用给定数字集合拼出小于 N 的最大数；螺旋矩阵；目标和；最大连续 1 的个数 III。 来源:[小红书 6a5511](https://www.xiaohongshu.com/explore/6a551178000000000f01e738)、[小红书 69f09d](https://www.xiaohongshu.com/explore/69f09d4f000000003700cfd6)、[小红书 6a7c43](https://www.xiaohongshu.com/explore/6a7c4350000000003301b93b)、[小红书 69af7b](https://www.xiaohongshu.com/explore/69af7b48000000001b01e2b1)、[小红书 6aa3a6](https://www.xiaohongshu.com/explore/6aa3a6a80000000028000688)

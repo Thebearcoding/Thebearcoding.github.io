@@ -15,7 +15,7 @@ series: multimodal-interview
 ---
 <span id="mm-a5813b6edb01" style="display:block;scroll-margin-top:6rem"></span>
 
-这篇解释一个贯穿多模态后训练的问题：**模型究竟根据什么信号改变参数，为什么 loss 下降不一定代表看懂了视频？**读完后，你应能给一条样本画出监督位置、手算交叉熵、解释 LoRA 的第一步梯度，并从偏好假设推到 DPO，而不只记住算法名字。
+这篇解释一个贯穿多模态后训练的问题：**模型究竟根据什么信号改变参数，为什么 loss 下降不一定代表看懂了视频**？读完后，你应能给一条样本画出监督位置、手算交叉熵、解释 LoRA 的第一步梯度，并从偏好假设推到 DPO，而不只记住算法名字。
 
 先读 [从一个token理解Transformer与多模态入口](/notes/transformer-attention-rope-gqa/) 中的自回归预测与 attention mask。本文的算例用“先开门，再进屋”这个视频问答贯穿；“开门”被当成单个教学 token，真实 tokenizer 未必如此切分。SFT/DPO 是训练目标，LoRA/QLoRA 是参数更新与存储方式，二者可以组合。本章还讨论数据分布如何影响后续训练；推导、练习和视频案例均用于教学，不代表已完成的实验。
 
@@ -56,7 +56,7 @@ $$
 <figcaption style="font-size:0.9em">SFT交叉熵（点击查看原图）</figcaption>
 </figure>
 
-**读图时沿着虚线看。**顶部黄色区域是 prompt，蓝色区域是参考回答。底部每一列是一整个词表的预测分布；粉色数字只取该位置真实目标 token 的概率。第一枚回答 token 的概率来自最后一个 prompt 位置的 logits，所以虚线向左错开一格。斜线覆盖的 prompt 区域不计 loss，但其内容仍能被回答位置读取。图中末尾还监督了结束符，因此有效目标数量要包含它。图用具体 tokenizer 的词表和切词作示意，不能把图中文字格数当成所有模型的 token 数。
+**读图时沿着虚线看**。顶部黄色区域是 prompt，蓝色区域是参考回答。底部每一列是一整个词表的预测分布；粉色数字只取该位置真实目标 token 的概率。第一枚回答 token 的概率来自最后一个 prompt 位置的 logits，所以虚线向左错开一格。斜线覆盖的 prompt 区域不计 loss，但其内容仍能被回答位置读取。图中末尾还监督了结束符，因此有效目标数量要包含它。图用具体 tokenizer 的词表和切词作示意，不能把图中文字格数当成所有模型的 token 数。
 
 <span id="mm-bd0ff5b87ace" style="display:block;scroll-margin-top:6rem"></span>
 
@@ -342,7 +342,7 @@ $$
 <figcaption style="font-size:0.9em">DPO训练全景（点击查看原图）</figcaption>
 </figure>
 
-**按四条概率路径读图。**蓝色 chosen 与粉色 rejected 各经过策略模型和参考模型，形成四个条件概率。带锁的参考模型只提供基准，梯度最后回到策略模型。图里的 Gather 是从每个词表分布中取真实回答 token 的概率；对整段回答还需逐 token 求 log-prob 并相加。两个灰色“隐式奖励”框相减，进入最下方的 sigmoid 分类损失。直接把四条路径缩成“好答案做 SFT、坏答案负 SFT”，会漏掉 reference 和随偏好置信度变化的权重。
+**按四条概率路径读图**。蓝色 chosen 与粉色 rejected 各经过策略模型和参考模型，形成四个条件概率。带锁的参考模型只提供基准，梯度最后回到策略模型。图里的 Gather 是从每个词表分布中取真实回答 token 的概率；对整段回答还需逐 token 求 log-prob 并相加。两个灰色“隐式奖励”框相减，进入最下方的 sigmoid 分类损失。直接把四条路径缩成“好答案做 SFT、坏答案负 SFT”，会漏掉 reference 和随偏好置信度变化的权重。
 
 <span id="mm-cca67c691bfd" style="display:block;scroll-margin-top:6rem"></span>
 
@@ -438,21 +438,21 @@ loss 只衡量训练标签拟合。先解释可能的目标错位：监督位置
 
 ## 10. 自测：能算清，才算读懂
 
-**练习 1。**只有两个回答 token 被监督，概率为 0.5 和 0.5，求和与均值损失各是多少？若另有 10 个 prompt token 不监督，分母是否变 12？
+**练习 1**。只有两个回答 token 被监督，概率为 0.5 和 0.5，求和与均值损失各是多少？若另有 10 个 prompt token 不监督，分母是否变 12？
 
-**答案。**求和为 $2\log2\approx1.38629$，均值为 $\log2\approx0.69315$；分母仍为 2。若把 12 当分母，会把梯度尺度压低六倍。
+**答案**。求和为 $2\log2\approx1.38629$，均值为 $\log2\approx0.69315$；分母仍为 2。若把 12 当分母，会把梯度尺度压低六倍。
 
-**练习 2。**A 的 reference log-prob 为 $-8$、当前为 $-7$；B 为 $-2$、$-1.5$。A 是 chosen，DPO logit 是什么？为什么 B 绝对概率更大不构成矛盾？
+**练习 2**。A 的 reference log-prob 为 $-8$、当前为 $-7$；B 为 $-2$、$-1.5$。A 是 chosen，DPO logit 是什么？为什么 B 绝对概率更大不构成矛盾？
 
 **答案。**$u_A=1,u_B=0.5$，logit 为 $0.5\beta$。DPO 比较的是相对 reference 的偏好变化；当前模型对 B 的绝对概率较大，不妨碍其对 A 的相对提升更大。
 
-**练习 3。**一个 $1024\times2048$ 线性层用 rank 4 LoRA，有多少可训练矩阵参数？A、B 都为零会发生什么？
+**练习 3**。一个 $1024\times2048$ 线性层用 rank 4 LoRA，有多少可训练矩阵参数？A、B 都为零会发生什么？
 
 **答案。**$4(1024+2048)=12{,}288$。普通 LoRA 两矩阵都零时，彼此的梯度因子也零，支路不能启动；经典做法只让其中 B 为零、A 随机。
 
-**练习 4。**reference log-prob 已缓存；第二天训练随机抽取同视频的不同帧，还能直接复用吗？
+**练习 4**。reference log-prob 已缓存；第二天训练随机抽取同视频的不同帧，还能直接复用吗？
 
-**答案。**不能默认复用。条件 $x$ 已改变，原 log-prob 不再对应当前输入。只有确定同样的完整输入、模板与概率计算协议时，缓存才匹配。
+**答案**。不能默认复用。条件 $x$ 已改变，原 log-prob 不再对应当前输入。只有确定同样的完整输入、模板与概率计算协议时，缓存才匹配。
 
 <span id="mm-1a00ac98b40b" style="display:block;scroll-margin-top:6rem"></span>
 

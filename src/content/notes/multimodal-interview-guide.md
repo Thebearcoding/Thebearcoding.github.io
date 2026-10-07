@@ -29,14 +29,14 @@ series: multimodal-interview
 | [从一个token理解Transformer与多模态入口](/notes/transformer-attention-rope-gqa/) | 手算注意力，推 RoPE 角差，说明 GQA、RMSNorm、SwiGLU 改了什么 | 第 2–3 天 |
 | [Prefill、Decode与视频token的计算代价](/notes/prefill-decode-video-tokens/) | 画缓存 mask，算 KV 显存，解释首 token 与后续生成瓶颈 | 第 4 天 |
 | [为什么图像和视频能够进入语言模型](/notes/vision-video-algorithms/) | 从 patch 推到 CLIP/连接器，再解释采帧、时间、数据和评测 | 第 5–6 天 |
-| [视觉定位：把一句话对应到图中的一个框](/notes/multimodal-grounding/) | 换算预处理前后的坐标，手算 IoU/GIoU，解释 IoU 奖励的 RL | 扩展 |
-| [视频理解：token 预算、时间编码、时间定位与长视频](/notes/multimodal-video-understanding/) | 算视频 token 账与漏帧概率，讲清绝对时间编码，设计打乱帧诊断 | 扩展 |
-| [多模态 embedding：从 CLIP 双塔到 VLM2Vec 与 MMEB](/notes/multimodal-embedding-retrieval/) | 手算 InfoNCE 与温度，讲清 GradCache，读懂 MMEB 的 IND/OOD | 扩展 |
+| [视觉定位：从 REC 到让 MLLM 写出坐标](/notes/multimodal-grounding/) | 区分 REC/RES/开放词表检测，换算三种坐标表示，手算 IoU 与 Acc@0.5 | 扩展 |
+| [视频 LLM 的设计取舍：帧数、token 压缩与时间定位](/notes/multimodal-video-understanding/) | 算视频 token 总数，写出 M-RoPE 位置编号，手算时间定位 IoU | 扩展 |
+| [多模态 Embedding 与检索：从 CLIP 双塔到 VLM2Vec](/notes/multimodal-embedding-retrieval/) | 比较 last-token 与 mean 池化，讲清 GradCache，读懂 MMEB 的组成 | 扩展 |
 | [工业界多模态表征：已上线的系统怎样训练、怎样接入、怎样评测](/notes/multimodal-industrial-representation/) | 说出抖音、快手、小红书等系统的训练信号、接入方式与线上结果，设计行为对齐的表征项目 | 扩展 |
 | [SFT与DPO：训练信号从哪里来](/notes/multimodal-sft-lora-dpo/) | 对齐 labels，推 CE/LoRA 梯度和 DPO，识别监督与事实的错位 | 第 7–8 天 |
 | [从RL基础推到PPO与GRPO](/notes/policy-gradient-ppo-grpo/) | 从回报推到 PG、GAE、PPO/GRPO，区分估计器、目标与实现 | 第 9–11 天 |
-| [多模态强化学习：可验证奖励、视觉依赖与多模态 DPO](/notes/multimodal-rl/) | 用原图与空白图测视觉依赖度，解释选择题奖励噪声与 mDPO | 扩展 |
-| [多模态幻觉：成因、CHAIR 与 POPE 怎样算、怎样缓解](/notes/multimodal-hallucination-eval/) | 手算 CHAIR、POPE 与 VCD，按五步诊断幻觉成因 | 扩展 |
+| [多模态 RL：VLM 上的 GRPO 与可验证奖励](/notes/multimodal-rl/) | 手算 IoU 奖励与组内优势，区分感知类与推理类奖励，检验模型是否在看图 | 扩展 |
+| [多模态幻觉与评测：POPE、CHAIR、MME、MMBench 与解码侧缓解](/notes/multimodal-hallucination-eval/) | 手算 CHAIR、POPE、MME acc+ 与 CircularEval，写出 VCD 的对比解码 | 扩展 |
 | [训练显存与实验排障：把机制变成可检查的量](/notes/training-memory-debugging/) | 列显存账单，解释 AdamW、混精和累积，设计逐项排障 | 第 12 天 |
 | [模型差异为什么必须落到具体版本](/notes/multimodal-models-paper-reading/) | 用固定版本比较 Qwen、DeepSeek、Llama，讲清 MLA/多模态位置与消融 | 第 13 天 |
 | [面试问题与项目深挖](/notes/multimodal-interview-questions/) | 从复习问题讲到机制、边界和项目证据，区分假设与结果 | 第 14 天 |

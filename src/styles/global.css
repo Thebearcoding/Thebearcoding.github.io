@@ -621,6 +621,7 @@ body.reading .site-footer .footer-inner { max-width: 1160px; }
 }
 .topic-card:nth-child(2) { border-top-color: var(--accent2); }
 .topic-card:nth-child(3) { border-top-color: var(--good); }
+.topic-card:nth-child(4) { border-top-color: #A9822F; }
 .topic-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
 .topic-top h3 { font-family: var(--font-display); font-weight: 400; font-size: 21px; line-height: 1.35; }
 .topic-top h3 a { color: var(--text); }

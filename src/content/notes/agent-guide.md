@@ -1,112 +1,167 @@
 ---
-title: Agent 算法学习手册：知识地图、阅读顺序与覆盖清单
+title: Agent 算法学习手册：知识地图与阅读顺序
 date: '2026-10-06'
-tags: [Agent, 学习路线, 工具调用, 上下文工程, 复习问答]
-summary: 把 Agent 拆成接口、控制循环、上下文与记忆、检索、协议与协作、评测、训练入门、训练进阶、系统设计九层，每层对应一篇教程；用四个手算把成本和可靠性落到数字上，回答八道高频八股题，最后给一份可以逐项勾掉的覆盖清单。
+tags: [Agent, 学习路线, 工具调用, RAG, 强化学习, 评测]
+summary: Agent 算法岗要会什么、各篇按什么顺序读、每篇读完该答出什么问题，以及怎样从多模态与跨模态检索背景接到 Agent 训练与评测。
 draft: false
 ---
 
-这套笔记围绕一个问题组织：**一个 LLM 怎样在多步交互中可靠地完成任务，又怎样用数据和训练让它更可靠？** 面向的是算法岗：重点是机制、可计算的代价、可验证的评测和训练方法，不是某个 Agent 框架的 API 用法。每篇教程都有手算例子，论文结论注明出处，可以在原文核对。
+这一篇是 Agent 专题的入口，回答三个问题：**Agent 算法岗**（偏模型、训练与评测，不是搭应用）到底考什么；专题里的各篇按什么顺序读，每篇读完应当能答出什么；做过多模态和跨模态检索的人，哪些已有知识可以直接迁移，哪些要补。总览本身少用公式，但第 4 节有一个 ReAct 轨迹的上下文长度与步数估算，要求能在纸上算出来。多模态部分的入口见 [多模态专题总览](/notes/multimodal-interview-guide/)。
 
-先分清两个词。Anthropic 的 *Building effective agents* 把基于 LLM 的系统分成两类：**workflow**（LLM 和工具按预先写好的代码路径编排）和 **agent**（LLM 自己动态决定流程和工具使用）。文章的建议是先找最简单的方案，只有在必要时才增加复杂度，因为 agent 系统通常是用延迟和成本换效果。这一句话本身就是很多面试题的答案起点。
+本篇数值算例为教学构造；涉及的论文数字都注明出处，核对记录见同名 `.verify.md`。
 
-## 1. 知识地图：九层，每层一篇
+## 1. Agent 算法岗要会什么
 
-| 层 | 要回答的问题 | 教程 |
+先给一个可以落到代码里的定义：**Agent** 是一个在循环里运行的 LLM 策略。每一步它读入当前上下文（任务、历史动作、环境返回的观测），输出一段文本；文本中如果有结构化的动作（工具调用、检索查询、代码、点击坐标），外部程序就执行它，把结果作为观测追加回上下文，直到模型给出最终答案或撞到步数上限。ReAct（Yao et al., arXiv 2210.03629，ICLR 2023）把这种“推理与动作交替”的写法定型，摘要里的实验覆盖 HotpotQA、FEVER、ALFWorld 和 WebShop。
+
+围绕这个循环，算法岗的问题可以分成六类：
+
+| 问题 | 要会的东西 | 典型追问 |
 |---|---|---|
-| 接口 | 模型怎样“调用”一个函数？参数怎样保证能执行？ | [工具调用](/notes/agent-tool-calling/) |
-| 控制循环 | 下一步做什么？什么时候停？失败了怎么办？ | [规划与记忆](/notes/agent-planning-memory/) 第 1–4 节 |
-| 上下文与记忆 | 窗口里放什么？放不下怎么办？跨会话记什么？ | [规划与记忆](/notes/agent-planning-memory/) 第 5–8 节 |
-| 检索 | 外部知识怎样进来？召回和生成怎样分开测？ | [Agent RAG](/notes/agent-rag/) |
-| 协议与协作 | 工具怎样标准化接入？什么时候拆成多个 Agent？ | [MCP 与多智能体](/notes/agent-mcp-multiagent/) |
-| 评测 | 涨了 6 个点是真的吗？裁判可信吗？ | [Agent 评测](/notes/agent-eval/) |
-| 训练入门 | 怎样用 RL 训练模型自己决定查什么？ | [Agent RL 预备](/notes/recsys-agent-rl/) |
-| 训练进阶 | 长度偏差、熵坍塌、多轮信用分配、奖励黑客 | [Agent RL 进阶](/notes/agent-rl-advanced/) |
-| 系统设计 | 一道开放的设计题怎样在 45 分钟内讲清楚？ | [Agent 系统设计](/notes/agent-system-design/) |
+| 动作怎么表示 | tool schema、消息格式、结构化输出、约束解码 | 模型输出的 JSON 参数非法怎么办 |
+| 多步怎么控制 | CoT、ReAct、Plan-and-Execute、反思、记忆 | 上下文塞满了怎么办；什么时候停 |
+| 知识从哪来 | RAG 全链路：切块、检索、重排、生成 | 检索召回高但答案不忠实，问题出在哪 |
+| 怎样接外部系统 | MCP 的 host/client/server，多智能体编排 | 什么时候多智能体反而更差 |
+| 怎样训练 | 工具调用 SFT 数据构造，多轮 Agent RL，奖励设计 | 环境返回的 token 为什么要掩掉；奖励被黑怎么发现 |
+| 怎样评测与设计 | 基准、pass@k 与 pass^k、轨迹失败分析、系统设计题 | 一次跑分 60% 能不能上线 |
 
-这九层不是互相独立的。一个典型的追问链是：“你的 Agent 为什么会死循环？”（控制循环）→“上下文里有没有重复的工具结果？”（上下文）→“怎样评估修复是否有效？”（评测）→“能不能通过训练让它学会停？”（RL）。读的时候随时想“这一层的失败会在哪一层表现出来”。
+前三类偏推理时的机制，后三类是算法岗和应用岗拉开差距的地方：你要能说清**训练信号从哪来**、**评测数字能说明什么**。
 
-多模态方向的对应入口是 [多模态学习手册](/notes/multimodal-interview-guide/)。两个专题的交汇点有三处：[多模态 embedding](/notes/multimodal-embedding-retrieval/) 可以当 Agent 的检索器；[视觉定位](/notes/multimodal-grounding/) 是 GUI Agent 点击屏幕元素的基础；[多模态 RL](/notes/multimodal-rl/) 和 Agent RL 共用同一套 GRPO 机制和同样的奖励黑客问题。
+## 2. 知识地图：分层看依赖
 
-## 2. 阅读顺序
+下面按依赖从下往上排。上层默认你会下层；面试追问通常是从上层往下层挖。
 
-| 顺序 | 教程 | 读完应该能够做到 |
-|---|---|---|
-| 1 | [工具调用](/notes/agent-tool-calling/) | 画出五步循环，写出 schema 与 `tool_calls`，手算前缀缓存的节省 |
-| 2 | [规划与记忆](/notes/agent-planning-memory/) | 对比 ReAct 与先规划再执行，手算记忆检索打分与压缩次数 |
-| 3 | [Agent RAG](/notes/agent-rag/) | 手算 RRF，用“是否召回 × 是否答对”四格表定位问题 |
-| 4 | [MCP 与多智能体](/notes/agent-mcp-multiagent/) | 写出 `tools/call` 往返，手算单 Agent 与多 Agent 的 token 账 |
-| 5 | [Agent 评测](/notes/agent-eval/) | 区分 pass@k 与 pass^k，手算 kappa 与 McNemar |
-| 6 | [Agent RL 预备](/notes/recsys-agent-rl/) | 讲清 Search-R1 的检索 token 掩码与 GRPO 组内优势 |
-| 7 | [Agent RL 进阶](/notes/agent-rl-advanced/) | 解释长度偏差与 Clip-Higher，说出 DAPO 四个改动的分量 |
-| 8 | [Agent 系统设计](/notes/agent-system-design/) | 用固定框架答一道设计题，手算成本、延迟和并发 |
-
-第一遍跟着正文算一遍数字；第二遍遮住答案自己算；第三遍改一个前提（窗口变小、工具变多、成功率变低），看结论怎样变。
-
-## 3. Prompt、框架、后训练的边界
-
-面试中常被问：“一个 Agent 能力不够，你会改 prompt、改框架，还是做后训练？” 三者解决的问题不同：
-
-| 手段 | 改变的是什么 | 适合 | 代价与边界 |
+| 层 | 内容 | 依赖下层的什么 | 对应篇 |
 |---|---|---|---|
-| Prompt / 上下文工程 | 模型这一次看到的信息与指令 | 模型能力足够，只是不知道规则、格式或背景 | 不改变能力上限；上下文越长越贵，也越容易被稀释 |
-| 框架（编排代码） | 调用顺序、工具集、重试、校验、停止条件 | 流程可预知，或需要硬约束（权限、预算、格式校验） | 框架写死的路径越多，灵活性越低；不能修正模型本身的判断错误 |
-| 后训练（SFT / RL） | 模型参数，即“在这种情况下倾向于怎么做” | 同类任务大量重复、有可验证的结果、提示已经调不动 | 需要数据和训练成本；可能损害其他能力；要有可靠的评测防止奖励黑客 |
+| L0 模型基础 | 注意力、位置编码、KV 缓存、prefill 与 decode | — | [Transformer](/notes/transformer-attention-rope-gqa/)、[Prefill 与 Decode](/notes/prefill-decode-video-tokens/) |
+| L1 单步动作 | 消息格式、tool schema、Function Calling、约束解码、并行调用 | 模型怎样按模板生成 | [agent-tool-calling](/notes/agent-tool-calling/) |
+| L2 多步控制 | CoT、Self-Consistency、ToT、ReAct、Plan-and-Execute、Reflexion、记忆与上下文管理 | 单步调用可靠；上下文长度的代价 | [agent-planning-memory](/notes/agent-planning-memory/) |
+| L3 外部知识 | RAG 全链路、多模态 RAG、自适应检索 | 检索与 embedding；多步控制 | [agent-rag](/notes/agent-rag/) |
+| L4 协议与编排 | MCP、多智能体框架 | 工具调用；多步控制 | [agent-mcp-multiagent](/notes/agent-mcp-multiagent/) |
+| L5 训练 | 工具调用 SFT → Search-R1 式 RL → 信用分配、过程奖励、rollout 工程 | SFT/DPO、PPO/GRPO；L1–L3 的轨迹格式 | [recsys-agent-rl](/notes/recsys-agent-rl/)、[agent-rl-advanced](/notes/agent-rl-advanced/) |
+| L6 评测 | 基准、可靠性指标、失败分析、污染与成本 | 能复现一条轨迹并判断对错 | [agent-eval](/notes/agent-eval/) |
+| L7 系统设计 | 需求 → 架构 → 容量/延迟/成本 → 失败处理 → 评测迭代 | 以上全部 | [agent-system-design](/notes/agent-system-design/) |
 
-**判断顺序**：先用评测集定位失败类型。格式错、不知道规则，先改 prompt；违反硬约束（越权、超预算、死循环），改框架加检查；同一类判断反复出错，而且能写出验证器，才考虑后训练。后训练的收益要用“同一评测集、同一脚手架”的配对比较来证明，方法见 [Agent 评测](/notes/agent-eval/) 第 6 节。
+读图方式：一个面试问题落在哪一层，就先在那一层给机制，再往下补一层的原因。比如“多轮工具调用的 RL 训练为什么不稳”属于 L5，回答要落到 L1 的消息拼接（环境 token 混进 response）和 L0 的长序列代价。
 
-## 4. 四个手算：把成本和可靠性落到数字上
+## 3. 阅读顺序与每篇的验收问题
 
-**① 前缀缓存的节省**（教学构造）。系统提示加工具定义共 1500 token，每轮新增 350 token，共 6 轮。不用前缀缓存时每轮重新 prefill 全部历史：$\sum_{t=1}^{6}(1500+350t)=16\,350$ token；用缓存时只算新增部分：$1500+350\times6=3600$ token，约为前者的 $1/4.5$。前提是前缀逐字节不变，工具列表里插一个时间戳缓存就从那里失效。原理见 [Prefill 与 Decode](/notes/prefill-decode-video-tokens/) 第 2 节。
+**主线**（按顺序读）：
 
-**② 窗口能撑几步**（教学构造）。窗口 8192 token，系统提示加工具 1500，预留输出 1024，可用于历史的是 $8192-1500-1024=5668$。每步（调用加结果）450 token，最多 $\lfloor5668/450\rfloor=12$ 步（12 步 5400 token，13 步 5850 token 就超了）。所以长任务必须压缩上下文或把信息外部化，见 [规划与记忆](/notes/agent-planning-memory/) 第 7 节。
+| 序 | 篇目 | 读完应当能回答 |
+|---|---|---|
+| 1 | agent-guide（本篇） | Agent 算法岗的六类问题各对应哪篇；一条 ReAct 轨迹的上下文长度怎样随步数增长？ |
+| 2 | [agent-tool-calling](/notes/agent-tool-calling/) | 一次 Function Calling 从 tool schema 到模型输出、再到工具结果回填，消息序列长什么样；工具调用 SFT 数据怎样造、怎样过滤？ |
+| 3 | [agent-planning-memory](/notes/agent-planning-memory/) | ReAct 与 Plan-and-Execute 各在什么任务上更合适；上下文快满时，截断、摘要和向量记忆各丢掉了什么？ |
+| 4 | [agent-rag](/notes/agent-rag/) | 召回、重排、生成三段各用什么指标定位问题；文档图像检索（如 ColPali）和先 OCR 再检索的区别在哪？ |
+| 5 | [agent-mcp-multiagent](/notes/agent-mcp-multiagent/) | MCP 里 host、client、server 各管什么，tools、resources、prompts 有何区别；什么条件下多智能体不如单智能体？ |
+| 6 | [recsys-agent-rl](/notes/recsys-agent-rl/)（已有） | Search-R1 的 rollout 怎样拼接，为什么要掩掉检索 token；verl 中谁负责 rollout、谁负责训练，检索器怎样作为环境接入？ |
+| 7 | [agent-rl-advanced](/notes/agent-rl-advanced/) | 多轮轨迹只有终局奖励时，信用怎样分到每一步；结果奖励、格式奖励、过程奖励各会被怎样“黑”？ |
+| 8 | [agent-eval](/notes/agent-eval/) | SWE-bench、GAIA、τ-bench、BFCL 各测什么、用什么指标；pass@k 与 pass^k 为什么会给出相反的印象？ |
+| 9 | [agent-system-design](/notes/agent-system-design/) | 给你“设计一个 deep research Agent”，怎样在 45 分钟内讲完需求、架构、成本估算、失败处理和评测迭代？ |
 
-**③ RL 时模型自己生成的 token 占多少**（教学构造）。一条轨迹：模型 3 轮各写 120 token，最后作答 40 token，共 400 个生成 token；3 次工具返回各 600 token，共 1800 个观测 token。response 部分里模型生成的只占 $400/(400+1800)=18.2\%$。如果不对观测 token 做损失掩码，八成以上的梯度权重会落在工具返回的文本上，这就是 [Agent RL 预备](/notes/recsys-agent-rl/) 第 3 节检索 token 掩码要解决的问题。
+**前置**（已有多模态笔记，按需回补）：
 
-**④ 多步可靠性**（教学构造）。每步成功率 0.95、步骤独立时，5 步全对的概率 $0.95^5=0.774$，10 步只剩 $0.95^{10}=0.599$。提升可靠性只有两条路：提高单步成功率，或者加上能发现错误的检查与重试，后者的收益取决于检查器的召回率，见 [规划与记忆](/notes/agent-planning-memory/) 第 4 节。
+| 篇目 | 在 Agent 专题里用在哪 |
+|---|---|
+| [数学与张量预备课](/notes/multimodal-math-prerequisites/) | softmax、对数概率、KL，读 RL 和约束解码的前提 |
+| [Transformer、RoPE 与 GQA](/notes/transformer-attention-rope-gqa/) | 理解 chat 模板为什么是“一条长序列”，以及注意力 mask |
+| [Prefill、Decode 与视频 token](/notes/prefill-decode-video-tokens/) | 多轮 Agent 的延迟与 KV 显存估算，前缀缓存为什么省钱 |
+| [对比学习](/notes/contrastive-learning/) | RAG 的稠密检索器、难负例 |
+| [SFT 与 DPO](/notes/multimodal-sft-lora-dpo/) | 工具调用 SFT 的 labels 对齐与掩码，偏好数据 |
+| [从 RL 基础推到 PPO 与 GRPO](/notes/policy-gradient-ppo-grpo/) | Agent RL 的全部目标函数，本专题不重推 |
+| [训练显存与实验排障](/notes/training-memory-debugging/) | 长轨迹 RL 的显存账与排障 |
 
-## 5. 八道高频八股
+**同批多模态补充**（做多模态 Agent 时读）：[多模态 embedding 与检索](/notes/multimodal-embedding-retrieval/)（RAG 检索器的多模态版本）、[多模态 RL](/notes/multimodal-rl/)（可验证奖励在 VLM 上的用法）、[视觉定位](/notes/multimodal-grounding/)（GUI Agent 输出点击坐标的基础）、[多模态幻觉与评测](/notes/multimodal-hallucination-eval/)（与 RAG 的 faithfulness 是同一类问题）、[视频理解](/notes/multimodal-video-understanding/)（长观测的压缩思路）。
 
-每道先口述 2 分钟，再对照下面的要点和对应教程。
+建议节奏：主线 1–5 是推理时机制，可以较快过完；6–7 是 Agent 算法岗的核心，要配合代码读；8 和 9 放在最后，因为它们要求把前面的东西串起来。
 
-**1. Prompt、框架与后训练的边界。** 见第 3 节的表：prompt 改信息，框架改流程和硬约束，后训练改模型的倾向；按“格式与规则 → 硬约束 → 反复出现的判断错误”的顺序选择，后训练要有验证器和配对评测。
+## 4. 手算：一条 ReAct 轨迹的上下文与步数预算
 
-**2. 记忆方案与多级记忆。** 三层：短期（上下文窗口）、工作（任务内的待办列表、已确认事实、草稿文件）、长期（向量库、数据库，跨会话）。核心是“写什么”和“读什么”：写入时去重、打重要性分；读取时按相关性、时近性、重要性打分取 top-$k$（Generative Agents 的做法，权重要在标注数据上调）。还要处理过时信息的更新与删除。详见 [规划与记忆](/notes/agent-planning-memory/) 第 5–6 节。
+**设定**（教学构造，所有 token 数虚构）。系统提示加 tool schema 共 800 token，用户问题 50 token。每一步模型生成“思考 + 工具调用”共 60 token，工具返回的观测截断到 400 token。做 5 次工具调用后，模型生成 40 token 的最终答案。模型上下文上限 8192。
 
-**3. Skill 与渐进式披露。** Anthropic 在 2025 年 10 月发布 Agent Skills（同年 12 月作为开放标准发布）：一个 skill 是一个目录，核心是带 YAML frontmatter（必填 `name` 和 `description`）的 `SKILL.md`，可以附带脚本和参考文件。**渐进式披露**分三级：启动时只把每个 skill 的名字和描述放进系统提示；模型判断某个 skill 相关时，才读入完整的 `SKILL.md`；`SKILL.md` 里引用的其他文件，只在需要时再打开。手算（教学构造）：装了 30 个 skill，每个元数据约 100 token、正文约 2000 token。全部预载要 $30\times2100=63\,000$ token；渐进式披露下常驻只有 $30\times100=3000$ token，一个任务用到 2 个 skill 时也只需 $3000+2\times2000=7000$ token。这是“上下文是有限资源”在工具层面的应用。
+**每次调用模型时的输入长度。** 每完成一步，上下文增加 $60+400=460$ 个 token。第 $t$ 次调用（$t=1,\dots,6$，第 6 次是写答案）的输入长度为
 
-**4. 任务规划与停止条件。** 规划有 ReAct（每步边想边做）、先规划再执行、两者混合（粗计划加逐步执行，假设被推翻时重新规划）。停止条件要分两层：**学习层**，模型自己判断信息已足够并作答（结果奖励会惩罚过早作答）；**工程层**，硬上限：最大步数、最大 token、最大费用、超时，以及“计划里的待办全部勾掉”这类显式完成条件。评估时报告平均步数和触顶比例。
+$$
+L_t = 850 + 460\,(t-1),
+$$
 
-**5. 从 Function Calling 到 MCP 再到 Skill。** 三者解决的问题不同：Function Calling 是模型侧的能力，按 schema 生成调用；MCP 是应用与工具之间的协议，把 $M$ 个应用接 $N$ 个工具的适配从 $M\times N$ 降到 $M+N$；Skill 是打包“程序性知识”（怎样做一类任务的说明、脚本、模板）的方式，配合渐进式披露控制上下文开销。一个 skill 里可以写“用哪个 MCP 工具、按什么步骤”，三者是叠加关系，不是替代关系。详见 [工具调用](/notes/agent-tool-calling/) 与 [MCP 与多智能体](/notes/agent-mcp-multiagent/)。
+依次为 850、1310、1770、2230、2690、3150，最终序列长度 $3150+40=3190$。
 
-**6. 死循环怎么处理。** 先分原因：工具一直报同样的错（错误信息没帮模型做决策）；结果被截断或压缩掉，模型不记得已经调过（上下文问题）；目标本身不可达（任务问题）。对策分三层：检测（同一工具同一参数重复调用、连续 $n$ 步无新信息）、干预（回填明确的错误说明与替代方案、强制换策略或请求用户澄清）、兜底（步数和费用上限、超限后返回部分结果并说明原因）。训练层面可以在 RL 奖励里加轮数代价，但系数要小，否则模型宁可不查直接猜，见 [Agent RL 进阶](/notes/agent-rl-advanced/) 第 6 节。
+**没有前缀缓存时的 prefill 总量**：每次调用都把整段上下文重新算一遍，
 
-**7. 上下文过长与上下文衰减。** 两个问题要分开。**过长**是装不下：用压缩、外部化、截断工具返回、子 Agent 隔离来控制。**衰减**是装得下但用不好：Anthropic 的 *Effective context engineering* 称之为 context rot，上下文 token 越多，模型准确回忆其中信息的能力越差；Chroma 的技术报告 *Context Rot* 测了 18 个模型，发现即使在简单任务上，性能也会随输入变长而越来越不稳定；Lost in the Middle 则发现放在中间的信息最容易被忽略。所以“窗口够大”不等于“全塞进去”：只放当前步骤需要的信息，关键信息放在开头或结尾。详见 [规划与记忆](/notes/agent-planning-memory/) 第 7 节和 [Agent RAG](/notes/agent-rag/) 第 3、8 节。
+$$
+\sum_{t=1}^{6} L_t = 6\times850 + 460\times(0+1+2+3+4+5) = 5100 + 6900 = 12000.
+$$
 
-**8. 多智能体什么时候更好。** 三个理由：子任务可以并行、需要上下文隔离、子任务需要差别很大的工具集。Anthropic 的多智能体调研系统在内部评测上比单 Agent 高 90.2%，但 token 用量约是普通对话的 15 倍（单 Agent 约 4 倍），只适合价值足够高的任务。三个理由都不成立时，单 Agent 加好的规划和上下文管理通常更省、更可靠。详见 [MCP 与多智能体](/notes/agent-mcp-multiagent/) 第 6–9 节。
+**有前缀缓存时**：之前的 token 已有 KV，只需 prefill 新增部分，即首次的 850 加上 5 段观测 $5\times400=2000$，共 2850（模型自己生成的 token 在 decode 时已写入缓存）。两者之比 $12000/2850\approx4.2$。步数越多差距越大：无缓存的总量随步数平方增长，有缓存的随步数线性增长。机制见 [Prefill 与 Decode](/notes/prefill-decode-video-tokens/)。
 
-## 6. 覆盖清单
+**步数上限。** 要求 $850+460n+40\le8192$，得 $n\le7302/460\approx15.9$，最多 15 步工具调用。验算：$n=15$ 时总长 7790，$n=16$ 时 8250，超限。
 
-每读完一篇、能闭卷讲清楚，就勾掉一项。
+**放到 RL 训练里看。** response 部分长 $3190-850=2340$，其中模型生成的只有 $5\times60+40=340$，占 $340/2340\approx14.5\%$。如果不掩掉观测 token，约 85% 的梯度权重落在工具返回的文本上，这正是 [recsys-agent-rl 第 3 节](/notes/recsys-agent-rl/) 讲的检索 token 掩码要解决的问题。
 
-- [ ] 工具调用的五步循环；`tool_calls` 与 `tool` 消息；为什么参数是不可信输入
-- [ ] chat 模板怎样渲染工具与调用；解析器何时工作；前缀缓存手算
-- [ ] 约束解码能保证什么、不能保证什么；strict 模式的要求
-- [ ] SFT 时为什么掩掉工具返回；BFCL 的题型与 AST 判定
-- [ ] ReAct 与 CoT 的实测差异；先规划再执行；Reflexion 什么时候有用
-- [ ] 三层记忆；Generative Agents 打分手算；压缩、外部化与 MemGPT
-- [ ] RAG 每个环节的失败；RRF 手算；四格诊断表；长上下文能否替代 RAG
-- [ ] MCP 的三个角色与三类能力；`initialize`、`tools/list`、`tools/call`；安全风险
-- [ ] 多智能体的三个理由、四种结构、失败模式；单 Agent 与多 Agent 的 token 账
-- [ ] pass@k 与 pass^k 及其无偏估计；LLM 裁判的偏差与 kappa；McNemar 检验
-- [ ] Search-R1 的四对标签、检索 token 掩码、EM 奖励、GRPO 组内优势
-- [ ] 长度偏差、Clip-Higher、动态采样、超长惩罚；多轮信用分配；奖励黑客
-- [ ] Skill 与渐进式披露；Function Calling、MCP、Skill 的关系
-- [ ] 死循环的检测、干预与兜底；上下文过长与衰减的区别
-- [ ] 系统设计题框架；deep research 主例的成本、延迟与并发手算；多模态客服副例
+**多步可靠性。** 假设每一步工具调用独立地以 0.95 的概率正确，5 步全对的概率是 $0.95^5\approx0.774$。单步 95% 看着很高，串成 5 步就只剩约 77%。真实步骤之间不独立，这个数只用来说明误差会累积，评测时要报告轨迹级成功率，而不是单步准确率。
+
+**边界。** ① 观测长度在真实任务里方差很大（网页、代码文件），用均值估算会低估尾部，要看 P95。② 摘要式记忆会让 $L_t$ 不再线性增长，但每次摘要本身也要一次模型调用。③ 前缀缓存要求前缀逐 token 不变；如果每步都改写系统提示（比如插入当前时间），缓存就失效。
+
+**怎样验证。** 在自己的 Agent 日志里统计每步观测长度的分布、每条轨迹的步数分布和触顶比例（撞到步数或长度上限仍未作答的轨迹占比），用实测分布替换上面的常数重算。
+
+## 5. 覆盖清单：必会、常问、加分
+
+**必会**（答不出来基本过不了算法面）：
+
+- ReAct 循环与消息格式，Function Calling 的 tool schema 和回填方式 → [agent-tool-calling](/notes/agent-tool-calling/)
+- 上下文长度怎样随步数增长，截断与摘要的取舍 → 本篇第 4 节、[agent-planning-memory](/notes/agent-planning-memory/)
+- RAG 全链路与各段指标，稠密/稀疏/混合检索 → [agent-rag](/notes/agent-rag/)
+- 多轮 RL 的 rollout 拼接、环境 token 掩码、GRPO 组内优势 → [recsys-agent-rl](/notes/recsys-agent-rl/)、[PPO 与 GRPO](/notes/policy-gradient-ppo-grpo/)
+- 至少三个基准的任务和指标，pass@k 与 pass^k 的区别 → [agent-eval](/notes/agent-eval/)
+
+**常问**：
+
+- 工具调用 SFT 数据的构造与过滤 → [agent-tool-calling](/notes/agent-tool-calling/)
+- 约束解码与结构化输出，并行工具调用 → [agent-tool-calling](/notes/agent-tool-calling/)
+- Reflexion 一类“用文字反思而不更新权重”的方法与 RL 的区别 → [agent-planning-memory](/notes/agent-planning-memory/)
+- MCP 的角色划分与三类 server 功能 → [agent-mcp-multiagent](/notes/agent-mcp-multiagent/)
+- 奖励设计：结果、格式、过程奖励，奖励黑客的发现方法 → [agent-rl-advanced](/notes/agent-rl-advanced/)
+- 轨迹级失败分析：把失败归到规划、调用、检索还是作答 → [agent-eval](/notes/agent-eval/)
+- 设计题：deep research Agent 的架构与成本估算 → [agent-system-design](/notes/agent-system-design/)
+
+**加分**：
+
+- PRM 与 ORM 的取舍，长轨迹的信用分配与训练稳定性 → [agent-rl-advanced](/notes/agent-rl-advanced/)
+- 多模态 RAG（文档图像检索）与 GUI 定位 → [agent-rag](/notes/agent-rag/)、[视觉定位](/notes/multimodal-grounding/)
+- 什么时候多智能体不如单智能体 → [agent-mcp-multiagent](/notes/agent-mcp-multiagent/)
+- 评测污染、结果方差与成本归一 → [agent-eval](/notes/agent-eval/)
+- 多模态客服 Agent 的设计 → [agent-system-design](/notes/agent-system-design/)
+
+## 6. 从多模态背景接上 Agent
+
+你做过跨模态检索、了解 VLM 训练，这些不是另起炉灶，而是能直接对上 Agent 链路里的几个环节。
+
+| 你已有的 | 在 Agent 里对应 | 要补的差异 |
+|---|---|---|
+| 双塔检索、对比学习、Recall@K | RAG 的稠密检索器与评测 | 检索的终点是“生成的答案对不对”，召回高不等于答案忠实；还要会重排和混合检索 |
+| VLM 把图像 token 接进 LLM | 多模态 Agent 的观测：截图、文档页、视频帧 | 观测是每步新增的，长度预算按步累加（第 4 节） |
+| 视频 token 压缩、采帧 | 长观测截断、摘要记忆 | 压缩丢掉的信息会在后续步骤里才暴露，要用轨迹级指标评 |
+| 视觉定位、输出框坐标 | GUI Agent 输出点击位置 | 坐标错一点，环境里的动作就全错，奖励是二值的 |
+| SFT 的 labels 掩码 | 工具调用 SFT 只在 assistant 段算损失 | 多轮里工具返回也在序列中，必须掩掉 |
+| PPO/GRPO 单轮 | 多轮 Agent RL | rollout 要和环境交互、异步、有失败；奖励更稀疏 |
+| 多模态幻觉评测 | RAG 的 faithfulness、Agent 编造工具结果 | 要能区分“检索没给到”和“给到了但没用” |
+
+面试时的讲法：先说明自己熟悉的那一环（例如检索器的难负例和 Recall@K），再说明它放进 Agent 之后哪个指标变了，最后给出一个实验来证明这种迁移有效。例如：“检索器 Recall@5 提升后，下游 EM 是否同步提升；如果没有，就去查重排或生成段。”不要把多模态项目硬说成 Agent 项目，讲清楚两者之间的接口就够了。
+
+## 7. 面试常问
+
+**Agent 和普通的多轮对话有什么区别？** 区别在于有没有环境。Agent 的输出里有可执行的动作，执行结果作为观测回到上下文，决定下一步；对话只有用户输入。因此 Agent 要处理动作格式错误、工具失败、步数上限和观测过长等问题，这些在普通对话里都不存在。
+
+**为什么多步 Agent 的评测要看 pass^k？** τ-bench（arXiv 2406.12045）把 pass^k 定义为 k 次独立试验全部成功的概率，用 $\binom{c}{k}/\binom{n}{k}$ 对任务取期望（§3）；pass@k 是至少一次成功。线上用户每次只跑一次、而且要每次都对，所以可靠性要看 pass^k。该文摘要报告 gpt-4o 一类函数调用 Agent 在任务上的成功率低于 50%，retail 域的 pass^8 低于 25%。
+
+**多轮工具调用 RL 和单轮 GRPO 最大的工程差异是什么？** rollout 中途要等环境返回，序列里混有环境 token 需要掩码，轨迹长度方差大导致 batch 内负载不均，工具服务的并发与超时会直接影响训练吞吐。细节见 [recsys-agent-rl](/notes/recsys-agent-rl/) 和 [agent-rl-advanced](/notes/agent-rl-advanced/)。
+
+**上下文窗口很长了，还需要记忆模块吗？** 需要。第 4 节说明了无缓存时 prefill 总量随步数平方增长；窗口长也不代表模型能用好远处的信息。是否需要摘要或外部记忆，要看任务的步数分布和长上下文下的实测准确率，而不是只看窗口上限。
 
 ## 闭卷验收
 
-不看资料说出 workflow 与 agent 的区别和“先找最简单方案”的原则；画出九层知识地图并说出每层对应的教程；用一张表讲清 prompt、框架、后训练各改变什么、适合什么、代价是什么；手算前缀缓存的节省、8192 窗口能撑的步数、RL 轨迹中生成 token 的占比、5 步和 10 步的全对概率；对八道八股每道口述 2 分钟；最后对照覆盖清单，把没勾掉的项按阅读顺序补上。
+不看资料写出 Agent 循环的定义和停止条件，说出算法岗的六类问题各对应专题里哪一篇；按第 3 节的表，逐篇说出读完应能回答的问题；画出 L0 到 L7 的分层，说明“多轮 RL 不稳”要往下挖到哪两层；对系统提示 800、问题 50、每步生成 60、观测 400、5 步、答案 40 的轨迹，手算各次调用的输入长度、无缓存与有缓存的 prefill 总量（12000 与 2850）、8192 窗口下的最大步数（15）、RL 中生成 token 占比（约 14.5%）；解释单步 95% 串成 5 步为何只剩约 77%；写出 pass^k 的定义并说明它与 pass@k 的区别；最后用自己的项目举一个例子，讲清多模态检索的哪一环怎样接进 Agent，以及用什么实验证明。
 
-**参考。** [Anthropic: Building effective agents](https://www.anthropic.com/engineering/building-effective-agents)；[Anthropic: Effective context engineering for AI agents](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)；[Anthropic: Equipping agents for the real world with Agent Skills](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills)；[Anthropic: How we built our multi-agent research system](https://www.anthropic.com/engineering/multi-agent-research-system)；[Chroma: Context Rot](https://research.trychroma.com/context-rot)；[Model Context Protocol 规范](https://modelcontextprotocol.io/specification)；[ReAct](https://arxiv.org/abs/2210.03629)；[Generative Agents](https://arxiv.org/abs/2304.03442)；[Lost in the Middle](https://arxiv.org/abs/2307.03172)；[Search-R1](https://arxiv.org/abs/2503.09516)；[DAPO](https://arxiv.org/abs/2503.14476)。
+**参考。** [ReAct](https://arxiv.org/abs/2210.03629)；[Toolformer](https://arxiv.org/abs/2302.04761)；[Reflexion](https://arxiv.org/abs/2303.11366)；[Search-R1](https://arxiv.org/abs/2503.09516)；[τ-bench](https://arxiv.org/abs/2406.12045)（[HTML](https://arxiv.org/html/2406.12045)）；[SWE-bench](https://arxiv.org/abs/2310.06770)；[GAIA](https://arxiv.org/abs/2311.12983)；[Model Context Protocol 规范](https://modelcontextprotocol.io/specification/latest)；[verl 仓库](https://github.com/volcengine/verl)。

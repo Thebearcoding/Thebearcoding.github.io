@@ -72,11 +72,15 @@ const planLite = {
 };
 ---
 <Base title="Xinran Xiong · athebear" bodyClass="home-page">
+<Fragment slot="head">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" />
+</Fragment>
 <div class="container">
 
   <header class="term-hero">
     <div class="term-intro">
-      <h1 class="term-name">熊昕然 <span lang="en">Xinran Xiong</span></h1>
+      <h1 class="term-name" lang="en">Athebear</h1>
+      <p class="term-who">熊昕然 <span lang="en">Xinran Xiong</span></p>
       <p class="term-tagline">做多模态研究，也在从零手写 Agent Harness。这里放我的研究笔记、手敲教程和互动课程。</p>
       <ul class="term-tracks" aria-label="方向">
         <li><b>多模态</b>视觉语言模型、跨模态检索、对比学习</li>
@@ -164,7 +168,7 @@ const planLite = {
       <span class="now-today" id="now-today">每天的时间块、任务和教程链接</span>
     </span>
     <span class="now-next" id="now-next"></span>
-    <span class="now-go">打开看板 →</span>
+    <span class="now-go">打开看板</span>
   </a>
   <script is:inline type="application/json" id="plan-lite" set:html={JSON.stringify(planLite)}></script>
   <script is:inline>
@@ -185,8 +189,8 @@ const planLite = {
 
   <section class="section">
     <div class="section-head">
-      <h2>专题</h2>
-      <a class="more" href="/notes/">全部 {all.length} 篇笔记 →</a>
+      <h2 data-en="Topics">专题</h2>
+      <a class="more" href="/notes/">全部 {all.length} 篇笔记</a>
     </div>
     <div class="topic-grid">
       {series.map((s) => (
@@ -200,7 +204,7 @@ const planLite = {
             {s.picks.map((n) => <li><a href={`/notes/${n.id}/`}>{n.data.title.split(/[:：]/)[0]}</a></li>)}
           </ol>
           <div class="topic-actions">
-            <a class="topic-start" href={`/notes/${s.notes[0]}/`}>从总览开始 →</a>
+            <a class="topic-start" href={`/notes/${s.notes[0]}/`}>从总览开始</a>
             <a class="topic-all" href={`/notes/#s-${s.key}`}>目录</a>
           </div>
         </article>
@@ -210,27 +214,27 @@ const planLite = {
 
   <section class="section">
     <div class="section-head">
-      <h2>课程与工具</h2>
-      <a class="more" href="/teaching/">全部教学与学习 →</a>
+      <h2 data-en="Courses &amp; tools">课程与工具</h2>
+      <a class="more" href="/teaching/">全部教学与学习</a>
     </div>
     <div class="card-grid card-grid-3">
       <a class="t-card" href="https://athebear.me/minimind-v-course/course/" target="_blank" rel="noopener">
         <span class="t-status live">互动课程 · 12 课</span>
         <h3>MiniMind-V:从零看懂并训练一个视觉语言模型</h3>
         <p>以 65M 参数的开源 VLM 为骨架,拆解结构、训练与推理。每课 4~5 个交互动画、真实源码逐行讲解和零依赖练习。</p>
-        <span class="t-go">开始学习 →</span>
+        <span class="t-go">开始学习</span>
       </a>
       <a class="t-card" href="https://athebear.me/defect-detection-course/" target="_blank" rel="noopener">
         <span class="t-status live">互动课程 · 13 课</span>
         <h3>缺陷检测:从深度学习基础到主流方法全景</h3>
         <p>工业缺陷检测中文交互课程,30+ 交互演示,从卷积讲到主流检测范式,配零依赖 Python 练习。</p>
-        <span class="t-go">开始学习 →</span>
+        <span class="t-go">开始学习</span>
       </a>
       <a class="t-card" href="https://paper.athebear.me" target="_blank" rel="noopener">
         <span class="t-status live">在线工具</span>
         <h3>Paper Insight:论文初筛工具</h3>
         <p>按会议批量浏览论文,自动回答四个初筛问题:代码开源吗、什么任务、什么指标、为何优于基线;支持 arXiv 直投与全文对话。</p>
-        <span class="t-go">开始筛论文 →</span>
+        <span class="t-go">开始筛论文</span>
       </a>
     </div>
     <div class="repo-strip">
@@ -244,8 +248,8 @@ const planLite = {
 
   <section class="section">
     <div class="section-head">
-      <h2>最近更新</h2>
-      <a class="more" href="/rss.xml">RSS 订阅 →</a>
+      <h2 data-en="Recently">最近更新</h2>
+      <a class="more" href="/rss.xml">RSS 订阅</a>
     </div>
     <ul class="recent-list">
       {notes.map((n) => {

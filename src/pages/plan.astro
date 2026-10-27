@@ -97,7 +97,7 @@ const last = plan.days[plan.days.length - 1].date;
 .pb-head { padding-top: 54px; }
 .pb-kicker {
   display: inline-block; padding: 4px 12px; margin-bottom: 10px;
-  border: 1px solid rgba(217, 119, 87, 0.6); border-radius: 999px;
+  border: 1px solid rgba(42, 139, 216, 0.6); border-radius: 999px;
   color: var(--accent); font-family: var(--font-heading); font-size: 11.5px; letter-spacing: 2px;
 }
 .pb-clocks { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
@@ -107,13 +107,13 @@ const last = plan.days[plan.days.length - 1].date;
 }
 .pb-clock b { display: block; font-family: var(--font-display); font-weight: 400; font-size: 26px; line-height: 1.2; font-variant-numeric: tabular-nums; }
 .pb-clock span { font-family: var(--font-heading); font-size: 12px; color: var(--text-dim); }
-.pb-clock.hot { border-color: var(--accent); background: rgba(217, 119, 87, 0.08); }
+.pb-clock.hot { border-color: var(--accent); background: rgba(42, 139, 216, 0.08); }
 .pb-clock.hot b { color: var(--accent); }
 
 .pb-grid { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr); gap: 20px; align-items: start; margin-bottom: 18px; }
 .pb-today, .pb-card {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
-  box-shadow: 0 2px 12px rgba(20, 20, 19, 0.04);
+  box-shadow: 0 2px 12px rgba(29, 43, 58, 0.04);
 }
 .pb-today { padding: 22px 24px 24px; }
 .pb-card { padding: 16px 18px; }
@@ -164,7 +164,7 @@ const last = plan.days[plan.days.length - 1].date;
   padding: 12px 8px; border-bottom: 1px dashed var(--border); border-radius: 10px;
 }
 .pb-task:last-child { border-bottom: none; }
-.pb-task.now { background: rgba(217, 119, 87, 0.08); box-shadow: inset 3px 0 0 var(--accent); }
+.pb-task.now { background: rgba(42, 139, 216, 0.08); box-shadow: inset 3px 0 0 var(--accent); }
 .pb-time { font-family: var(--font-mono); font-size: 12.5px; color: var(--text-dim); padding-top: 3px; font-variant-numeric: tabular-nums; }
 .pb-task.now .pb-time { color: var(--accent); font-weight: 600; }
 .pb-body { display: flex; gap: 10px; align-items: flex-start; min-width: 0; }
@@ -184,7 +184,7 @@ const last = plan.days[plan.days.length - 1].date;
   width: 100%; margin-top: 6px; resize: vertical; font: inherit; font-size: 14.5px; color: var(--text);
   background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 9px 12px;
 }
-.pb-reflect:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(217, 119, 87, 0.18); }
+.pb-reflect:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(42, 139, 216, 0.18); }
 
 .pb-week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
 .pb-wd {
@@ -220,7 +220,7 @@ const last = plan.days[plan.days.length - 1].date;
   transition: all 0.2s var(--ease);
 }
 .pb-ph:hover { border-color: var(--accent); transform: translateY(-2px); }
-.pb-ph.cur { border-color: var(--accent); background: rgba(217, 119, 87, 0.06); }
+.pb-ph.cur { border-color: var(--accent); background: rgba(42, 139, 216, 0.06); }
 .pb-ph .t { font-family: var(--font-heading); font-weight: 500; font-size: 14.5px; }
 .pb-ph .r { font-family: var(--font-mono); font-size: 11.5px; color: var(--text-dim); }
 .pb-ph .g { font-size: 13.5px; color: var(--text-dim); line-height: 1.55; }
@@ -234,13 +234,13 @@ const last = plan.days[plan.days.length - 1].date;
   background: none; border: none; border-bottom: 1px dashed var(--border);
   display: grid; grid-template-columns: 92px 1fr 64px; gap: 12px; padding: 9px 6px; align-items: baseline;
 }
-.pb-row:hover { background: rgba(245, 243, 236, 0.75); }
+.pb-row:hover { background: rgba(255, 255, 255, 0.75); }
 .pb-row .d { font-family: var(--font-mono); font-size: 12.5px; color: var(--text-dim); white-space: nowrap; }
 .pb-row .t { font-size: 14.5px; min-width: 0; }
 .pb-row .c { font-family: var(--font-mono); font-size: 12px; color: var(--text-dim); text-align: right; font-variant-numeric: tabular-nums; }
 .pb-row.full .c { color: var(--good); font-weight: 600; }
 .pb-row.today .d, .pb-row.today .t { color: var(--accent); }
-.pb-row.sel { background: rgba(217, 119, 87, 0.07); }
+.pb-row.sel { background: rgba(42, 139, 216, 0.07); }
 
 .pb-backup details { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; }
 .pb-backup summary { cursor: pointer; font-family: var(--font-heading); font-weight: 500; font-size: 14.5px; }

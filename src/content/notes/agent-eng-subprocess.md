@@ -21,19 +21,7 @@ draft: false
 ## 1. 先看全貌：一条命令走过的路
 
 <figure style="margin:1.5rem 0">
-<svg viewBox="0 0 720 210" role="img" aria-label="一次工具调用的流程：模型输出 JSON，harness 解析后启动子进程，命令的输出经过管道回到 harness，截断后作为工具结果追加进对话，再交给模型" style="width:100%;height:auto;font-family:var(--font-heading)">
-<style>.s1-b{fill:var(--surface);stroke:var(--border);stroke-width:1.5}.s1-h{fill:#F6E3D9;stroke:var(--accent);stroke-width:1.5}.s1-t{fill:var(--text);font-size:14px;font-weight:500}.s1-s{fill:var(--text-dim);font-size:12px}.s1-a{stroke:var(--accent);stroke-width:2;fill:none;marker-end:url(#s1-arrow)}.s1-d{stroke:var(--text-dim);stroke-width:1.5;fill:none;stroke-dasharray:5 4;marker-end:url(#s1-arrow2)}</style>
-<defs><marker id="s1-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--accent)"/></marker><marker id="s1-arrow2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--text-dim)"/></marker></defs>
-<rect class="s1-b" x="10" y="30" width="130" height="60" rx="10"/><text class="s1-t" x="75" y="57" text-anchor="middle">大模型</text><text class="s1-s" x="75" y="76" text-anchor="middle">只会输出文字</text>
-<rect class="s1-h" x="200" y="30" width="150" height="60" rx="10"/><text class="s1-t" x="275" y="57" text-anchor="middle">Harness</text><text class="s1-s" x="275" y="76" text-anchor="middle">解析 JSON · 执行</text>
-<rect class="s1-b" x="410" y="30" width="130" height="60" rx="10"/><text class="s1-t" x="475" y="57" text-anchor="middle">子进程 sh -c</text><text class="s1-s" x="475" y="76" text-anchor="middle">真正跑命令</text>
-<rect class="s1-b" x="590" y="30" width="120" height="60" rx="10"/><text class="s1-t" x="650" y="57" text-anchor="middle">pytest …</text><text class="s1-s" x="650" y="76" text-anchor="middle">孙进程</text>
-<path class="s1-a" d="M140 50H198"/><text class="s1-s" x="169" y="42" text-anchor="middle">JSON</text>
-<path class="s1-a" d="M350 50H408"/><text class="s1-s" x="379" y="42" text-anchor="middle">启动</text>
-<path class="s1-a" d="M540 50H588"/>
-<path class="s1-d" d="M650 92V150H275V94"/><text class="s1-s" x="462" y="143" text-anchor="middle">输出经「管道」流回 · 退出码</text>
-<path class="s1-d" d="M240 92V180H75V94"/><text class="s1-s" x="158" y="198" text-anchor="middle">截断后作为「工具结果」追加进对话</text>
-</svg>
+<a href="/notes-assets/agent-eng-subprocess/01-one-tool-call.jpg" target="_blank" rel="noopener" aria-label="查看原图：一次工具调用：模型输出 JSON，harness 解析后启动 sh -c，sh 再启动 pytest；输出和退出码经管道流回 harness，截断后作为工具结果交还给模型"><img src="/notes-assets/agent-eng-subprocess/01-one-tool-call.jpg" alt="一次工具调用：模型输出 JSON，harness 解析后启动 sh -c，sh 再启动 pytest；输出和退出码经管道流回 harness，截断后作为工具结果交还给模型" width="1400" height="788" loading="lazy" decoding="async" style="height:auto;cursor:zoom-in" /></a>
 </figure>
 
 注意最右边的「孙进程」。harness 启动的通常是一个 shell（`sh -c "..."`），shell 再去启动真正的命令。命令自己可能还会再开进程，比如 `pytest -n 4` 会开 4 个 worker。**一条命令往往不是一个进程，而是一棵进程树。** 后面两个坑都出在这棵树上。
@@ -87,24 +75,7 @@ $ pgrep -fl "sleep 33"
 `subprocess.run` 杀掉的只是它直接启动的那个进程，也就是 shell。shell 启动的两个 `sleep` 是孙进程，没人管它们。父进程死了，它们就变成了**孤儿进程**，被系统的 1 号进程（Linux 上是 init 或 systemd，macOS 上是 launchd）收养，然后继续运行。
 
 <figure style="margin:1.5rem 0">
-<svg viewBox="0 0 720 230" role="img" aria-label="左图：只杀 shell，两个 sleep 变成孤儿继续运行；右图：杀整个进程组，shell 和两个 sleep 一起结束" style="width:100%;height:auto;font-family:var(--font-heading)">
-<style>.s2-b{fill:var(--surface);stroke:var(--border);stroke-width:1.5}.s2-k{fill:#EBEAE6;stroke:var(--text-dim);stroke-width:1.5;stroke-dasharray:5 4}.s2-o{fill:#F6E3D9;stroke:var(--error);stroke-width:1.5}.s2-g{fill:none;stroke:var(--good);stroke-width:2;stroke-dasharray:6 4}.s2-t{fill:var(--text);font-size:13.5px;font-weight:500}.s2-s{fill:var(--text-dim);font-size:12px}.s2-r{fill:var(--error);font-size:12.5px;font-weight:500}.s2-ok{fill:var(--good);font-size:12.5px;font-weight:500}.s2-l{stroke:var(--text-dim);stroke-width:1.5}</style>
-<text class="s2-t" x="175" y="20" text-anchor="middle">只杀子进程（proc.kill）</text>
-<rect class="s2-b" x="115" y="35" width="120" height="36" rx="8"/><text class="s2-t" x="175" y="58" text-anchor="middle">harness</text>
-<rect class="s2-k" x="115" y="95" width="120" height="36" rx="8"/><text class="s2-s" x="175" y="118" text-anchor="middle">sh -c（已杀）</text>
-<rect class="s2-o" x="30" y="160" width="120" height="36" rx="8"/><text class="s2-t" x="90" y="183" text-anchor="middle">sleep 33</text>
-<rect class="s2-o" x="200" y="160" width="120" height="36" rx="8"/><text class="s2-t" x="260" y="183" text-anchor="middle">sleep 33</text>
-<line class="s2-l" x1="175" y1="71" x2="175" y2="95"/><line class="s2-l" x1="160" y1="131" x2="90" y2="160"/><line class="s2-l" x1="190" y1="131" x2="260" y2="160"/>
-<text class="s2-r" x="175" y="220" text-anchor="middle">孙进程成了孤儿，还在运行</text>
-<text class="s2-t" x="545" y="20" text-anchor="middle">杀整个进程组（os.killpg）</text>
-<rect class="s2-b" x="485" y="35" width="120" height="36" rx="8"/><text class="s2-t" x="545" y="58" text-anchor="middle">harness</text>
-<rect class="s2-g" x="385" y="84" width="320" height="122" rx="12"/><text class="s2-ok" x="395" y="102">进程组</text>
-<rect class="s2-k" x="485" y="95" width="120" height="36" rx="8"/><text class="s2-s" x="545" y="118" text-anchor="middle">sh -c（已杀）</text>
-<rect class="s2-k" x="400" y="160" width="120" height="36" rx="8"/><text class="s2-s" x="460" y="183" text-anchor="middle">sleep（已杀）</text>
-<rect class="s2-k" x="570" y="160" width="120" height="36" rx="8"/><text class="s2-s" x="630" y="183" text-anchor="middle">sleep（已杀）</text>
-<line class="s2-l" x1="545" y1="71" x2="545" y2="95"/><line class="s2-l" x1="530" y1="131" x2="460" y2="160"/><line class="s2-l" x1="560" y1="131" x2="630" y2="160"/>
-<text class="s2-ok" x="545" y="222" text-anchor="middle">一个不剩</text>
-</svg>
+<a href="/notes-assets/agent-eng-subprocess/02-orphan-vs-group.jpg" target="_blank" rel="noopener" aria-label="查看原图：左：proc.kill() 只杀掉 sh -c，两个 sleep 成了孤儿继续运行；右：os.killpg() 杀掉整个进程组，sh -c 和两个 sleep 一起结束"><img src="/notes-assets/agent-eng-subprocess/02-orphan-vs-group.jpg" alt="左：proc.kill() 只杀掉 sh -c，两个 sleep 成了孤儿继续运行；右：os.killpg() 杀掉整个进程组，sh -c 和两个 sleep 一起结束" width="1400" height="788" loading="lazy" decoding="async" style="height:auto;cursor:zoom-in" /></a>
 </figure>
 
 放到 Agent 场景里，后果很具体：模型启动了一个开发服务器，超时后「被杀掉」了，其实服务器还占着端口。模型下一步再启动，就报「端口已被占用」。它不知道原因，于是开始乱改代码。
@@ -128,6 +99,10 @@ except subprocess.TimeoutExpired:
 ```
 
 我实测的现象是：**第二次 `communicate()` 一直不返回**，4 秒后它还卡着。直到我手动 `pkill` 掉两个 `sleep`，它才打印出 `communicate returned after 3.0 s`。如果我不去杀，它会一直等到两个 `sleep` 自己结束，也就是 30 多秒后。
+
+<figure style="margin:1.5rem 0">
+<a href="/notes-assets/agent-eng-subprocess/03-pipe-eof.jpg" target="_blank" rel="noopener" aria-label="查看原图：管道示意：harness 在读端等待 EOF；写端分出三根管子，sh -c 已被杀，两个 sleep 仍拿着写端，所以 EOF 迟迟不来"><img src="/notes-assets/agent-eng-subprocess/03-pipe-eof.jpg" alt="管道示意：harness 在读端等待 EOF；写端分出三根管子，sh -c 已被杀，两个 sleep 仍拿着写端，所以 EOF 迟迟不来" width="1400" height="788" loading="lazy" decoding="async" style="height:auto;cursor:zoom-in" /></a>
+</figure>
 
 原因在**管道**。`stdout=subprocess.PIPE` 会创建一根管道：子进程往写端写，我们从读端读。`communicate()` 要一直读到「文件结束」（EOF）才返回，而 **EOF 只有在所有拿着写端的进程都关掉它之后才会出现**。孙进程是从 shell 那里继承了这个写端的，shell 死了，孙进程还拿着，所以读的一方就永远等不到 EOF。
 

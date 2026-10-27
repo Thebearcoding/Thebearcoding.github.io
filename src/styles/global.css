@@ -1157,3 +1157,15 @@ body.home-page { --maxw: 1208px; }
 @media (max-width: 700px) {
   .home-page .repo-bar { border-right: none; border-bottom: 1px solid var(--hair); width: 100%; }
 }
+
+/* ---- 窗口按钮:macOS 的红黄绿 ---- */
+.home-page .term-dots i { box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.18); }
+.home-page .term-dots i:nth-child(1) { background: #FF5F57; }
+.home-page .term-dots i:nth-child(2) { background: #FEBC2E; }
+.home-page .term-dots i:nth-child(3) { background: #28C840; }
+.home-page .card-grid-3 .t-card:hover .term-dots i:first-child { background: #FF5F57; }
+
+/* ---- 窗口逐行生成:标题像命令一样打出来,内容一行一行出现(由脚本加上 .win-anim 才生效) ---- */
+.win-anim .win-line { opacity: 0; transform: translateY(3px); }
+.win-anim .win-line.shown { opacity: 1; transform: none; transition: opacity 0.28s ease, transform 0.28s ease; }
+.win-title.typing::after { content: '▌'; margin-left: 1px; color: var(--t-ask); animation: term-blink 1s steps(2) infinite; }

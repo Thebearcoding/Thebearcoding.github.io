@@ -282,5 +282,33 @@ const planLite = {
     </div>
   </section>
 
+  <script is:inline>
+    // 下面的窗口:进入视口时,标题逐字打出,内容逐行出现;减弱动态效果时什么都不做,内容直接可见
+    (function () {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return;
+      var wins = Array.prototype.slice.call(document.querySelectorAll('.home-page .win, .home-page .card-grid-3 .t-card'));
+      wins.forEach(function (w) {
+        var title = w.querySelector('.win-title');
+        if (title) { title.setAttribute('data-full', title.textContent); title.setAttribute('aria-label', title.textContent); title.textContent = ''; }
+        w.querySelectorAll('.topic-card, .recent-list li, .t-body > *, .repo-links > a, .win-meta').forEach(function (l) { l.classList.add('win-line'); });
+        w.classList.add('win-anim');
+      });
+      function play(w) {
+        var title = w.querySelector('.win-title');
+        var lines = Array.prototype.slice.call(w.querySelectorAll('.win-line'));
+        var full = title ? title.getAttribute('data-full') : '', i = 0;
+        if (title) title.classList.add('typing');
+        (function type() {
+          if (title && i < full.length) { i += 1; title.textContent = full.slice(0, i); setTimeout(type, 32); return; }
+          lines.forEach(function (l, k) { setTimeout(function () { l.classList.add('shown'); }, 90 * k); });
+          setTimeout(function () { if (title) title.classList.remove('typing'); }, 90 * lines.length + 600);
+        })();
+      }
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) { if (e.isIntersecting) { io.unobserve(e.target); play(e.target); } });
+      }, { threshold: 0.2 });
+      wins.forEach(function (w) { io.observe(w); });
+    })();
+  </script>
 </div>
 </Base>

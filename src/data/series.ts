@@ -52,6 +52,15 @@ export const SERIES: Series[] = [
     ],
   },
   {
+    key: 'agent-eng',
+    name: 'Agent 工程实战',
+    desc: '从零手写一个 Agent Harness：子进程与工具执行、工具协议、Agent 循环、上下文管理，再一步步长成能持久化、能流式输出、能部署、能评测、能自我改进的服务，后端基础在需要的地方顺手学。',
+    notes: [
+      'agent-eng-roadmap',
+      'agent-eng-subprocess',
+    ],
+  },
+  {
     key: 'recsys',
     name: '推荐与 LLM4Rec',
     desc: '写给多模态背景、没系统学过推荐的人:评估与偏差、长序列、排序 scaling、语义 ID、生成式推荐,以及搜索、图推荐、多任务与系统设计题。',

@@ -1100,3 +1100,78 @@ body.home-page::after { background: linear-gradient(180deg, var(--bg) 0%, #F7FAF
 .site-footer { background: #DCE9F3; color: #3D5873; border-top: 1px solid rgba(12, 34, 54, 0.08); }
 .site-footer a { color: #24425F; }
 .site-footer .foot-note { color: #6E859B; }
+
+/* ============================================================
+   首页首屏 · 调色台:监看画面(原片 / 天空蓝对比划条)+ 元数据栏 + 介绍与终端
+   ============================================================ */
+body.home-page .site-nav { background: var(--haze-mid); }
+.grade-hero {
+  margin: 0 calc(50% - 50vw) 8px; padding: 18px max(20px, calc(50vw - 600px)) 24px;
+  background: linear-gradient(180deg, var(--haze-mid) 0%, var(--haze-low) 55%, var(--bg) 100%);
+}
+.viewer {
+  position: relative; margin: 0; aspect-ratio: 21 / 8; overflow: hidden; border-radius: 4px;
+  background: #0C2236; box-shadow: 0 30px 70px -40px rgba(12, 34, 54, 0.6);
+  cursor: ew-resize; user-select: none; touch-action: pan-y;
+}
+.v-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 64%; pointer-events: none; }
+/* 天空蓝:去色后整体着冷蓝,提亮天空、压一点对比 */
+.v-grade { filter: grayscale(1) sepia(1) hue-rotate(168deg) saturate(1.5) brightness(1.08) contrast(0.95); clip-path: inset(0 0 0 var(--pos)); }
+.v-handle { position: absolute; top: 0; bottom: 0; left: var(--pos); width: 1px; background: rgba(255, 255, 255, 0.9); pointer-events: none; }
+.v-handle::after {
+  content: '‹ ›'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+  background: rgba(255, 255, 255, 0.92); color: #0C2236; font: 600 13px/1 var(--font-mono); letter-spacing: -1px;
+  box-shadow: 0 4px 14px rgba(12, 34, 54, 0.3);
+}
+.v-range { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize; }
+.viewer:has(.v-range:focus-visible) { outline: 2px solid var(--t-ask); outline-offset: 3px; }
+.v-mark {
+  position: absolute; left: 3.2%; top: 5%; margin: 0; pointer-events: none;
+  font-family: 'Instrument Serif', 'Times New Roman', serif; font-style: italic; font-weight: 400;
+  font-size: clamp(3.4rem, 9.5vw, 8.4rem); line-height: 0.95; letter-spacing: -0.015em; color: #0C2236;
+}
+.v-tag {
+  position: absolute; bottom: 12px; padding: 3px 8px; border-radius: 3px; pointer-events: none;
+  background: rgba(12, 34, 54, 0.55); color: #fff; font: 500 11.5px/1.4 var(--font-sans); letter-spacing: 0.04em;
+}
+.v-tag.left { left: 12px; }
+.v-tag.right { right: 12px; }
+
+.v-meta {
+  display: flex; flex-wrap: wrap; align-items: center; margin-top: 10px;
+  border-top: 1px solid var(--hair); border-bottom: 1px solid var(--hair);
+  font: 12px/1.6 var(--font-mono), var(--font-sans); color: var(--ink-2);
+}
+.v-meta > span { padding: 7px 16px; border-left: 1px solid var(--hair); white-space: nowrap; }
+.v-meta > span:first-child { padding-left: 2px; border-left: none; }
+.v-meta i { font-style: normal; color: var(--ink-3); margin-right: 8px; font-family: var(--font-sans); }
+.v-swatches { display: inline-flex; gap: 3px; }
+.v-swatches b { width: 14px; height: 14px; border-radius: 2px; box-shadow: inset 0 0 0 1px rgba(12, 34, 54, 0.08); }
+
+.grade-row { display: grid; grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr); gap: 36px; margin-top: 22px; align-items: start; }
+.grade-row .term-who { margin: 0; font-size: 19px; font-weight: 600; letter-spacing: 0.04em; color: var(--ink-sky); }
+.grade-row .term-who span { font-size: 14px; }
+.grade-row .term-tagline { margin: 10px 0 16px; font-size: 15.5px; line-height: 1.8; }
+.grade-row .term-tracks { margin: 0 0 18px; font-size: 14px; }
+.grade-row .term-tracks li { padding: 8px 0; }
+.grade-row .hero-btn { height: 40px; padding: 0 18px; font-size: 14px; }
+.grade-row .term-body { height: 236px; padding: 14px 18px 10px; }
+.grade-row .term-asks { padding: 10px 14px 12px; }
+
+/* 下面的区块:间距再收一档 */
+.home-page .now-banner { margin-top: 4px; padding: 11px 18px; }
+.home-page .section { padding: 18px 0; }
+.home-page .section-head { margin-bottom: 12px; padding-bottom: 8px; }
+.home-page .section-head h2::before { font-size: 34px; }
+.home-page .topic-card { padding: 12px 20px; row-gap: 4px; }
+.home-page .card-grid-3 .t-card { padding: 14px 16px; }
+.home-page .recent-list li { padding: 9px 2px; }
+.home-page .container { padding-bottom: 24px; }
+
+@media (max-width: 900px) {
+  .viewer { aspect-ratio: 4 / 3; }
+  .v-img { object-position: 30% 64%; }
+  .v-meta > span { padding: 6px 10px; }
+  .grade-row { grid-template-columns: 1fr; gap: 24px; }
+}

@@ -17,9 +17,6 @@ const series = SERIES.map((s) => ({
   picks: s.notes.slice(1, 5).map((id) => byId.get(id)).filter((n) => n !== undefined),
 }));
 const fmt = (d: Date) => d.toISOString().slice(0, 10);
-const latest = notes.length ? fmt(notes[0].data.date) : '';
-// 天空蓝调色的色板:从地平线的深蓝到天顶的亮白
-const swatches = ['#2F5F86', '#5F92BD', '#9CC4E4', '#D6E8F5'];
 
 // 首屏终端:每条演示都是一次 ReAct 循环,内容取自真实的专题与笔记数据
 const short = (t: string) => t.split(/[:：？?]/)[0];
@@ -80,25 +77,9 @@ const planLite = {
 </Fragment>
 <div class="container">
 
-  <header class="grade-hero">
-    <figure class="viewer" id="viewer" style="--pos: 56%">
-      <img class="v-img v-orig" src="/images/global-gathered-scenes.webp" alt="傍晚的海边，两个人坐在堤岸上看对岸的灯火" width="1672" height="941" />
-      <img class="v-img v-grade" src="/images/global-gathered-scenes.webp" alt="" aria-hidden="true" width="1672" height="941" />
-      <h1 class="v-mark" lang="en">Athebear</h1>
-      <span class="v-tag left">原片</span>
-      <span class="v-tag right">天空蓝</span>
-      <span class="v-handle" aria-hidden="true"></span>
-      <input class="v-range" id="v-range" type="range" min="0" max="100" value="56" aria-label="拖动分割线，对比原片和调成天空蓝之后的画面" />
-    </figure>
-    <div class="v-meta" aria-label="画面信息">
-      <span><i>片段</i>A001 Across the water</span>
-      <span><i>调色</i>天空蓝</span>
-      <span class="v-swatches" aria-hidden="true">{swatches.map((c) => <b style={`background:${c}`} title={c}></b>)}</span>
-      <span><i>笔记</i>{all.length} 篇，{series.length} 个专题</span>
-      <span><i>更新</i>{latest}</span>
-    </div>
-    <div class="grade-row">
+  <header class="term-hero">
     <div class="term-intro">
+      <h1 class="term-name" lang="en">Athebear</h1>
       <p class="term-who">熊昕然 <span lang="en">Xinran Xiong</span></p>
       <p class="term-tagline">做多模态研究，也在从零手写 Agent Harness。这里放我的研究笔记、手敲教程和互动课程。</p>
       <ul class="term-tracks" aria-label="方向">
@@ -124,14 +105,7 @@ const planLite = {
         {traces.map((t, i) => <button type="button" class="term-ask" data-i={i}>{t.ask}</button>)}
       </div>
     </section>
-    </div>
   </header>
-  <script is:inline>
-    (function () {
-      var v = document.getElementById('viewer'), r = document.getElementById('v-range');
-      r.addEventListener('input', function () { v.style.setProperty('--pos', r.value + '%'); });
-    })();
-  </script>
   <script is:inline type="application/json" id="term-traces" set:html={JSON.stringify(traces)}></script>
   <script is:inline>
     (function () {

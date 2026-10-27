@@ -17,6 +17,54 @@ const series = SERIES.map((s) => ({
   picks: s.notes.slice(1, 5).map((id) => byId.get(id)).filter((n) => n !== undefined),
 }));
 const fmt = (d: Date) => d.toISOString().slice(0, 10);
+
+// 首屏终端:每条演示都是一次 ReAct 循环,内容取自真实的专题与笔记数据
+const short = (t: string) => t.split(/[:：？?]/)[0];
+const link = (id: string) => ({ href: `/notes/${id}/`, text: short(byId.get(id)?.data.title ?? id) });
+const eng = series.find((s) => s.key === 'agent-eng');
+const agent = series.find((s) => s.key === 'agent');
+const mm = series.find((s) => s.key === 'multimodal');
+const traces = [
+  {
+    ask: '这个博客有什么？',
+    steps: [
+      { k: 'thought', t: '先看看一共有哪些专题。' },
+      { k: 'action', t: 'run_command("ls notes/")' },
+      { k: 'obs', t: series.map((s) => `${s.key}/ (${s.count})`).join('   ') },
+      { k: 'thought', t: `${series.length} 个专题，共 ${all.length} 篇。想边敲代码边学，就从 Agent 工程实战开始。` },
+    ],
+    links: series.map((s) => ({ href: `/notes/${s.notes[0]}/`, text: s.name })),
+  },
+  eng && agent && {
+    ask: 'Agent 从哪开始读？',
+    steps: [
+      { k: 'thought', t: '工程和算法是两条线，都列出来。' },
+      { k: 'action', t: 'run_command("cat notes/agent-eng/README")' },
+      { k: 'obs', t: eng.notes.filter((id) => byId.has(id)).map((id, i) => `${String(i + 1).padStart(2, '0')}  ${short(byId.get(id)!.data.title)}`).join('\n') },
+      { k: 'thought', t: '想自己写 Harness，读工程线；准备算法面试，读 Agent 算法总览。' },
+    ],
+    links: [link(eng.notes[eng.notes.length > 1 ? 1 : 0]), link(agent.notes[0])],
+  },
+  {
+    ask: '最近更新了什么？',
+    steps: [
+      { k: 'thought', t: '按时间排一下，取最新的三篇。' },
+      { k: 'action', t: 'run_command("ls -t notes/ | head -3")' },
+      { k: 'obs', t: notes.slice(0, 3).map((n) => `${fmt(n.data.date)}  ${short(n.data.title)}`).join('\n') },
+    ],
+    links: notes.slice(0, 3).map((n) => link(n.id)),
+  },
+  mm && {
+    ask: '多模态怎么入门？',
+    steps: [
+      { k: 'thought', t: '多模态专题有总览，先看它推荐的前几篇。' },
+      { k: 'action', t: 'run_command("head -4 notes/multimodal/README")' },
+      { k: 'obs', t: mm.picks.map((n, i) => `${String(i + 1).padStart(2, '0')}  ${short(n.data.title)}`).join('\n') },
+      { k: 'thought', t: `一共 ${mm.count} 篇，从总览开始最稳。` },
+    ],
+    links: [link(mm.notes[0])],
+  },
+].filter(Boolean);
 // 看板横幅:只把日期、主题和节点交给客户端,按访问当天显示
 const planLite = {
   days: plan.days.map((d) => ({ date: d.date, theme: d.theme })),
@@ -26,41 +74,15 @@ const planLite = {
 <Base title="Xinran Xiong · athebear" bodyClass="home-page">
 <div class="container">
 
-  <header class="hero">
-    <div class="hero-backdrop" aria-hidden="true"></div>
-    <div class="hero-copy">
-      <div class="hero-intro">
-        <a
-          class="hero-avatar-link"
-          href="https://github.com/Thebearcoding"
-          target="_blank"
-          rel="noopener"
-          aria-label="在 GitHub 查看 Thebearcoding"
-        >
-          <img
-            class="hero-avatar"
-            src="/images/github-avatar.png"
-            alt="Xinran Xiong 的 GitHub 头像"
-            width="460"
-            height="460"
-          />
-        </a>
-        <div>
-          <span class="kicker">MULTIMODAL · ML RESEARCH</span>
-          <h1>Xinran Xiong<span class="accent-dot">.</span></h1>
-        </div>
-      </div>
-      <p class="tagline">
-        多模态方向的研究者。关心视觉与语言如何在同一个空间里相遇,
-        也相信 65M 参数的小模型和一支笔一样,足够把一件事讲清楚。
-        这里记录我的研究笔记、想法,和亲手做的互动课程。
-      </p>
-      <div class="hero-chips" aria-label="研究兴趣">
-        <span class="chip"><b>多模态学习</b> · 视觉-语言模型</span>
-        <span class="chip">跨模态检索与对齐</span>
-        <span class="chip">对比学习 · CLIP / SigLIP</span>
-        <span class="chip">小模型 · 从零实现</span>
-      </div>
+  <header class="term-hero">
+    <div class="term-intro">
+      <img class="term-logo" src="/icon-192.png" alt="" width="64" height="64" />
+      <h1 class="term-name">熊昕然 <span lang="en">Xinran Xiong</span></h1>
+      <p class="term-tagline">做多模态研究，也在从零手写 Agent Harness。这里放我的研究笔记、手敲教程和互动课程。</p>
+      <ul class="term-tracks" aria-label="方向">
+        <li><b>多模态</b>视觉语言模型、跨模态检索、对比学习</li>
+        <li><b>Agent</b>工具调用、上下文管理、从零写 Harness</li>
+      </ul>
       <div class="hero-links">
         <a class="pill-link primary" href="/notes/"><PillIcon name="notes" />读笔记</a>
         <a class="pill-link" href="/teaching/"><PillIcon name="teaching" />互动课程</a>
@@ -68,7 +90,73 @@ const planLite = {
         <a class="pill-link" href="mailto:hello@athebear.me"><PillIcon name="email" />Email</a>
       </div>
     </div>
+
+    <section class="term" aria-label="演示：一个 Agent 帮你逛这个博客">
+      <div class="term-bar">
+        <span class="term-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="term-title">athebear@harness: ~</span>
+        <button class="term-replay" id="term-replay" type="button">再跑一次</button>
+      </div>
+      <div class="term-body" id="term-body" aria-live="polite"></div>
+      <div class="term-asks" role="group" aria-label="换一个问题问它">
+        {traces.map((t, i) => <button type="button" class="term-ask" data-i={i}>{t.ask}</button>)}
+      </div>
+    </section>
   </header>
+  <script is:inline type="application/json" id="term-traces" set:html={JSON.stringify(traces)}></script>
+  <script is:inline>
+    (function () {
+      var traces = JSON.parse(document.getElementById('term-traces').textContent);
+      var body = document.getElementById('term-body');
+      var asks = Array.prototype.slice.call(document.querySelectorAll('.term-ask'));
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var LABEL = { thought: 'Thought', action: 'Action', obs: 'Observation' };
+      var run = 0, current = 0;
+      function line(cls, label) {
+        var row = document.createElement('div');
+        row.className = 'term-line ' + cls;
+        if (label) { var l = document.createElement('span'); l.className = 'term-k'; l.textContent = label; row.appendChild(l); }
+        var v = document.createElement('span'); v.className = 'term-v'; row.appendChild(v);
+        body.appendChild(row);
+        body.scrollTop = body.scrollHeight;
+        return v;
+      }
+      function wait(ms, id) { return new Promise(function (r) { setTimeout(function () { r(id === run); }, reduce ? 0 : ms); }); }
+      function type(el, text, id, speed) {
+        if (reduce) { el.textContent = text; return Promise.resolve(true); }
+        return new Promise(function (resolve) {
+          var i = 0;
+          (function tick() {
+            if (id !== run) return resolve(false);
+            i += 1; el.textContent = text.slice(0, i);
+            body.scrollTop = body.scrollHeight;
+            if (i < text.length) setTimeout(tick, speed); else resolve(true);
+          })();
+        });
+      }
+      async function play(idx) {
+        var id = ++run; current = idx;
+        var t = traces[idx];
+        asks.forEach(function (b, i) { b.setAttribute('aria-pressed', i === idx ? 'true' : 'false'); });
+        body.textContent = '';
+        if (!(await type(line('ask', '>'), t.ask, id, 45))) return;
+        for (var s = 0; s < t.steps.length; s++) {
+          var st = t.steps[s];
+          if (!(await wait(st.k === 'obs' ? 520 : 260, id))) return;
+          var v = line(st.k, LABEL[st.k]);
+          if (st.k === 'obs') { v.classList.add('running'); if (!(await wait(420, id))) return; v.classList.remove('running'); v.textContent = st.t; body.scrollTop = body.scrollHeight; }
+          else if (!(await type(v, st.t, id, st.k === 'action' ? 22 : 26))) return;
+        }
+        if (!(await wait(300, id))) return;
+        var f = line('final', 'Final');
+        t.links.forEach(function (lk) { var a = document.createElement('a'); a.href = lk.href; a.textContent = lk.text; f.appendChild(a); });
+        body.scrollTop = body.scrollHeight;
+      }
+      asks.forEach(function (b) { b.addEventListener('click', function () { play(+b.getAttribute('data-i')); }); });
+      document.getElementById('term-replay').addEventListener('click', function () { play(current); });
+      play(0);
+    })();
+  </script>
 
   <a class="now-banner" href="/plan/">
     <span class="now-tag">进行中</span>

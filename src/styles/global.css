@@ -1118,3 +1118,42 @@ body.home-page::after { background: linear-gradient(180deg, var(--bg) 0%, #F7FAF
 
 /* ---- 首页统一宽度:顶栏、各区块、页脚与首屏内容对齐(1208 - 2×24 = 1160,与 .term-hero 的内容宽一致) ---- */
 body.home-page { --maxw: 1208px; }
+
+/* ============================================================
+   首页窗口:下面的面板与首屏终端同一套 Mac 窗口样式(三点 + 路径标题 + 半透明玻璃)
+   ============================================================ */
+.home-page .win,
+.home-page .card-grid-3 .t-card {
+  border: 1px solid rgba(255, 255, 255, 0.7); border-radius: 12px; overflow: hidden;
+  background: rgba(255, 255, 255, 0.68); backdrop-filter: blur(16px) saturate(1.1);
+  box-shadow: 0 30px 70px -40px rgba(12, 34, 54, 0.4), 0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 0 0 1px rgba(12, 34, 54, 0.06);
+}
+.home-page .win-bar {
+  display: flex; align-items: center; gap: 12px; padding: 9px 14px;
+  border-bottom: 1px solid var(--hair); background: rgba(240, 246, 251, 0.6);
+}
+.home-page .win-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 12px/1.5 var(--font-mono), var(--font-sans); letter-spacing: 0.02em; color: var(--ink-3); }
+.home-page .win-meta { flex: none; font-size: 12.5px; color: var(--ink-3); }
+
+/* 窗口里的内容不再自带边框和底色 */
+.home-page .win .topic-grid { background: none; border: none; border-radius: 0; box-shadow: none; backdrop-filter: none; }
+.home-page .win .recent-list { padding: 2px 18px 4px; }
+.home-page .win .recent-list li:last-child { border-bottom: none; }
+
+/* 课程卡片:窗口标题栏 + 内容区 */
+.home-page .card-grid-3 .t-card { display: flex; flex-direction: column; padding: 0; }
+.home-page .card-grid-3 .t-card:hover { border-color: rgba(255, 255, 255, 0.9); box-shadow: 0 30px 70px -36px rgba(12, 34, 54, 0.5), 0 0 0 1px rgba(31, 111, 178, 0.35); }
+.home-page .card-grid-3 .t-card:hover .term-dots i:first-child { background: #4AACEC; }
+.home-page .t-body { display: flex; flex-direction: column; flex: 1; padding: 12px 16px 14px; }
+.home-page .card-grid-3 .t-card .t-go { margin-top: auto; }
+
+/* 仓库链接条:扁窗口,标题栏和链接在同一行 */
+.home-page .repo-strip.win { display: flex; align-items: stretch; flex-wrap: wrap; padding: 0; gap: 0; }
+.home-page .repo-bar { border-bottom: none; border-right: 1px solid var(--hair); }
+.home-page .repo-bar .win-title { flex: none; }
+.home-page .repo-links { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 20px; padding: 8px 16px; font-size: 13.5px; }
+.home-page .repo-links a { color: var(--ink-2); }
+.home-page .repo-links a:hover { color: var(--t-ask); text-decoration: none; }
+@media (max-width: 700px) {
+  .home-page .repo-bar { border-right: none; border-bottom: 1px solid var(--hair); width: 100%; }
+}

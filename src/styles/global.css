@@ -1100,3 +1100,21 @@ body.home-page::after { background: linear-gradient(180deg, var(--bg) 0%, #F7FAF
 .site-footer { background: #DCE9F3; color: #3D5873; border-top: 1px solid rgba(12, 34, 54, 0.08); }
 .site-footer a { color: #24425F; }
 .site-footer .foot-note { color: #6E859B; }
+
+/* ---- 首页间距收紧一档(只动留白,不动样式) ---- */
+.term-hero { padding-top: 60px; padding-bottom: 76px; gap: 52px; }
+.term-tagline { margin: 20px 0 22px; }
+.term-tracks { margin-bottom: 24px; }
+.term-tracks li { padding: 9px 0; }
+.home-page .now-banner { padding: 11px 18px; }
+.home-page .section { padding: 18px 0; }
+.home-page .section-head { margin-bottom: 12px; padding-bottom: 8px; }
+.home-page .section-head h2::before { font-size: 34px; }
+.home-page .topic-card { padding: 12px 20px; row-gap: 4px; }
+.home-page .card-grid-3 .t-card { padding: 14px 16px; }
+.home-page .recent-list li { padding: 9px 2px; }
+.home-page .container { padding-bottom: 24px; }
+@media (max-width: 900px) { .term-hero { padding: 40px 20px 52px; gap: 28px; } }
+
+/* ---- 首页统一宽度:顶栏、各区块、页脚与首屏内容对齐(1208 - 2×24 = 1160,与 .term-hero 的内容宽一致) ---- */
+body.home-page { --maxw: 1208px; }

@@ -137,7 +137,7 @@ except subprocess.TimeoutExpired:
 
 现在把超时、进程组、输出处理拼起来。建议你**逐行手敲**，存成 `run_command.py`：
 
-```python
+```python title="run_command.py"
 import os
 import signal
 import subprocess
@@ -213,7 +213,7 @@ print(run_command("sleep 30 & sleep 30", timeout=1))
 
 工具写好了，把它接进循环。这里先用一个**脚本化的假模型**，它按顺序吐出预先写好的回复，这样不用 API key，也不花钱，就能把循环调通。存成 `mini_loop.py`：
 
-```python
+```python title="mini_loop.py"
 import json
 
 from run_command import run_command

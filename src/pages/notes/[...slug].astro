@@ -22,7 +22,14 @@ const next = idx >= 0 && idx < series.length - 1 ? series[idx + 1] : undefined;
 const toc = headings.filter((h) => h.depth === 2);
 ---
 <Base title={`${note.data.title} · athebear`} description={note.data.summary} math={true} bodyClass="reading">
+<script is:inline slot="head">
+  try { if (localStorage.getItem('immersive') === '1') document.documentElement.classList.add('immersive'); } catch (e) {}
+</script>
 <div class="read-progress" id="read-progress" aria-hidden="true"></div>
+<button class="immersive-btn" id="immersive-toggle" type="button" aria-pressed="false" title="沉浸阅读（快捷键 I，Esc 退出）">
+  <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path class="ib-enter" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><path class="ib-exit" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>
+  <span class="ib-label">沉浸阅读</span>
+</button>
 <div class="doc">
   <aside class="doc-side" aria-label="专题章节">
     {ser && series.length > 1 ? (
@@ -88,6 +95,48 @@ const toc = headings.filter((h) => h.depth === 2);
       var box = side.parentElement;
       if (on && box) box.scrollTop = on.offsetTop - box.clientHeight / 2;
     }
+    // 代码块:包一层标题栏(文件名或语言 + 复制按钮),4 行以上加行号
+    var LANG = { python: 'Python', py: 'Python', bash: 'Shell', sh: 'Shell', shell: 'Shell', json: 'JSON', text: '输出', plaintext: '输出', js: 'JavaScript', javascript: 'JavaScript', ts: 'TypeScript', typescript: 'TypeScript', yaml: 'YAML', toml: 'TOML', sql: 'SQL', go: 'Go', rust: 'Rust', java: 'Java', cpp: 'C++', c: 'C' };
+    Array.prototype.forEach.call(document.querySelectorAll('.doc-prose pre.astro-code'), function (pre) {
+      var box = document.createElement('div');
+      box.className = 'code-box';
+      var head = document.createElement('div');
+      head.className = 'code-head';
+      var title = document.createElement('span');
+      title.className = 'code-title';
+      var lang = (pre.getAttribute('data-language') || '').toLowerCase();
+      title.textContent = pre.getAttribute('data-title') || LANG[lang] || lang || '代码';
+      var copy = document.createElement('button');
+      copy.type = 'button';
+      copy.className = 'code-copy';
+      copy.textContent = '复制';
+      copy.setAttribute('aria-label', '复制这段代码');
+      copy.addEventListener('click', function () {
+        var text = pre.innerText.replace(/\n$/, '');
+        var done = function () {
+          copy.textContent = '已复制';
+          copy.classList.add('done');
+          setTimeout(function () { copy.textContent = '复制'; copy.classList.remove('done'); }, 1600);
+        };
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(text).then(done, function () { copy.textContent = '复制失败'; });
+        } else {
+          var ta = document.createElement('textarea');
+          ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+          document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); done(); } catch (e) { copy.textContent = '复制失败'; }
+          document.body.removeChild(ta);
+        }
+      });
+      head.appendChild(title);
+      head.appendChild(copy);
+      pre.parentNode.insertBefore(box, pre);
+      box.appendChild(head);
+      box.appendChild(pre);
+      var isOutput = lang === 'text' || lang === 'plaintext' || lang === '';
+      if (!isOutput && pre.querySelectorAll('.line').length >= 4) box.classList.add('numbered');
+    });
+
     var links = Array.prototype.slice.call(document.querySelectorAll('.read-toc-list a'));
     var heads = links.map(function (a) { return document.getElementById(decodeURIComponent(a.getAttribute('href').slice(1))); });
     function onScroll() {
@@ -100,5 +149,49 @@ const toc = headings.filter((h) => h.depth === 2);
     }
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
+
+    // 沉浸阅读:隐藏顶栏、两侧栏与页脚;切换前后让正在读的段落停在原位
+    var root = document.documentElement;
+    var btn = document.getElementById('immersive-toggle');
+    var label = btn.querySelector('.ib-label');
+    var blocks = Array.prototype.slice.call(document.querySelectorAll('.doc-head, .doc-prose > *'));
+    function sync() {
+      var on = root.classList.contains('immersive');
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      label.textContent = on ? '退出沉浸' : '沉浸阅读';
+    }
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    function setImmersive(on) {
+      if (on === root.classList.contains('immersive')) return;
+      if (document.startViewTransition && !reduceMotion.matches) {
+        document.startViewTransition(function () { applyImmersive(on); });
+      } else {
+        applyImmersive(on);
+      }
+    }
+    function applyImmersive(on) {
+      // 记下视线所在的块、以及读到它的几分之几;字号变化后按同一比例对齐回视线
+      var line = Math.min(160, window.innerHeight / 3), anchor = null, ratio = 0;
+      for (var i = 0; i < blocks.length; i++) {
+        var r = blocks[i].getBoundingClientRect();
+        if (r.bottom > line) { anchor = blocks[i]; ratio = r.height ? Math.max(0, (line - r.top) / r.height) : 0; break; }
+      }
+      root.classList.toggle('immersive', on);
+      if (anchor) {
+        var r2 = anchor.getBoundingClientRect();
+        window.scrollBy(0, r2.top + ratio * r2.height - line);
+      }
+      try { localStorage.setItem('immersive', on ? '1' : '0'); } catch (e) {}
+      sync();
+      onScroll();
+    }
+    btn.addEventListener('click', function () { setImmersive(!root.classList.contains('immersive')); });
+    document.addEventListener('keydown', function (e) {
+      var t = e.target;
+      if (e.metaKey || e.ctrlKey || e.altKey || (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)))) return;
+      if (e.key === 'i' || e.key === 'I') { e.preventDefault(); setImmersive(!root.classList.contains('immersive')); }
+      else if (e.key === 'Escape' && root.classList.contains('immersive')) setImmersive(false);
+    });
+    sync();
   })();
 </script>

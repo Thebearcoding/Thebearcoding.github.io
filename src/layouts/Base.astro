@@ -16,7 +16,10 @@ import '../styles/global.css';
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="description" content={description} />
-<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<meta name="theme-color" content="#2A8BD8" />
 <title>{title}</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css" media="print" onload="this.media='all'" />
@@ -32,7 +35,7 @@ import '../styles/global.css';
 
 <nav class="site-nav">
   <div class="nav-inner">
-    <a class="nav-brand" href="/"><img src="/favicon.svg" alt="" />athebear</a>
+    <a class="nav-brand" href="/"><img src="/favicon-64.png" alt="" width="32" height="32" />athebear</a>
     <div class="nav-links">
       <a href="/" aria-current={isActive('/')}>主页</a>
       <a href="/notes/" aria-current={isActive('/notes')}>笔记</a>

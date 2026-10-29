@@ -61,6 +61,18 @@ export const SERIES: Series[] = [
     ],
   },
   {
+    key: 'lcc',
+    name: 'learn-claude-code 精读',
+    desc: '转载 shareAI-lab/learn-claude-code（MIT），每课补配图、code.py 逐段导读和一次真实运行：从一个 while 循环开始，一课加一个 harness 机制。',
+    notes: [
+      'lcc-s01-agent-loop',
+      'lcc-s02-tool-use',
+      'lcc-s03-permission',
+      'lcc-s04-hooks',
+      'lcc-s05-todo-write',
+    ],
+  },
+  {
     key: 'recsys',
     name: '推荐与 LLM4Rec',
     desc: '写给多模态背景、没系统学过推荐的人:评估与偏差、长序列、排序 scaling、语义 ID、生成式推荐,以及搜索、图推荐、多任务与系统设计题。',

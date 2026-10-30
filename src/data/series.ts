@@ -77,6 +77,7 @@ export const SERIES: Series[] = [
       'lcc-s10-task-system',
       'lcc-s11-background-tasks',
       'lcc-s12-cron-scheduler',
+      'lcc-s13-agent-teams',
     ],
   },
   {

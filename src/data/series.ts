@@ -75,6 +75,7 @@ export const SERIES: Series[] = [
       'lcc-s08-context-compact',
       'lcc-s09-memory',
       'lcc-s10-task-system',
+      'lcc-s11-background-tasks',
     ],
   },
   {

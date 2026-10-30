@@ -72,6 +72,7 @@ export const SERIES: Series[] = [
       'lcc-s05-todo-write',
       'lcc-s06-subagent',
       'lcc-s07-skill-loading',
+      'lcc-s08-context-compact',
     ],
   },
   {

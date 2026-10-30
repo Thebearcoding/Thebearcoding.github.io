@@ -306,4 +306,4 @@ python s05_todo_write/code.py
 
 Agent 能计划了。但如果一个任务太大，比如"重构整个认证模块"，光靠 TODO 列表不够。这个任务本身就是几十个小任务的集合，放在同一个对话里会被上下文淹没。
 
-[s06 Subagent](https://github.com/shareAI-lab/learn-claude-code/tree/main/s06_subagent) → 把大任务拆成子任务，每个子任务派一个独立的 Agent。它们有自己的干净上下文，不会互相污染。
+[s06 Subagent](/notes/lcc-s06-subagent/) → 把大任务拆成子任务，每个子任务派一个独立的 Agent。它们有自己的干净上下文，不会互相污染。

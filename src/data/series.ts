@@ -70,6 +70,7 @@ export const SERIES: Series[] = [
       'lcc-s03-permission',
       'lcc-s04-hooks',
       'lcc-s05-todo-write',
+      'lcc-s06-subagent',
     ],
   },
   {

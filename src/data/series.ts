@@ -81,6 +81,7 @@ export const SERIES: Series[] = [
       'lcc-s14-mcp-plugin',
       'lcc-s15-integrated-harness',
       'lcc-s16-workflow-runtime',
+      'lcc-s17-goal-loop',
     ],
   },
   {

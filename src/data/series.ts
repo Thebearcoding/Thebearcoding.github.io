@@ -71,6 +71,7 @@ export const SERIES: Series[] = [
       'lcc-s04-hooks',
       'lcc-s05-todo-write',
       'lcc-s06-subagent',
+      'lcc-s07-skill-loading',
     ],
   },
   {

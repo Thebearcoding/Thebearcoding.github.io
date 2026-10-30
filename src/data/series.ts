@@ -79,6 +79,7 @@ export const SERIES: Series[] = [
       'lcc-s12-cron-scheduler',
       'lcc-s13-agent-teams',
       'lcc-s14-mcp-plugin',
+      'lcc-s15-integrated-harness',
     ],
   },
   {

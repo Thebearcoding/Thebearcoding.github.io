@@ -89,7 +89,7 @@ TOOL_HANDLERS = {**BASE_HANDLERS, "task": run_subagent}
 
 ## 代码导读：把 code.py 从头读一遍（本站补充）
 
-完整的 [`s06_subagent/code.py`](https://github.com/shareAI-lab/learn-claude-code/blob/main/s06_subagent/code.py) 有 385 行。前 260 行几乎都是 s05 的老代码（todo_write 这一课没带过来），真正新增的只有 `run_subagent` 和 `task` 工具这几十行。
+完整的 [`s06_subagent/code.py`](https://github.com/shareAI-lab/learn-claude-code/blob/main/s06_subagent/code.py) 有 385 行。前 260 行几乎都是 s04 留下来的老代码：五个基础工具、权限检查和 hooks（s05 的 todo_write 这一课没带过来），真正新增的只有 `run_subagent` 和 `task` 工具这几十行。
 
 ### 第一段：两份 system prompt
 
@@ -121,7 +121,7 @@ TOOLS = [*BASE_TOOLS, TASK_TOOL]
 TOOL_HANDLERS = {**BASE_HANDLERS, "task": run_subagent}
 ```
 
-s05 里只有一份 `TOOLS`，这里拆成了「基础工具」和「父 Agent 额外多一个 `task`」。
+之前几课里只有一份 `TOOLS`，这里拆成了「基础工具」和「父 Agent 额外多一个 `task`」。
 
 子 Agent 的工具表里**没有 `task`**，所以它没办法再派子 Agent。这样就只有一层委派，不会出现「子 Agent 派孙 Agent，孙 Agent 再派……」无限套娃。
 

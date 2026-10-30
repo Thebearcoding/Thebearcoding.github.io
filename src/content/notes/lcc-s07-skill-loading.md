@@ -125,7 +125,7 @@ def load(self, name: str) -> str:
 
 ## 代码导读：把 code.py 从头读一遍（本站补充）
 
-完整的 [`s07_skill_loading/code.py`](https://github.com/shareAI-lab/learn-claude-code/blob/main/s07_skill_loading/code.py) 有 401 行。注意它是在 s05 的基础上加的，**s06 的 `task` 工具没有带过来**。每一课只演示一个机制，不是一路叠加。
+完整的 [`s07_skill_loading/code.py`](https://github.com/shareAI-lab/learn-claude-code/blob/main/s07_skill_loading/code.py) 有 401 行。注意它是在 s04 的骨架（五个基础工具、权限、hooks）上加的，**s05 的 `todo_write` 和 s06 的 `task` 工具都没有带过来**。每一课只演示一个机制，不是一路叠加。
 
 新增的部分全在文件开头：`SkillLoader` 类、`build_system_prompt()`，以及工具表里的一行 `load_skill`。
 

@@ -73,6 +73,7 @@ export const SERIES: Series[] = [
       'lcc-s06-subagent',
       'lcc-s07-skill-loading',
       'lcc-s08-context-compact',
+      'lcc-s09-memory',
     ],
   },
   {

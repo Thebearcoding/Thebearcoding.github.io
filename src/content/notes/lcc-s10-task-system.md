@@ -6,7 +6,7 @@ summary: 转载 learn-claude-code 第 10 课，补充配图、code.py 导读和�
 draft: false
 ---
 
-> 本文转载自 [shareAI-lab/learn-claude-code](https://github.com/shareAI-lab/learn-claude-code/tree/main/s10_task_system)（MIT License，Copyright (c) 2024 shareAI Lab），手绘配图、「代码导读」「实际跑一次」「想一想」三节为本站补充，SVG 图示来自原仓库。
+> 本文转载自 [shareAI-lab/learn-claude-code](https://github.com/shareAI-lab/learn-claude-code/tree/main/s10_task_system)（MIT License，Copyright (c) 2024 shareAI Lab），配图（部分据原仓库图示重绘）、「代码导读」「实际跑一次」「想一想」三节为本站补充。
 
 > *"大目标拆成小任务, 排好序, 持久化"* — 文件持久化的任务图, 多 agent 协作的基础。
 >
@@ -25,7 +25,7 @@ TodoWrite 没有记录这些依赖和分工。它可以显示“编写 API”仍
 ## 解决方案
 
 <figure style="margin:1.5rem 0">
-<img src="/notes-assets/lcc-s10-task-system/task-system-overview.svg" alt="Task System Overview" loading="lazy" decoding="async" style="width:100%;height:auto;background:#fff;border-radius:8px;padding:8px;box-sizing:border-box" />
+<a href="/notes-assets/lcc-s10-task-system/00-task-overview.jpg" target="_blank" rel="noopener" aria-label="查看原图：Agent 循环的工具分发里，除了 5 个基础工具，多了 create_task、update_task、list_tasks、get_task、claim_task、complete_task 六个任务工具；任务存成 .tasks 下的 JSON 文件，字段有 id、subject、description、status、owner、blockedBy；状态从 pending 经 claim 到 in_progress，再经 complete 到 completed"><img src="/notes-assets/lcc-s10-task-system/00-task-overview.jpg" alt="Agent 循环的工具分发里，除了 5 个基础工具，多了 create_task、update_task、list_tasks、get_task、claim_task、complete_task 六个任务工具；任务存成 .tasks 下的 JSON 文件，字段有 id、subject、description、status、owner、blockedBy；状态从 pending 经 claim 到 in_progress，再经 complete 到 completed" width="1400" height="788" loading="lazy" decoding="async" style="height:auto;cursor:zoom-in" /></a>
 </figure>
 
 代码保留 S04 的五个基础工具、Permission、Hooks 和统一 `execute_tool`，再加入 6 个任务工具、`.tasks/` 目录持久化和 `blockedBy` 依赖检查。
@@ -46,7 +46,7 @@ TodoWrite vs Task System：
 ## 工作原理
 
 <figure style="margin:1.5rem 0">
-<img src="/notes-assets/lcc-s10-task-system/task-dag.svg" alt="Task DAG" loading="lazy" decoding="async" style="width:100%;height:auto;background:#fff;border-radius:8px;padding:8px;box-sizing:border-box" />
+<a href="/notes-assets/lcc-s10-task-system/00-task-dag.jpg" target="_blank" rel="noopener" aria-label="查看原图：任务依赖图：schema 已完成；endpoints 进行中，依赖 schema；docs 依赖 schema，可以开始；tests 依赖 endpoints，被阻塞；deploy 依赖 tests 和 docs，被阻塞"><img src="/notes-assets/lcc-s10-task-system/00-task-dag.jpg" alt="任务依赖图：schema 已完成；endpoints 进行中，依赖 schema；docs 依赖 schema，可以开始；tests 依赖 endpoints，被阻塞；deploy 依赖 tests 和 docs，被阻塞" width="1400" height="788" loading="lazy" decoding="async" style="height:auto;cursor:zoom-in" /></a>
 </figure>
 
 ### Task: 数据结构

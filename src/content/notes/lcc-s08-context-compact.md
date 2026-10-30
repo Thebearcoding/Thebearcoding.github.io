@@ -6,7 +6,7 @@ summary: 转载 learn-claude-code 第 8 课，补充配图、code.py 导读和�
 draft: false
 ---
 
-> 本文转载自 [shareAI-lab/learn-claude-code](https://github.com/shareAI-lab/learn-claude-code/tree/main/s08_context_compact)（MIT License，Copyright (c) 2024 shareAI Lab），手绘配图、「代码导读」「实际跑一次」「想一想」三节为本站补充，SVG 图示来自原仓库。
+> 本文转载自 [shareAI-lab/learn-claude-code](https://github.com/shareAI-lab/learn-claude-code/tree/main/s08_context_compact)（MIT License，Copyright (c) 2024 shareAI Lab），配图（部分据原仓库图示重绘）、「代码导读」「实际跑一次」「想一想」三节为本站补充。
 
 > *"上下文总会满，要有办法腾地方。"* 四步压缩，低成本的操作优先执行。
 >
@@ -17,7 +17,7 @@ Agent 持续工作时，读过的文件、执行过的命令和模型回复都�
 本节将实现一条四步压缩管线。它先整理可以恢复的工具结果，空间仍然不足时再总结历史。
 
 <figure style="margin:1.5rem 0">
-<img src="/notes-assets/lcc-s08-context-compact/compact-overview.svg" alt="Context Compact 全景" loading="lazy" decoding="async" style="width:100%;height:auto;background:#fff;border-radius:8px;padding:8px;box-sizing:border-box" />
+<a href="/notes-assets/lcc-s08-context-compact/00-pipeline-overview.jpg" target="_blank" rel="noopener" aria-label="查看原图：每次调用模型之前，messages 先经过压缩管线再交给模型；第一、二步每轮都跑，不调用接口；超过阈值才跑第三步，仍然超过再用一次接口写摘要；接口报 prompt_too_long 时紧急压缩并重试一次"><img src="/notes-assets/lcc-s08-context-compact/00-pipeline-overview.jpg" alt="每次调用模型之前，messages 先经过压缩管线再交给模型；第一、二步每轮都跑，不调用接口；超过阈值才跑第三步，仍然超过再用一次接口写摘要；接口报 prompt_too_long 时紧急压缩并重试一次" width="1400" height="788" loading="lazy" decoding="async" style="height:auto;cursor:zoom-in" /></a>
 </figure>
 
 ## 先理解上下文
@@ -46,7 +46,7 @@ Agent 持续工作时，读过的文件、执行过的命令和模型回复都�
 因此压缩顺序按照信息损失和调用成本排列：先转存，再裁剪，再替换旧结果，最后才生成摘要。
 
 <figure style="margin:1.5rem 0">
-<img src="/notes-assets/lcc-s08-context-compact/compaction-layers.svg" alt="四步压缩管线" loading="lazy" decoding="async" style="width:100%;height:auto;background:#fff;border-radius:8px;padding:8px;box-sizing:border-box" />
+<a href="/notes-assets/lcc-s08-context-compact/00-four-steps.jpg" target="_blank" rel="noopener" aria-label="查看原图：四步按成本从低到高排列：第一步大结果转存，第二步按消息数裁剪，第三步把旧结果换成路径，这三步不调用接口、信息可以恢复；第四步调用一次模型写摘要，会丢失细节；另外 prompt_too_long 时保留最近 5 条重试一次"><img src="/notes-assets/lcc-s08-context-compact/00-four-steps.jpg" alt="四步按成本从低到高排列：第一步大结果转存，第二步按消息数裁剪，第三步把旧结果换成路径，这三步不调用接口、信息可以恢复；第四步调用一次模型写摘要，会丢失细节；另外 prompt_too_long 时保留最近 5 条重试一次" width="1400" height="788" loading="lazy" decoding="async" style="height:auto;cursor:zoom-in" /></a>
 </figure>
 
 ## 第一步：tool_result_budget
@@ -62,7 +62,7 @@ Agent 持续工作时，读过的文件、执行过的命令和模型回复都�
 上下文中保留文件路径和前 2000 个字符的预览：
 
 <figure style="margin:1.5rem 0">
-<img src="/notes-assets/lcc-s08-context-compact/layer1-budget.svg" alt="大结果转存" loading="lazy" decoding="async" style="width:100%;height:auto;background:#fff;border-radius:8px;padding:8px;box-sizing:border-box" />
+<a href="/notes-assets/lcc-s08-context-compact/00-step1-persist.jpg" target="_blank" rel="noopener" aria-label="查看原图：第一步：三个工具结果分别是 78k、142k、290k 字符，总共 510k 超出预算；转存后上下文里只留路径和前 2000 字符预览，大约 18k，完整数据留在磁盘上"><img src="/notes-assets/lcc-s08-context-compact/00-step1-persist.jpg" alt="第一步：三个工具结果分别是 78k、142k、290k 字符，总共 510k 超出预算；转存后上下文里只留路径和前 2000 字符预览，大约 18k，完整数据留在磁盘上" width="1400" height="788" loading="lazy" decoding="async" style="height:auto;cursor:zoom-in" /></a>
 </figure>
 
 核心循环按照结果大小依次转存：
@@ -130,7 +130,7 @@ messages = [*messages[:head_end], marker, *messages[tail_start:]]
 前两步完成后，`prepare` 会估算剩余上下文的大小，只有超过 `CONTEXT_CHAR_LIMIT` 时才执行 `micro_compact`。对于模型已经读取过的结果，它保留最近 3 条，并逐条缩短更早且超过 120 个字符的结果，直到上下文接近阈值的 80%。旧结果被替换前会先完整落盘，因此每个占位都带有可恢复路径：
 
 <figure style="margin:1.5rem 0">
-<img src="/notes-assets/lcc-s08-context-compact/micro-compact.svg" alt="旧结果替换为可恢复路径" loading="lazy" decoding="async" style="width:100%;height:auto;background:#fff;border-radius:8px;padding:8px;box-sizing:border-box" />
+<a href="/notes-assets/lcc-s08-context-compact/00-step3-replace.jpg" target="_blank" rel="noopener" aria-label="查看原图：第三步：十条读文件结果里，前七条换成指向 .task_outputs 的占位符，最近三条保留完整，一直缩短到上下文降到阈值的 80%"><img src="/notes-assets/lcc-s08-context-compact/00-step3-replace.jpg" alt="第三步：十条读文件结果里，前七条换成指向 .task_outputs 的占位符，最近三条保留完整，一直缩短到上下文降到阈值的 80%" width="1400" height="788" loading="lazy" decoding="async" style="height:auto;cursor:zoom-in" /></a>
 </figure>
 
 ```python
@@ -172,7 +172,7 @@ def estimate_chars(messages):
 4. 用一条 `[Compacted]` 消息替换当前历史。
 
 <figure style="margin:1.5rem 0">
-<img src="/notes-assets/lcc-s08-context-compact/auto-compact.svg" alt="历史摘要" loading="lazy" decoding="async" style="width:100%;height:auto;background:#fff;border-radius:8px;padding:8px;box-sizing:border-box" />
+<a href="/notes-assets/lcc-s08-context-compact/00-step4-summary.jpg" target="_blank" rel="noopener" aria-label="查看原图：第四步：先保存 transcript，再让模型写事实摘要，最后把整段历史换成一条消息；这条消息分成当前用户请求和仅供参考的对话摘要两部分"><img src="/notes-assets/lcc-s08-context-compact/00-step4-summary.jpg" alt="第四步：先保存 transcript，再让模型写事实摘要，最后把整段历史换成一条消息；这条消息分成当前用户请求和仅供参考的对话摘要两部分" width="1400" height="788" loading="lazy" decoding="async" style="height:auto;cursor:zoom-in" /></a>
 </figure>
 
 ```python

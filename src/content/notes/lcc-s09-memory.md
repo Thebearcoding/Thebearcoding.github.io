@@ -6,7 +6,7 @@ summary: 转载 learn-claude-code 第 9 课，补充配图、code.py 导读和�
 draft: false
 ---
 
-> 本文转载自 [shareAI-lab/learn-claude-code](https://github.com/shareAI-lab/learn-claude-code/tree/main/s09_memory)（MIT License，Copyright (c) 2024 shareAI Lab），手绘配图、「代码导读」「实际跑一次」「想一想」三节为本站补充，SVG 图示来自原仓库。
+> 本文转载自 [shareAI-lab/learn-claude-code](https://github.com/shareAI-lab/learn-claude-code/tree/main/s09_memory)（MIT License，Copyright (c) 2024 shareAI Lab），配图（部分据原仓库图示重绘）、「代码导读」「实际跑一次」「想一想」三节为本站补充。
 
 > *"把以后还会用到的信息留下来。"* 文件存储 + 索引 + 相关性选择 + 按需召回。
 >
@@ -19,7 +19,7 @@ Agent 开始新会话时，`messages` 里没有上一次的对话。用户之前
 把完整 transcript 留下来适合归档，却不适合每次都发给模型。对话会越来越长，当前任务需要的信息很难定位，旧事实也可能已经过期。Memory 要解决的是两个问题：哪些信息值得跨会话保存，以及当前任务应该取回哪几条。
 
 <figure style="margin:1.5rem 0">
-<img src="/notes-assets/lcc-s09-memory/memory-overview.svg" alt="Memory Overview" loading="lazy" decoding="async" style="width:100%;height:auto;background:#fff;border-radius:8px;padding:8px;box-sizing:border-box" />
+<a href="/notes-assets/lcc-s09-memory/00-memory-overview.jpg" target="_blank" rel="noopener" aria-label="查看原图：Agent 循环外面套了一层记忆：调用模型前先从 .memory 的目录里选出最多 5 条，再把正文放进 system prompt；这一轮结束后提取值得长期保存的知识写回 .memory；满 10 个文件时整理"><img src="/notes-assets/lcc-s09-memory/00-memory-overview.jpg" alt="Agent 循环外面套了一层记忆：调用模型前先从 .memory 的目录里选出最多 5 条，再把正文放进 system prompt；这一轮结束后提取值得长期保存的知识写回 .memory；满 10 个文件时整理" width="1400" height="788" loading="lazy" decoding="async" style="height:auto;cursor:zoom-in" /></a>
 </figure>
 
 ## 全部写进 system prompt，为什么不合适
@@ -31,7 +31,7 @@ s07 已经展示过一种更合适的读取方式：保留简短索引，只在�
 因此，本章需要处理四件事：存储、召回、提取和整理。
 
 <figure style="margin:1.5rem 0">
-<img src="/notes-assets/lcc-s09-memory/memory-subsystems.svg" alt="Memory Subsystems" loading="lazy" decoding="async" style="width:100%;height:auto;background:#fff;border-radius:8px;padding:8px;box-sizing:border-box" />
+<a href="/notes-assets/lcc-s09-memory/00-memory-subsystems.jpg" target="_blank" rel="noopener" aria-label="查看原图：记忆分四块：存储是 .memory 下的 md 文件加 MEMORY.md 索引；召回由模型从索引里选最多 5 条，失败时退回关键词；提取在每轮结束后做，并检查 scope 和重复；整理在满 10 个文件时去重合并，带快照回滚；记忆分为 user、feedback、project、reference 四类"><img src="/notes-assets/lcc-s09-memory/00-memory-subsystems.jpg" alt="记忆分四块：存储是 .memory 下的 md 文件加 MEMORY.md 索引；召回由模型从索引里选最多 5 条，失败时退回关键词；提取在每轮结束后做，并检查 scope 和重复；整理在满 10 个文件时去重合并，带快照回滚；记忆分为 user、feedback、project、reference 四类" width="1400" height="788" loading="lazy" decoding="async" style="height:auto;cursor:zoom-in" /></a>
 </figure>
 
 ## 存储：一个记忆一个文件

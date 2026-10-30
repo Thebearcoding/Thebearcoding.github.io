@@ -6,7 +6,7 @@ summary: 转载 learn-claude-code 第 12 课，补充配图、code.py 导读和�
 draft: false
 ---
 
-> 本文转载自 [shareAI-lab/learn-claude-code](https://github.com/shareAI-lab/learn-claude-code/tree/main/s12_cron_scheduler)（MIT License，Copyright (c) 2024 shareAI Lab），手绘配图、「代码导读」「实际跑一次」「想一想」三节为本站补充，SVG 图示来自原仓库。
+> 本文转载自 [shareAI-lab/learn-claude-code](https://github.com/shareAI-lab/learn-claude-code/tree/main/s12_cron_scheduler)（MIT License，Copyright (c) 2024 shareAI Lab），配图（部分据原仓库图示重绘）、「代码导读」「实际跑一次」「想一想」三节为本站补充。
 
 ## 问题
 
@@ -17,7 +17,7 @@ S11 解决的是命令开始后的执行方式：耗时的 Bash 命令可以在�
 ## 解决方案
 
 <figure style="margin:1.5rem 0">
-<img src="/notes-assets/lcc-s12-cron-scheduler/cron-scheduler-overview.svg" alt="Cron Scheduler Overview" loading="lazy" decoding="async" style="width:100%;height:auto;background:#fff;border-radius:8px;padding:8px;box-sizing:border-box" />
+<a href="/notes-assets/lcc-s12-cron-scheduler/00-cron-overview.jpg" target="_blank" rel="noopener" aria-label="查看原图：调度线程每秒检查一次到期任务，匹配后先存盘再放进 cron_queue；Agent 空闲时接收，[Scheduled] 提示被注入到 messages；cron 表达式有分、时、日、月、星期五个字段；持久任务存在 .scheduled_tasks.json，会话任务只在内存里；进程退出调度器就停了"><img src="/notes-assets/lcc-s12-cron-scheduler/00-cron-overview.jpg" alt="调度线程每秒检查一次到期任务，匹配后先存盘再放进 cron_queue；Agent 空闲时接收，[Scheduled] 提示被注入到 messages；cron 表达式有分、时、日、月、星期五个字段；持久任务存在 .scheduled_tasks.json，会话任务只在内存里；进程退出调度器就停了" width="1400" height="788" loading="lazy" decoding="async" style="height:auto;cursor:zoom-in" /></a>
 </figure>
 
 假设 Agent 注册了下面这项任务：

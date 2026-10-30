@@ -6,7 +6,7 @@ summary: 转载 learn-claude-code 第 11 课，补充配图、code.py 导读和�
 draft: false
 ---
 
-> 本文转载自 [shareAI-lab/learn-claude-code](https://github.com/shareAI-lab/learn-claude-code/tree/main/s11_background_tasks)（MIT License，Copyright (c) 2024 shareAI Lab），手绘配图、「代码导读」「实际跑一次」「想一想」三节为本站补充，SVG 图示来自原仓库。
+> 本文转载自 [shareAI-lab/learn-claude-code](https://github.com/shareAI-lab/learn-claude-code/tree/main/s11_background_tasks)（MIT License，Copyright (c) 2024 shareAI Lab），配图（部分据原仓库图示重绘）、「代码导读」「实际跑一次」「想一想」三节为本站补充。
 
 > *"慢操作放后台，Agent Loop 继续运行"* — 后台线程执行命令，后续轮次收集完成结果。
 >
@@ -23,7 +23,7 @@ S11 要解决的问题是：让耗时的 Bash 命令在后台执行，使 Agent 
 ## 解决方案
 
 <figure style="margin:1.5rem 0">
-<img src="/notes-assets/lcc-s11-background-tasks/background-tasks-overview.svg" alt="Background Tasks Overview" loading="lazy" decoding="async" style="width:100%;height:auto;background:#fff;border-radius:8px;padding:8px;box-sizing:border-box" />
+<a href="/notes-assets/lcc-s11-background-tasks/00-sync-vs-background.jpg" target="_blank" rel="noopener" aria-label="查看原图：s04 同步执行时，模型调用之后要一直等 bash 跑完才能进入下一轮；s11 打开 run_in_background 后，先返回 bg_0001 已启动，继续执行其他工具，bash 在工作线程里跑，结果在下一轮以 task_notification 收进来"><img src="/notes-assets/lcc-s11-background-tasks/00-sync-vs-background.jpg" alt="s04 同步执行时，模型调用之后要一直等 bash 跑完才能进入下一轮；s11 打开 run_in_background 后，先返回 bg_0001 已启动，继续执行其他工具，bash 在工作线程里跑，结果在下一轮以 task_notification 收进来" width="1400" height="788" loading="lazy" decoding="async" style="height:auto;cursor:zoom-in" /></a>
 </figure>
 
 本章把慢操作放入后台线程。当前工具调用先返回一个占位 `tool_result`，Agent Loop 可以继续运行；后续轮次开始时再收集已经完成的结果，以通知形式加入对话。

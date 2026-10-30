@@ -275,9 +275,46 @@ Created `test.txt` containing `hi`, but deletion with `rm` was denied by the env
 ## 想一想（本站补充）
 
 1. 上面的输出里，为什么两次被拒绝的 `bash` 调用都没有留下 `[HOOK]` 日志？对照第一段讲的 `trigger_hooks` 和 `register_hook` 的调用顺序找原因。如果想让所有调用都留下日志，最小的改动是什么？
+
+   <details class="qa"><summary>参考答案</summary>
+
+   `permission_hook` 比 `log_hook` 先注册，`trigger_hooks` 遇到第一个返回非 `None` 的回调就直接返回。权限检查拒绝时返回了一个字符串，后面的 `log_hook` 根本没有机会执行，所以没有日志。
+
+   最小的改动是把注册顺序对调：先 `register_hook("PreToolUse", log_hook)`，再注册 `permission_hook`。日志 hook 永远返回 `None`，不会挡住后面的权限检查。
+
+   </details>
+
 2. 模型第一次被拒后，把一条命令拆成了两步，先写文件，再删文件。这算不算一种「绕过」？如果第二步没有 `rm` 这个词，会发生什么？
+
+   <details class="qa"><summary>参考答案</summary>
+
+   算是绕过。用户拒绝的是「删掉这个文件」，模型换一种步骤达到同样的效果，意图没变。
+
+   如果第二步里没有 `rm` 这个词，比如用 `find -delete` 或者 `python3 -c "import os; os.remove(...)"`，s03 的规则都匹配不到，命令会直接执行，用户连确认都看不到。这再次说明：按命令文本做匹配，拦不住有心的绕过。
+
+   </details>
+
 3. 如果要防止 Stop hook 让循环永远停不下来，你会把限制加在哪里，是 hook 里面还是 `agent_loop` 里面？为什么？
+
+   <details class="qa"><summary>参考答案</summary>
+
+   加在 `agent_loop` 里更稳妥。比如记一个计数器：Stop hook 连续要求继续超过 N 次，就不再听它的，直接返回。
+
+   原因是：hook 是可以随便挂上去的扩展，你不能保证每个 hook 都写对了。限制放在循环里，不管挂了什么 hook、写得好不好，循环都一定能停下来。s17 就是这么做的：Stop hook 最多连续阻止 8 次。
+
+   </details>
+
 4. 想让 `UserPromptSubmit` 真的能往提示词里加内容，主循环里哪一行要改？改成什么样？
+
+   <details class="qa"><summary>参考答案</summary>
+
+   主循环里的 `trigger_hooks("UserPromptSubmit", query)` 这一行，返回值被直接丢掉了。改成接住返回值，并拼进用户消息：
+
+   `extra = trigger_hooks("UserPromptSubmit", query)`，然后 `content = f"{query}\n\n{extra}" if extra else query`，再 `history.append({"role": "user", "content": content})`。
+
+   要注意 `trigger_hooks` 只返回**第一个**非 `None` 的结果。如果有好几个 hook 都想注入内容，需要改成把所有结果收集起来再拼接。
+
+   </details>
 
 ## 试一下
 

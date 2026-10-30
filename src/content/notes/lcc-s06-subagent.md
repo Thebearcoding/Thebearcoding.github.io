@@ -286,10 +286,54 @@ sub 2 到 sub 3 那一下从 1.7k 跳到 65k，是因为子 Agent 跑了一条�
 ## 想一想（本站补充）
 
 1. 子 Agent 跑满 30 轮被叫停时，已经改过的文件怎么办？父 Agent 能知道它改了哪些文件吗？如果要让父 Agent 知道，你会让 `run_subagent` 多返回什么？
+
+   <details class="qa"><summary>参考答案</summary>
+
+   文件的修改都还在，`messages` 丢了，改动不会跟着消失。父 Agent 只收到一句 `Subagent stopped after 30 turns without a final answer.`，完全不知道子 Agent 动了哪些文件。
+
+   可以让 `run_subagent` 多返回一些信息：在子 Agent 的 `write_file` / `edit_file` 外面包一层，把改过的路径记下来，停止时一起返回，再附上最后一次回复的文字和已经跑了多少轮。
+
+   </details>
+
 2. 父 Agent 在同一次回复里发了两个 `task`，它们是并行还是串行？如果改成并行，共享的 `WORKDIR` 和权限确认里的 `input()` 会出什么问题？
+
+   <details class="qa"><summary>参考答案</summary>
+
+   是串行的。父循环用 `for block in tool_calls` 逐个执行，`run_subagent` 是同步调用，第一个子 Agent 跑完，第二个才开始。
+
+   改成并行（比如每个子 Agent 一个线程）会遇到几个问题：两个子 Agent 可能同时改同一个文件，互相覆盖；`permission_hook` 里的 `input()` 可能同时被两个线程调用，用户按的 `y` 不知道回答的是谁；终端输出也会交错在一起。s13 的团队就是在处理这些问题。
+
+   </details>
+
 3. 子 Agent 读过的文件内容全都丢掉了。如果父 Agent 后面恰好需要其中某个文件，会发生什么？什么样的任务交给子 Agent 才划算？
+
+   <details class="qa"><summary>参考答案</summary>
+
+   父 Agent 只能自己再读一遍，或者再派一次子 Agent，等于这部分工作做了两次。
+
+   所以子 Agent 适合「过程很长、结论很短」的任务：找某个函数在哪、确认用的什么测试框架、总结一堆文件各自做什么。如果父 Agent 后面要逐行修改的，正是子 Agent 读过的那个文件，就不如自己读。
+
+   </details>
+
 4. 如果想允许两层委派（子 Agent 也能派孙 Agent），只把 `task` 加进 `SUB_TOOLS` 够吗？还需要加什么保护，才不会无限套娃？
+
+   <details class="qa"><summary>参考答案</summary>
+
+   不够。还需要一个**深度计数**：`run_subagent` 多接收一个 `depth` 参数，超过上限就不给 `task` 工具。
+
+   另外要有总预算。每一层最多 30 轮，两层就可能是 30 × 30 = 900 次模型调用。还要防止循环委派：子 Agent 把任务原样再派给孙 Agent，层层转手，谁都不干活。
+
+   </details>
+
 5. 子 Agent 只返回**最后一次**回复的文字。如果它中间某轮写下了关键发现，最后一轮只说了一句 "Done."，父 Agent 拿到的是什么？可以怎么改？
+
+   <details class="qa"><summary>参考答案</summary>
+
+   父 Agent 只拿到一句 "Done."，关键发现全部丢了。
+
+   改进办法有几种：在 `SUB_SYSTEM` 里明确要求最后一条回复必须包含完整的结论；`extract_text` 改成收集所有轮次的文字，而不只是最后一次；或者检测到最后的回复太短时，自动追加一轮「请总结你的发现」，类似 s04 的 Stop hook。
+
+   </details>
 
 ## 试一下
 

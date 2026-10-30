@@ -509,11 +509,64 @@ agent_loop(history, query)
 ## 想一想（本站补充）
 
 1. 这次运行里自动摘要从没触发，却多花了很多请求。如果把 `KEEP_RECENT_RESULTS` 从 3 改成 10，或者把 `CONTEXT_CHAR_LIMIT` 调到 100k，你觉得会发生什么？各有什么代价？
+
+   <details class="qa"><summary>参考答案</summary>
+
+   `KEEP_RECENT_RESULTS` 改成 10：保留更多读过的完整结果，重读会变少；但每次请求更大，更容易越过阈值，可能更早进入 `fit_tool_results` 甚至摘要。
+
+   `CONTEXT_CHAR_LIMIT` 调到 100k：这次两个文件加起来 5.3 万字符，基本能整份留住，几乎不用重读，请求次数会少很多；代价是每次请求的 token 更多，而且越接近模型真实的上下文上限，越容易收到 `prompt is too long`。
+
+   </details>
+
 2. 占位符现在只写了 `[Earlier tool result saved at <路径>]`。如果在里面加上「这是哪条命令的结果」，比如 `sed -n '252,430p' s08.../code.py`，模型的重读行为会有变化吗？
+
+   <details class="qa"><summary>参考答案</summary>
+
+   很可能有帮助。模型知道每个占位符对应的是「哪条命令、哪几行」，就能判断自己是不是真的需要，需要时也可以直接读保存下来的那个文件，而不是重新 `sed` 一遍。甚至可以在占位符里附一行摘要，有时候连读都不用读。
+
+   代价是占位符变长了一点。比起整段重读，这点长度可以忽略。
+
+   </details>
+
 3. `estimate_chars` 按字符计数。同样 5 万个字符，全是中文的对话和全是英文的对话，token 数差不多吗？阈值该怎么定才稳妥？
+
+   <details class="qa"><summary>参考答案</summary>
+
+   差很多。英文大约 4 个字符一个 token，5 万字符大概一万多 token；中文常常一个字就是一个 token，5 万字符可能就是三五万 token。
+
+   稳妥的做法是按 token 来定阈值：用 tokenizer 估算，或者直接用 API 返回的 `usage` 里的真实 token 数；阈值按最坏的情况留出余量；再保留 `reactive_compact` 作为最后的兜底。
+
+   </details>
+
 4. `persisted_output_path` 为什么不直接相信占位符里写的路径？回想一下这次运行读到的文件里写着什么。
+
+   <details class="qa"><summary>参考答案</summary>
+
+   因为占位符只是一段文本，任何文本都可以伪造。这次运行读到的 s08 源码里，本身就写着 `[Earlier tool result saved at` 这句话。
+
+   如果直接相信，一个内容是 `[Earlier tool result saved at /etc/passwd]` 的文件，就会被当成「已经存过盘」，harness 跳过保存，原始内容就真的丢了；之后模型还可能按这个路径去读敏感文件。所以代码要求路径必须在 `.task_outputs/tool-results/` 下面，而且文件确实存在。
+
+   </details>
+
 5. API 报 `prompt is too long` 以后，`reactive_compact` 只补救一次，第二次就直接抛异常。为什么不一直重试？
+
+   <details class="qa"><summary>参考答案</summary>
+
+   压缩一次还是太长，再压往往也没用。比如最近保留的 5 条消息本身就超长，怎么总结前面的历史都救不回来。无限重试只会不停地调用模型、不停地失败。
+
+   只试一次，失败就把异常抛出去，交给上层或者用户处理，这比卡在一个死循环里要好。
+
+   </details>
+
 6. 摘要是模型写的。如果它漏掉了一条用户约束（比如「不要改测试文件」），之后会发生什么？`Full transcript` 那个路径在这种时候能起什么作用？
+
+   <details class="qa"><summary>参考答案</summary>
+
+   模型在之后的轮次里不再知道这条约束，很可能真的去改测试文件，而且它不会觉得自己做错了。
+
+   `Full transcript` 路径指向完整的原始记录。发现结果不对时，人可以回去查；也可以让模型在拿不准的时候去读原文。更稳的做法是把用户的约束单独保存，像 `active_request` 一样，不经过摘要，每次都原样带上。
+
+   </details>
 
 ## 试一下
 

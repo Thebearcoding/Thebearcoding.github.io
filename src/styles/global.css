@@ -1274,3 +1274,20 @@ html.lb-open { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .lb[open] { animation: none; }
 }
+
+/* ---- 想一想:可折叠的参考答案 ---- */
+.prose details.qa {
+  margin: 10px 0 18px; padding: 0 16px;
+  border: 1px solid var(--border); border-radius: 10px; background: var(--surface2);
+}
+.prose details.qa summary {
+  cursor: pointer; list-style: none; padding: 9px 0;
+  color: var(--accent2); font-size: 14px; user-select: none;
+}
+.prose details.qa summary::-webkit-details-marker { display: none; }
+.prose details.qa summary::before { content: "▸"; display: inline-block; width: 1.1em; transition: transform .15s; }
+.prose details.qa[open] summary::before { transform: rotate(90deg); }
+.prose details.qa[open] { padding-bottom: 4px; }
+.prose details.qa p { font-size: 15px; margin: 0 0 12px; }
+.prose details.qa summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+@media (prefers-reduced-motion: reduce) { .prose details.qa summary::before { transition: none; } }

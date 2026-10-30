@@ -296,10 +296,54 @@ The script is clear and works for string inputs. No security or performance conc
 ## 想一想（本站补充）
 
 1. 进到 `s07_skill_loading/` 目录里再运行 `python code.py`，system prompt 里的技能目录会变成什么？为什么？
+
+   <details class="qa"><summary>参考答案</summary>
+
+   会变成 `(no skills found)`。`SKILLS_DIR = WORKDIR / "skills"`，而 `WORKDIR = Path.cwd()` 是**启动时所在的目录**。在 `s07_skill_loading/` 里启动，它找的是 `s07_skill_loading/skills/`，那里没有这个文件夹。
+
+   模型调用 `load_skill` 也只会得到 `Unknown skill ... Available: none`。
+
+   </details>
+
 2. 程序运行中新建一个 `skills/foo/SKILL.md`，模型能用上吗？如果要支持「热加载」，你会改哪里？改完以后，对 prompt caching 有什么影响？
+
+   <details class="qa"><summary>参考答案</summary>
+
+   用不上。`SkillLoader` 只在 import 时 `scan()` 一次，`SYSTEM` 也只在启动时拼一次。
+
+   要热加载，可以在每次调用模型前重新扫描并拼 system prompt（s14 组装工具池就是这么做的），或者在 `load()` 找不到名字时再扫描一次。代价是：system prompt 一变，服务端的 prompt cache 就失效了。折中办法是只在目录真的变化时才更新（比较修改时间或内容哈希），或者把「新增了某个技能」作为一条消息追加，而不改 system prompt。
+
+   </details>
+
 3. 两个技能文件夹的 frontmatter 里写了同一个 `name`，`self.skills` 里最后剩下哪一个？模型能发现吗？
+
+   <details class="qa"><summary>参考答案</summary>
+
+   后扫描到的覆盖先扫描到的。`scan()` 按文件夹名排序，`self.skills[name] = ...` 是普通的字典赋值，名字一样就直接覆盖，排在后面的那个留下来。
+
+   模型发现不了：目录里只会显示一条，另一份技能就像不存在一样。更好的做法是扫描时检测重名，直接报错或打印警告。
+
+   </details>
+
 4. 加载过的技能会一直留在 `messages` 里。如果一次长会话里先后加载了五六个技能，会出现什么问题？
+
+   <details class="qa"><summary>参考答案</summary>
+
+   每份 SKILL.md 有四五千字符，五六份就是两三万字符，一直留在 `messages` 里，之后每次请求都要带上。上下文越来越满，旧技能的说明还可能干扰现在的任务。
+
+   解决办法是 s08 的压缩：已经用过的旧 `tool_result` 换成一个占位符，需要的时候再 `load_skill` 取回来。
+
+   </details>
+
 5. 如果某个技能的描述写成 `Useful helper`，会发生什么？你会怎么验证一条 description 写得好不好？
+
+   <details class="qa"><summary>参考答案</summary>
+
+   模型只能靠描述判断该不该加载。描述太含糊，结果要么是该用的时候从来想不起来，要么是什么任务都去加载一下。
+
+   可以像写测试一样验证：准备一组「应该触发」和「不应该触发」的提问，看模型在每一句里有没有调用 `load_skill`、加载的对不对，统计一下命中率。改了描述再跑一遍，对比结果。
+
+   </details>
 
 ## 试一下
 

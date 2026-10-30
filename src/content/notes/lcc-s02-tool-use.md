@@ -245,9 +245,44 @@ msgs=3  -> stop_reason=end_turn  内容块: [text]
 做真实项目时，工具系统光「能跑」是不够的，还要考虑校验、重试和幂等。拿 s02 的代码对照下面几个问题，看看它做了哪些，没做哪些：
 
 1. **校验：** 如果模型调用 `read_file` 时把参数名写成了 `{"file": "a.py"}`，会发生什么？注意 `handler(**block.input)` 这一行在不在 `try` 里面。
+
+   <details class="qa"><summary>参考答案</summary>
+
+   `handler(**block.input)` 会变成 `run_read(file="a.py")`，Python 直接抛出 `TypeError`：多了一个不认识的参数 `file`，又少了必填的 `path`。
+
+   `run_read` 里面的 `try` 只包住了读文件那几行，参数绑定发生在**进入函数之前**，所以接不住。异常冒到 `agent_loop` 外面，程序崩溃。s05 开始把整行调用包进 `try`，才解决这个问题。
+
+   </details>
+
 2. **重试：** `run_edit` 返回 `Error: text not found` 之后，谁来重试？harness 有没有写重试的代码？
+
+   <details class="qa"><summary>参考答案</summary>
+
+   harness 不负责重试，代码里也没有任何重试逻辑。错误信息作为 `tool_result` 交给模型，**由模型决定**下一步：通常它会重新 `read_file` 看一眼最新内容，再换一个 `old_text` 试一次。
+
+   这是 Agent 里很常见的设计：把错误当成一次「观察」交给模型，而不是在 harness 里写死重试策略。
+
+   </details>
+
 3. **幂等：** 同一个 `edit_file` 调用连续执行两次，第二次会怎样？`write_file` 呢？
+
+   <details class="qa"><summary>参考答案</summary>
+
+   `edit_file` 第二次会失败：第一次已经把 `old_text` 换掉了，第二次在文件里找不到它，返回 `Error: text not found`。所以它不是幂等的，但失败得很安全，不会把文件改坏（除非 `new_text` 里本身又包含了 `old_text`）。
+
+   `write_file` 是幂等的：写两次同样的内容，结果一模一样。
+
+   </details>
+
 4. **歧义：** 如果 `old_text` 在文件里出现了两次，`run_edit` 改的是哪一处？模型知道吗？
+
+   <details class="qa"><summary>参考答案</summary>
+
+   `text.replace(old_text, new_text, 1)` 只换**第一处**。模型并不知道文件里还有第二处，它以为改的是自己想改的那一处，结果可能改错地方。
+
+   更稳妥的做法是：`old_text` 出现不止一次就直接报错，让模型多带几行上下文，把位置说唯一。Claude Code 的 Edit 工具就是这样要求的。
+
+   </details>
 
 ## 试一下
 

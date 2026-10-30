@@ -281,8 +281,34 @@ Create a file called hello.py that prints "Hello, World!", then run it
 读完代码，试着回答这三个问题，答案都在上面的代码里：
 
 1. 如果模型每次都调用工具，`agent_loop` 什么时候会停？有没有一个上限？
+
+   <details class="qa"><summary>参考答案</summary>
+
+   没有上限。`agent_loop` 是一个 `while True`，唯一的出口是模型某次回复里**没有** `tool_use`。只要模型一直调用工具，循环就一直转下去，一直花钱。
+
+   真实的 harness 都会加一道保险：最大轮数、总 token 预算，或者超时。后面 s06 的子 Agent 就加了「最多 30 轮」，s17 有全局的 `MAX_TURNS`。
+
+   </details>
+
 2. 如果模型调用 `bash` 时忘了传 `command` 参数，会发生什么？程序会崩吗？
+
+   <details class="qa"><summary>参考答案</summary>
+
+   会崩。`block.input['command']` 在打印那一行就会先抛出 `KeyError`，这一行不在任何 `try` 里，异常一路冒到最外层，程序直接退出。
+
+   模型其实很少漏参数，但「很少」不等于「不会」。后面的课会把工具执行包进 `try`，把异常变成一句 `Error: ...` 交还给模型，让它自己改。
+
+   </details>
+
 3. 第二轮提问时，`history` 里大概有几条消息？它会一直变长吗？
+
+   <details class="qa"><summary>参考答案</summary>
+
+   取决于第一轮调了几次工具。假设第一轮调了一次 `bash`，那第一轮结束时有 4 条：用户问题、assistant（tool_use）、user（tool_result）、assistant（最终回答）。第二轮提问时再加 1 条，就是 5 条。
+
+   它会一直变长：每一轮的问题、工具调用、工具结果都留在 `history` 里，程序不退出就不会清空。这就是 s08 要解决的上下文压缩问题。
+
+   </details>
 
 ## 试一下
 

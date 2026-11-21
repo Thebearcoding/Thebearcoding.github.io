@@ -5,7 +5,7 @@ tags: [多模态, VLM, 教学相长]
 summary: 为一个 65M 的视觉语言模型做了 12 课互动课程,过程中真正学到的三件事。
 ---
 
-给 [MiniMind-V 做完 12 课互动课程](https://athebear.me/minimind-v-course/course/)之后,回头看有三个收获值得单独记下来。
+给 [MiniMind-V 做完 12 课互动课程](https://athebear.com/minimind-v-course/course/)之后,回头看有三个收获值得单独记下来。
 
 ## 一、"多模态"在实现上小得惊人
 

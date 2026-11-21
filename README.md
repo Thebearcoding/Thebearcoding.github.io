@@ -1,4 +1,4 @@
-# athebear.me
+# athebear.com
 
 个人主页与博客:研究笔记、想法、互动课程入口。
 
